@@ -28,7 +28,7 @@ mod common {
         d.dot(d)
     }
     pub fn dist(a: V3, b: V3) -> f32 {
-        dist(a, b).sqrt()
+        dist2(a, b).sqrt()
     }
 
     impl V3 {
@@ -52,7 +52,11 @@ mod common {
             self.dot(self).sqrt()
         }
         pub fn norm(self) -> Self {
-            self / self.magn()
+            if self.magn() == 0.0 {
+                V3::zero()
+            } else {
+                self / self.magn()
+            }
         }
         pub fn cross(self, rhs: V3) -> V3 {
             let (u1, u2, u3) = (self.x(), self.y(), self.z());
@@ -103,7 +107,7 @@ mod common {
         type Output = V3;
 
         fn add(self, rhs: V3) -> V3 {
-            V3([self.x() + rhs.x(), self.y() + rhs.y(), self.z() + rhs.y()])
+            V3([self.x() + rhs.x(), self.y() + rhs.y(), self.z() + rhs.z()])
         }
     }
 
@@ -118,8 +122,9 @@ mod common {
             Plane(r0, n.norm())
         }
         pub fn primary_axis(&self) -> V3 {
-            let shift = V3([1.0, 1.0, 1.0]);
-            (shift - shift.dot(self.n())).norm()
+            let shift = V3([0.0, 1.0, 0.0]);
+            let dist = shift.dot(self.n());
+            (shift - self.n() * dist).norm()
         }
         pub fn secondary_axis(&self) -> V3 {
             self.n().cross(self.primary_axis())
@@ -128,7 +133,10 @@ mod common {
 
     impl Ray {
         pub fn new(orig: V3, dir: V3) -> Self {
-            Self { orig, dir }
+            Self {
+                orig,
+                dir: dir.norm(),
+            }
         }
     }
 }
@@ -162,16 +170,15 @@ mod object {
             }
 
             let thc = (self.r * self.r - d2).sqrt();
-            let t = if tca - thc > 0.0 {
-                tca - thc
-            } else {
-                tca + thc
-            };
+            let t = vec![tca - thc, tca + thc].into_iter().find(|x| *x > 0.0);
+            if let Some(t) = t {
+                let hit = ray.orig + ray.dir * t;
+                let norm = (hit - self.c).norm();
 
-            let hit = ray.orig + ray.dir * t;
-            let norm = (hit - self.c).norm();
+                return Some((hit, norm));
+            }
 
-            Some((hit, norm))
+            None
         }
     }
 }
@@ -211,10 +218,10 @@ mod scene {
             let dx = self.vp_width * 2.0 / (w as f32);
             let dy = self.vp_height * 2.0 / (h as f32);
             let plane = &self.vp_plane;
+            let (x, y, w, h) = (x as i64, y as i64, w as i64, h as i64);
 
-            let shift_x = plane.primary_axis() * dx * ((w / 2 - x) as f32);
-            let shift_y = plane.secondary_axis() * dy * ((h / 2 - y) as f32);
-
+            let shift_x = plane.primary_axis() * dx * (x - w / 2) as f32;
+            let shift_y = plane.secondary_axis() * dy * (y - h / 2) as f32;
             plane.r0() + shift_x + shift_y
         }
     }
@@ -227,7 +234,9 @@ mod raytracing {
 
     // simplest ray tracing algorithm
     pub fn trace1(s: Scene, w: u32, h: u32) -> GrayImage {
+        use std::cmp::Ordering;
         let mut film = ImageBuffer::new(w, h);
+
         for (x, y, pixel) in film.enumerate_pixels_mut() {
             let ray = {
                 let orig = s.vp_from_pixel(x, y, w, h);
@@ -241,14 +250,15 @@ mod raytracing {
                     hits.push(hit);
                 }
             }
-            if let Some(_hit) = hits.into_iter().min_by(|hit1, hit2| {
+            if let Some(hit) = hits.into_iter().min_by(|hit1, hit2| {
                 dist2(*hit1, ray.orig)
-                    .partial_cmp(&dist(*hit2, ray.orig))
-                    .unwrap()
+                    .partial_cmp(&dist2(*hit2, ray.orig))
+                    .unwrap_or(Ordering::Less)
             }) {
-                *pixel = Luma([255]);
+                let dist = dist(hit, ray.orig);
+                *pixel = Luma([255 - (dist * 20.0) as u8]);
             } else {
-                *pixel = Luma([0]);
+                *pixel = Luma([0 as u8]);
             }
         }
         film
@@ -264,7 +274,7 @@ fn main() {
     let mut scene1 = Scene::new(
         V3::zero(),
         Plane::new(
-            V3([2.0, 0.0, 0.0]), // r0
+            V3([10.0, 0.0, 0.0]), // r0
             V3([1.0, 0.0, 0.0]), // n
         ),
         3.0,
@@ -272,13 +282,17 @@ fn main() {
     );
 
     scene1.add_object(Sphere {
-        c: V3([3.0, 1.0, 0.0]),
-        r: 1.0
+        c: V3([20.0, 1.0, 0.0]),
+        r: 3.0,
     });
     scene1.add_object(Sphere {
-        c: V3([3.0, -2.0, 0.0]),
-        r: 1.5
+        c: V3([25.0, 2.0, 0.0]),
+        r: 3.0,
     });
+    // scene1.add_object(Sphere {
+    //     c: V3([4.0, -2.0, 0.0]),
+    //     r: 1.5,
+    // });
 
     let img = trace1(scene1, 400, 400);
     img.save("./trace1.png").ok();
