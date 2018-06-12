@@ -425,7 +425,10 @@ fn main() {
         scene1.add_object(Sphere {
             c: V3([7.0, (i as f32 - 2.0) * 2.0, 0.0]),
             r: 0.5 + i as f32 * 0.1,
-            material: material.clone(),
+            material: Material {
+                surface_color: Color([0.0, 0.2 * i as f32, 0.0]),
+                ..material
+            },
         });
     }
     // scene1.add_object(Sphere {
