@@ -316,7 +316,6 @@ mod scene {
         }
 
         pub fn closet_hit<'a>(&'a self, ray: &Ray) -> Option<(&'a Box<Object>, Hit)> {
-            use std::cmp::Ordering;
             use std::f32;
             let mut min_dist = f32::MAX;
             let mut result = None;
@@ -327,6 +326,7 @@ mod scene {
                         continue;
                     }
                     result = Some((obj, hit));
+                    min_dist = dist2(hit.pos, ray.orig);
                 }
             }
 
