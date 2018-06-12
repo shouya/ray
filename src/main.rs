@@ -8,6 +8,7 @@ mod common {
 
     pub mod color {
         use super::Color;
+
         pub const Red: Color = Color([1.0, 0.0, 0.0]);
         pub const Green: Color = Color([0.0, 1.0, 0.0]);
         pub const Blue: Color = Color([0.0, 0.0, 1.0]);
@@ -376,7 +377,6 @@ mod raytracing {
         }
 
         pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
-            use std::cmp::Ordering;
             let mut film = ImageBuffer::new(w, h);
             let ambient_color = Color([0.2, 0.2, 0.2]);
 
