@@ -3,7 +3,15 @@ extern crate image;
 mod common {
     #[derive(Debug, Clone, Copy)]
     pub struct V3(pub [f32; 3]);
-    pub struct Color([f32; 3]);
+    #[derive(Debug, Clone, Copy)]
+    pub struct Color(pub [f32; 3]);
+
+    pub mod color {
+        use super::Color;
+        pub const Red: Color = Color([1.0, 0.0, 0.0]);
+        pub const Green: Color = Color([0.0, 1.0, 0.0]);
+        pub const Blue: Color = Color([0.0, 0.0, 1.0]);
+    }
 
     #[derive(Debug, Clone)]
     pub struct Line(V3, V3);
@@ -12,6 +20,7 @@ mod common {
     #[derive(Debug, Clone)]
     pub struct Trig(V3, V3, V3);
 
+    #[derive(Debug, Clone)]
     pub enum Projection {
         Orthogonal,
         Perspective,
@@ -24,9 +33,9 @@ mod common {
         pub dir: V3,
     }
 
-    pub struct Camera {
+    pub struct Hit {
         pub pos: V3,
-        pub dir: V3,
+        pub norm: V3,
     }
 
     pub fn dist2(a: V3, b: V3) -> f32 {
@@ -145,24 +154,68 @@ mod common {
             }
         }
     }
+
+    impl Color {
+        pub fn r(&self) -> f32 {
+            self.0[0]
+        }
+        pub fn g(&self) -> f32 {
+            self.0[1]
+        }
+        pub fn b(&self) -> f32 {
+            self.0[2]
+        }
+    }
+
+    impl Into<[u8; 3]> for Color {
+        fn into(self) -> [u8; 3] {
+            let normalize = |k: f32| {
+                if k < 0.0 {
+                    0
+                } else if k > 1.0 {
+                    1
+                } else {
+                    (k * 255.0) as u8
+                }
+            };
+            [
+                normalize(self.r()),
+                normalize(self.g()),
+                normalize(self.b()),
+            ]
+        }
+    }
 }
 
 mod object {
     use common::*;
+    use std::borrow::Cow;
 
-    pub trait Intersectable {
+    #[derive(Debug, Clone, Copy)]
+    pub struct Material {
+        pub surface_color: Color,
+        pub emission_color: Color,
+        pub refractive_index: f32,
+        pub transparency: f32, // 0: opaque, 1: transparent
+        pub reflexivity: f32,  // 0: black body, 1: perfect mirror
+        pub roughness: f32,    // norm of random reflected shadow rays, 0: perfect smooth
+    }
+
+    pub trait Object {
         // returns hit and norm
-        fn intersect(&self, ray: &Ray) -> Option<(V3, V3)>;
+        fn intersect(&self, ray: &Ray) -> Option<Hit>;
+        fn material(&self, pos: V3) -> Cow<Material>;
     }
 
     pub struct Sphere {
         pub c: V3,
         pub r: f32,
+        pub material: Material,
     }
 
-    impl Intersectable for Sphere {
+    impl Object for Sphere {
         // See: http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
-        fn intersect(&self, ray: &Ray) -> Option<(V3, V3)> {
+        fn intersect(&self, ray: &Ray) -> Option<Hit> {
             let l = self.c - ray.orig;
             let tc = l.dot(ray.dir);
 
@@ -190,22 +243,26 @@ mod object {
             let t = if t1 > 0.0 { Some(t1) } else { None };
 
             if let Some(t) = t {
-                let hit = ray.orig + ray.dir * t;
-                let norm = (hit - self.c).norm();
-                Some((hit, norm))
+                let pos = ray.orig + ray.dir * t;
+                let norm = (pos - self.c).norm();
+                Some(Hit { pos, norm })
             } else {
                 None
             }
+        }
+
+        fn material(&self, pos: V3) -> Cow<Material> {
+            Cow::Borrowed(&self.material)
         }
     }
 }
 
 mod scene {
     use common::*;
-    use object::Intersectable;
+    use object::Object;
 
     pub struct Scene {
-        pub objs: Vec<Box<Intersectable>>,
+        pub objs: Vec<Box<Object>>,
         // plane w/ center, width, height
         pub vp_plane: Plane,
         pub vp_width: f32,
@@ -228,7 +285,7 @@ mod scene {
 
         pub fn add_object<T: 'static>(&mut self, obj: T)
         where
-            T: Intersectable + Sized,
+            T: Object + Sized,
         {
             self.objs.push(Box::new(obj))
         }
@@ -256,6 +313,24 @@ mod scene {
             };
             Ray::new(orig, dir)
         }
+
+        pub fn closet_hit<'a>(&'a self, ray: &Ray) -> Option<(&'a Box<Object>, Hit)> {
+            use std::cmp::Ordering;
+            use std::f32;
+            let mut min_dist = f32::MAX;
+            let mut result = None;
+
+            for obj in self.objs.iter() {
+                if let Some(hit) = obj.intersect(&ray) {
+                    if dist2(hit.pos, ray.orig) >= min_dist {
+                        continue;
+                    }
+                    result = Some((obj, hit));
+                }
+            }
+
+            result
+        }
     }
 }
 
@@ -270,24 +345,13 @@ mod raytracing {
         use super::{dist, dist2, ImageBuffer, Rgb, RgbImage, Scene};
 
         pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
-            use std::cmp::Ordering;
             let mut film = ImageBuffer::new(w, h);
 
             for (x, y, pixel) in film.enumerate_pixels_mut() {
                 let ray = s.generate_ray(x, y, w, h);
 
-                let mut hits = vec![];
-                for obj in s.objs.iter() {
-                    if let Some((hit, _norm)) = obj.intersect(&ray) {
-                        hits.push(hit);
-                    }
-                }
-                if let Some(hit) = hits.into_iter().min_by(|hit1, hit2| {
-                    dist2(*hit1, ray.orig)
-                        .partial_cmp(&dist2(*hit2, ray.orig))
-                        .unwrap_or(Ordering::Less)
-                }) {
-                    let dist = dist(hit, ray.orig);
+                if let Some((_obj, hit)) = s.closet_hit(&ray) {
+                    let dist = dist(hit.pos, ray.orig);
                     let brit = 250 - ((dist - 4.0) * 60.0) as u8;
                     *pixel = Rgb([brit, brit, brit]);
                 } else {
@@ -297,11 +361,45 @@ mod raytracing {
             film
         }
     }
+
+    pub mod color {
+        use super::*;
+        pub fn trace_ray(s: &Scene, ray: Ray) -> Option<Color> {
+            let hit = s.closet_hit(&ray);
+            if hit.is_none() {
+                return None;
+            }
+
+            let (obj, hit) = hit.unwrap();
+            let color = obj.material(hit.pos).surface_color;
+            Some(color)
+        }
+
+        pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
+            use std::cmp::Ordering;
+            let mut film = ImageBuffer::new(w, h);
+            let ambient_color = Color([0.2, 0.2, 0.2]);
+
+            for (x, y, pixel) in film.enumerate_pixels_mut() {
+                let ray = s.generate_ray(x, y, w, h);
+                match trace_ray(&s, ray) {
+                    Some(color) => {
+                        *pixel = Rgb(color.into());
+                    }
+                    None => {
+                        *pixel = Rgb(ambient_color.into());
+                    }
+                }
+            }
+
+            film
+        }
+    }
 }
 
 fn main() {
     use common::*;
-    use object::Sphere;
+    use object::{Material, Sphere};
     use scene::Scene;
 
     let mut scene1 = Scene::new(
@@ -314,10 +412,20 @@ fn main() {
         2.0,
     );
 
+    let material = Material {
+        surface_color: color::Green,
+        emission_color: Color([0.1, 0.0, 0.0]),
+        reflexivity: 0.0,
+        refractive_index: 0.0,
+        roughness: 0.0,
+        transparency: 0.0,
+    };
+
     for i in 0..5 {
         scene1.add_object(Sphere {
             c: V3([7.0, (i as f32 - 2.0) * 2.0, 0.0]),
             r: 0.5 + i as f32 * 0.1,
+            material: material.clone(),
         });
     }
     // scene1.add_object(Sphere {
@@ -325,6 +433,6 @@ fn main() {
     //     r: 1.5,
     // });
 
-    let img = raytracing::incidence::trace(scene1, 400, 400);
-    img.save("./trace1.png").ok();
+    let img = raytracing::color::trace(scene1, 400, 400);
+    img.save("./trace.png").ok();
 }
