@@ -12,6 +12,7 @@ mod common {
     #[derive(Debug, Clone)]
     pub struct Trig(V3, V3, V3);
 
+    #[derive(Debug, Clone)]
     pub struct Ray {
         pub orig: V3,
         // direction, must be normalized
@@ -99,7 +100,7 @@ mod common {
         type Output = V3;
 
         fn sub(self, rhs: V3) -> V3 {
-            V3([self.x() - rhs.x(), self.y() - rhs.y(), self.z() - rhs.y()])
+            V3([self.x() - rhs.x(), self.y() - rhs.y(), self.z() - rhs.z()])
         }
     }
 
@@ -122,12 +123,12 @@ mod common {
             Plane(r0, n.norm())
         }
         pub fn primary_axis(&self) -> V3 {
-            let shift = V3([0.0, 1.0, 0.0]);
+            let shift = V3([0.0, -0.1, 0.0]);
             let dist = shift.dot(self.n());
             (shift - self.n() * dist).norm()
         }
         pub fn secondary_axis(&self) -> V3 {
-            self.n().cross(self.primary_axis())
+            self.primary_axis().cross(self.n())
         }
     }
 
@@ -158,27 +159,43 @@ mod object {
         // See: http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
         fn intersect(&self, ray: &Ray) -> Option<(V3, V3)> {
             let l = self.c - ray.orig;
-            let tca = l.dot(ray.dir);
+            let tc = l.dot(ray.dir);
 
-            if tca < 0.0 {
+            if tc < 0.0 {
+                println!("Dropped case 1");
                 return None;
             }
 
-            let d2 = l.dot(l) - tca * tca;
-            if d2 > self.r * self.r {
+            let d2 = l.dot(l) - tc * tc;
+            let r2 = self.r * self.r;
+
+            if d2 > r2 {
+                println!("{:?}, L: {:?}, Tc: {:?}", ray, l, tc);
+                println!("Dropped case 2: {} {}", d2, r2);
                 return None;
             }
 
-            let thc = (self.r * self.r - d2).sqrt();
-            let t = vec![tca - thc, tca + thc].into_iter().find(|x| *x > 0.0);
+            let t1c = (r2 - d2).sqrt();
+            let mut t1 = tc - t1c;
+            let mut t2 = tc + t1c;
+
+            if t1 < 0.0 {
+                t1 = t2;
+            }
+            if t2 < t1 {
+                t1 = t2;
+            }
+            let t = if t1 > 0.0 { Some(t1) } else { None };
+
             if let Some(t) = t {
                 let hit = ray.orig + ray.dir * t;
                 let norm = (hit - self.c).norm();
-
-                return Some((hit, norm));
+                println!("Accepted at {:?} {:?}, {}", hit, norm, t);
+                Some((hit, norm))
+            } else {
+                println!("Dropped case 3");
+                None
             }
-
-            None
         }
     }
 }
@@ -233,14 +250,16 @@ mod raytracing {
     use scene::Scene;
 
     // simplest ray tracing algorithm
-    pub fn trace1(s: Scene, w: u32, h: u32) -> GrayImage {
+    pub fn trace1(s: Scene, w: u32, h: u32) -> RgbImage {
         use std::cmp::Ordering;
         let mut film = ImageBuffer::new(w, h);
 
         for (x, y, pixel) in film.enumerate_pixels_mut() {
             let ray = {
                 let orig = s.vp_from_pixel(x, y, w, h);
-                let dir = orig - s.camera;
+                // let dir = orig - s.camera;
+                let dir = s.vp_plane.n();
+                let dir = dir.norm();
                 Ray::new(orig, dir)
             };
 
@@ -256,9 +275,15 @@ mod raytracing {
                     .unwrap_or(Ordering::Less)
             }) {
                 let dist = dist(hit, ray.orig);
-                *pixel = Luma([255 - (dist * 20.0) as u8]);
+                // *pixel = Rgb([
+                //     (100.0 + 100.0 * dir.x()) as u8,
+                //     (100.0 + 100.0 * dir.y()) as u8,
+                //     (100.0 + 100.0 * dir.z()) as u8,
+                // ]);
+                let brit = 200 - (dist * 60.0) as u8;
+                *pixel = Rgb([brit, brit, brit]);
             } else {
-                *pixel = Luma([0 as u8]);
+                *pixel = Rgb([0, 0, 0]);
             }
         }
         film
@@ -274,21 +299,19 @@ fn main() {
     let mut scene1 = Scene::new(
         V3::zero(),
         Plane::new(
-            V3([10.0, 0.0, 0.0]), // r0
+            V3([2.0, 0.0, 0.0]), // r0
             V3([1.0, 0.0, 0.0]), // n
         ),
-        3.0,
-        3.0,
+        2.0,
+        2.0,
     );
 
-    scene1.add_object(Sphere {
-        c: V3([20.0, 1.0, 0.0]),
-        r: 3.0,
-    });
-    scene1.add_object(Sphere {
-        c: V3([25.0, 2.0, 0.0]),
-        r: 3.0,
-    });
+    for i in 2..3 {
+        scene1.add_object(Sphere {
+            c: V3([5.0, (i as f32 - 2.0) * 2.0, 0.0]),
+            r: 1.0,
+        });
+    }
     // scene1.add_object(Sphere {
     //     c: V3([4.0, -2.0, 0.0]),
     //     r: 1.5,
