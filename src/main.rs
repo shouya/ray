@@ -1,4 +1,5 @@
 extern crate image;
+extern crate rand;
 
 mod common {
     #[derive(Debug, Clone, Copy)]
@@ -160,6 +161,18 @@ mod common {
             let proj_n_d = hit.norm * self.dir.dot(hit.norm);
             Ray::new(hit.pos, self.dir - proj_n_d * 2.0)
         }
+
+        pub fn drift(&self, std_dev: f32) -> Ray {
+            use rand::distributions::Distribution;
+            use rand::distributions::Normal;
+            use rand::thread_rng;
+
+            let n = Normal::new(0.0, std_dev as f64);
+            let dx = n.sample(&mut thread_rng());
+            let dy = n.sample(&mut thread_rng());
+            let dz = n.sample(&mut thread_rng());
+            Ray::new(self.orig, self.dir + V3([dx as f32, dy as f32, dz as f32]))
+        }
     }
 
     impl Color {
@@ -181,6 +194,18 @@ mod common {
                 rhs.g() * t0 + self.g() * t1,
                 rhs.b() * t0 + self.b() * t1,
             ])
+        }
+
+        pub fn blend_all(colors: &[Color]) -> Color {
+            if colors.is_empty() {
+                return Color([0.0, 0.0, 0.0]);
+            }
+
+            let n = colors.len() as f32;
+            let r: f32 = colors.iter().map(|x| x.r()).sum();
+            let g: f32 = colors.iter().map(|x| x.g()).sum();
+            let b: f32 = colors.iter().map(|x| x.b()).sum();
+            Color([r / n, g / n, b / n])
         }
     }
 
@@ -249,7 +274,7 @@ mod object {
 
             let t1c = (r2 - d2).sqrt();
             let mut t1 = tc - t1c;
-            let mut t2 = tc + t1c;
+            let t2 = tc + t1c;
 
             if t1 < 0.0 {
                 t1 = t2;
@@ -268,7 +293,7 @@ mod object {
             }
         }
 
-        fn material(&self, pos: V3) -> Cow<Material> {
+        fn material(&self, _pos: V3) -> Cow<Material> {
             Cow::Borrowed(&self.material)
         }
     }
@@ -420,6 +445,68 @@ mod raytracing {
             film
         }
     }
+
+    pub mod scatter {
+        use super::*;
+        const MAX_DEPTH: u32 = 3;
+        const SCATTER_AMOUNT: u32 = 100;
+
+        pub fn trace_ray(s: &Scene, ray: Ray, ambient: Color, depth: u32) -> Option<Color> {
+            if depth >= MAX_DEPTH {
+                return None;
+            }
+
+            let hit = s.closet_hit(&ray);
+            if hit.is_none() {
+                return None;
+            }
+
+            let (obj, hit) = hit.unwrap();
+            let dist = dist(hit.pos, ray.orig);
+
+            let material = obj.material(hit.pos);
+            let suf_color = material.surface_color;
+            let shadowray = ray.reflect(&hit);
+            let mut refl_colors = Vec::new();
+
+            for _ in 0..(SCATTER_AMOUNT / depth) {
+                let ray = shadowray.drift(material.roughness);
+                if let Some(color) = trace_ray(s, ray, ambient, depth + 1) {
+                    refl_colors.push(color);
+                } else {
+                    refl_colors.push(ambient);
+                }
+            }
+            let refl_color = Color::blend_all(&refl_colors);
+
+            let color = suf_color.blend(refl_color, material.reflexivity);
+            // fog
+            let color = color.blend(ambient, 0.05 * dist);
+
+            Some(color)
+        }
+
+        pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
+            let mut film = ImageBuffer::new(w, h);
+            let ambient_color = Color([0.2, 0.2, 0.2]);
+
+            for (x, y, pixel) in film.enumerate_pixels_mut() {
+                let ray = s.generate_ray(x, y, w, h);
+                print!("Process: {}/{} ({}%)\r", y, h, y * 100 / h);
+                match trace_ray(&s, ray, ambient_color, 1) {
+                    Some(color) => {
+                        *pixel = Rgb(color.into());
+                    }
+                    None => {
+                        *pixel = Rgb(ambient_color.into());
+                    }
+                }
+            }
+
+            println!("");
+            film
+        }
+    }
 }
 
 fn main() {
@@ -442,7 +529,7 @@ fn main() {
         emission_color: Color([0.1, 0.0, 0.0]),
         reflexivity: 0.5,
         refractive_index: 0.0,
-        roughness: 0.0,
+        roughness: 0.2,
         transparency: 0.0,
     };
 
@@ -461,6 +548,6 @@ fn main() {
     //     r: 1.5,
     // });
 
-    let img = raytracing::reflection::trace(scene1, 400, 400);
+    let img = raytracing::scatter::trace(scene1, 400, 400);
     img.save("./trace.png").ok();
 }
