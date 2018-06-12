@@ -27,13 +27,14 @@ mod common {
         Perspective,
     }
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, Copy)]
     pub struct Ray {
         pub orig: V3,
         // direction, must be normalized
         pub dir: V3,
     }
 
+    #[derive(Debug, Clone, Copy)]
     pub struct Hit {
         pub pos: V3,
         pub norm: V3,
@@ -154,6 +155,11 @@ mod common {
                 dir: dir.norm(),
             }
         }
+
+        pub fn reflect(&self, hit: &Hit) -> Ray {
+            let proj_n_d = hit.norm * self.dir.dot(hit.norm);
+            Ray::new(hit.pos, self.dir - proj_n_d * 2.0)
+        }
     }
 
     impl Color {
@@ -165,6 +171,16 @@ mod common {
         }
         pub fn b(&self) -> f32 {
             self.0[2]
+        }
+
+        // transparency: 0: all self, 1: all rhs
+        pub fn blend(&self, rhs: Color, transparency: f32) -> Color {
+            let (t0, t1) = (transparency, 1.0 - transparency);
+            Color([
+                rhs.r() * t0 + self.r() * t1,
+                rhs.g() * t0 + self.g() * t1,
+                rhs.b() * t0 + self.b() * t1,
+            ])
         }
     }
 
@@ -363,16 +379,25 @@ mod raytracing {
         }
     }
 
-    pub mod color {
+    pub mod reflection {
         use super::*;
-        pub fn trace_ray(s: &Scene, ray: Ray) -> Option<Color> {
+        pub fn trace_ray(s: &Scene, ray: Ray, ambient: Color) -> Option<Color> {
             let hit = s.closet_hit(&ray);
             if hit.is_none() {
                 return None;
             }
 
             let (obj, hit) = hit.unwrap();
-            let color = obj.material(hit.pos).surface_color;
+            let dist = dist(hit.pos, ray.orig);
+
+            let material = obj.material(hit.pos);
+            let suf_color = material.surface_color;
+            let refl_color = trace_ray(s, ray.reflect(&hit), ambient).unwrap_or(ambient);
+
+            let color = suf_color.blend(refl_color, material.reflexivity);
+            // fog
+            let color = color.blend(ambient, 0.05 * dist);
+
             Some(color)
         }
 
@@ -382,7 +407,7 @@ mod raytracing {
 
             for (x, y, pixel) in film.enumerate_pixels_mut() {
                 let ray = s.generate_ray(x, y, w, h);
-                match trace_ray(&s, ray) {
+                match trace_ray(&s, ray, ambient_color) {
                     Some(color) => {
                         *pixel = Rgb(color.into());
                     }
@@ -415,7 +440,7 @@ fn main() {
     let material = Material {
         surface_color: color::Green,
         emission_color: Color([0.1, 0.0, 0.0]),
-        reflexivity: 0.0,
+        reflexivity: 0.5,
         refractive_index: 0.0,
         roughness: 0.0,
         transparency: 0.0,
@@ -436,6 +461,6 @@ fn main() {
     //     r: 1.5,
     // });
 
-    let img = raytracing::color::trace(scene1, 400, 400);
+    let img = raytracing::reflection::trace(scene1, 400, 400);
     img.save("./trace.png").ok();
 }
