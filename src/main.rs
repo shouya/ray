@@ -128,7 +128,7 @@ mod common {
             Plane(r0, n.norm())
         }
         pub fn primary_axis(&self) -> V3 {
-            let shift = V3([0.0, -0.1, 0.0]);
+            let shift = V3([0.0, 1.0, 0.0]);
             let dist = shift.dot(self.n());
             (shift - self.n() * dist).norm()
         }
@@ -267,7 +267,7 @@ mod raytracing {
     pub mod incidence {
         // simplest ray tracing algorithm,
         // only considering incidence
-        use super::{ImageBuffer, Rgb, RgbImage, Scene, dist, dist2};
+        use super::{dist, dist2, ImageBuffer, Rgb, RgbImage, Scene};
 
         pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
             use std::cmp::Ordering;
@@ -317,7 +317,7 @@ fn main() {
     for i in 0..5 {
         scene1.add_object(Sphere {
             c: V3([7.0, (i as f32 - 2.0) * 2.0, 0.0]),
-            r: 0.3 + i as f32 * 0.1,
+            r: 0.5 + i as f32 * 0.1,
         });
     }
     // scene1.add_object(Sphere {
