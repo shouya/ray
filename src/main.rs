@@ -12,6 +12,11 @@ mod common {
     #[derive(Debug, Clone)]
     pub struct Trig(V3, V3, V3);
 
+    pub enum Projection {
+        Orthogonal,
+        Perspective,
+    }
+
     #[derive(Debug, Clone)]
     pub struct Ray {
         pub orig: V3,
@@ -162,7 +167,6 @@ mod object {
             let tc = l.dot(ray.dir);
 
             if tc < 0.0 {
-                println!("Dropped case 1");
                 return None;
             }
 
@@ -170,8 +174,6 @@ mod object {
             let r2 = self.r * self.r;
 
             if d2 > r2 {
-                println!("{:?}, L: {:?}, Tc: {:?}", ray, l, tc);
-                println!("Dropped case 2: {} {}", d2, r2);
                 return None;
             }
 
@@ -190,10 +192,8 @@ mod object {
             if let Some(t) = t {
                 let hit = ray.orig + ray.dir * t;
                 let norm = (hit - self.c).norm();
-                println!("Accepted at {:?} {:?}, {}", hit, norm, t);
                 Some((hit, norm))
             } else {
-                println!("Dropped case 3");
                 None
             }
         }
@@ -211,6 +211,7 @@ mod scene {
         pub vp_width: f32,
         pub vp_height: f32,
         pub camera: V3,
+        pub projection: Projection,
     }
 
     impl Scene {
@@ -221,6 +222,7 @@ mod scene {
                 vp_width,
                 vp_height,
                 objs: Vec::new(),
+                projection: Projection::Perspective,
             }
         }
 
@@ -229,6 +231,10 @@ mod scene {
             T: Intersectable + Sized,
         {
             self.objs.push(Box::new(obj))
+        }
+
+        pub fn projection(&mut self, p: Projection) {
+            self.projection = p;
         }
 
         pub fn vp_from_pixel(&self, x: u32, y: u32, w: u32, h: u32) -> V3 {
@@ -241,6 +247,15 @@ mod scene {
             let shift_y = plane.secondary_axis() * dy * (y - h / 2) as f32;
             plane.r0() + shift_x + shift_y
         }
+
+        pub fn generate_ray(&self, x: u32, y: u32, w: u32, h: u32) -> Ray {
+            let orig = self.vp_from_pixel(x, y, w, h);
+            let dir = match self.projection {
+                Projection::Perspective => orig - self.camera,
+                Projection::Orthogonal => self.vp_plane.n(),
+            };
+            Ray::new(orig, dir)
+        }
     }
 }
 
@@ -249,51 +264,44 @@ mod raytracing {
     use common::*;
     use scene::Scene;
 
-    // simplest ray tracing algorithm
-    pub fn trace1(s: Scene, w: u32, h: u32) -> RgbImage {
-        use std::cmp::Ordering;
-        let mut film = ImageBuffer::new(w, h);
+    pub mod incidence {
+        // simplest ray tracing algorithm,
+        // only considering incidence
+        use super::{ImageBuffer, Rgb, RgbImage, Scene, dist, dist2};
 
-        for (x, y, pixel) in film.enumerate_pixels_mut() {
-            let ray = {
-                let orig = s.vp_from_pixel(x, y, w, h);
-                // let dir = orig - s.camera;
-                let dir = s.vp_plane.n();
-                let dir = dir.norm();
-                Ray::new(orig, dir)
-            };
+        pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
+            use std::cmp::Ordering;
+            let mut film = ImageBuffer::new(w, h);
 
-            let mut hits = vec![];
-            for obj in s.objs.iter() {
-                if let Some((hit, _norm)) = obj.intersect(&ray) {
-                    hits.push(hit);
+            for (x, y, pixel) in film.enumerate_pixels_mut() {
+                let ray = s.generate_ray(x, y, w, h);
+
+                let mut hits = vec![];
+                for obj in s.objs.iter() {
+                    if let Some((hit, _norm)) = obj.intersect(&ray) {
+                        hits.push(hit);
+                    }
+                }
+                if let Some(hit) = hits.into_iter().min_by(|hit1, hit2| {
+                    dist2(*hit1, ray.orig)
+                        .partial_cmp(&dist2(*hit2, ray.orig))
+                        .unwrap_or(Ordering::Less)
+                }) {
+                    let dist = dist(hit, ray.orig);
+                    let brit = 250 - ((dist - 4.0) * 60.0) as u8;
+                    *pixel = Rgb([brit, brit, brit]);
+                } else {
+                    *pixel = Rgb([0, 0, 0]);
                 }
             }
-            if let Some(hit) = hits.into_iter().min_by(|hit1, hit2| {
-                dist2(*hit1, ray.orig)
-                    .partial_cmp(&dist2(*hit2, ray.orig))
-                    .unwrap_or(Ordering::Less)
-            }) {
-                let dist = dist(hit, ray.orig);
-                // *pixel = Rgb([
-                //     (100.0 + 100.0 * dir.x()) as u8,
-                //     (100.0 + 100.0 * dir.y()) as u8,
-                //     (100.0 + 100.0 * dir.z()) as u8,
-                // ]);
-                let brit = 200 - (dist * 60.0) as u8;
-                *pixel = Rgb([brit, brit, brit]);
-            } else {
-                *pixel = Rgb([0, 0, 0]);
-            }
+            film
         }
-        film
     }
 }
 
 fn main() {
     use common::*;
     use object::Sphere;
-    use raytracing::trace1;
     use scene::Scene;
 
     let mut scene1 = Scene::new(
@@ -306,10 +314,10 @@ fn main() {
         2.0,
     );
 
-    for i in 2..3 {
+    for i in 0..5 {
         scene1.add_object(Sphere {
-            c: V3([5.0, (i as f32 - 2.0) * 2.0, 0.0]),
-            r: 1.0,
+            c: V3([7.0, (i as f32 - 2.0) * 2.0, 0.0]),
+            r: 0.3 + i as f32 * 0.1,
         });
     }
     // scene1.add_object(Sphere {
@@ -317,6 +325,6 @@ fn main() {
     //     r: 1.5,
     // });
 
-    let img = trace1(scene1, 400, 400);
+    let img = raytracing::incidence::trace(scene1, 400, 400);
     img.save("./trace1.png").ok();
 }
