@@ -16,7 +16,7 @@ impl Default for ChessBoard {
             emission_color: Color::Black,
             refractive_index: 0.0,
             transparency: 0.0,   // 0: opaque, 1: transparent
-            reflexivity: 0.0,    // 0: black body, 1: perfect mirror
+            reflexivity: 0.3,    // 0: black body, 1: perfect mirror
             specular_index: 0.0, // std dev of reflected shadow rays, 0: perfect smooth
         };
         let black = Material {
@@ -31,7 +31,7 @@ impl Default for ChessBoard {
         ChessBoard {
             plane: Plane::new(V3::zero(), V3([0.0, 0.0, 1.0])),
             material: (black, white),
-            cell_size: 5.0,
+            cell_size: 1.0,
         }
     }
 }
@@ -41,20 +41,16 @@ impl Object for ChessBoard {
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
         // parallel to plane
         let det = ray.dir.dot(self.plane.n());
-        if det == 0.0 {
+        if det <= 0.0 {
             return None;
         }
 
         let d = (self.plane.r0() - ray.orig).dot(self.plane.n()) / det;
-        if d > 0.0 {
+        if d < 0.0 {
             return None;
         }
         let pos = ray.orig + ray.dir * d;
-        let norm = if det > 0.0 {
-            self.plane.n()
-        } else {
-            V3::zero() - self.plane.n()
-        };
+        let norm = V3::zero() - self.plane.n();
 
         Some(Hit {
             pos,

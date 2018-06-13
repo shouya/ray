@@ -132,8 +132,8 @@ impl Plane {
         (shift - self.n() * dist).norm()
     }
     pub fn secondary_axis(&self) -> V3 {
-        // self.primary_axis().cross(self.n())
-        self.n().cross(self.primary_axis())
+        self.primary_axis().cross(self.n())
+        // self.n().cross(self.primary_axis())
     }
 }
 

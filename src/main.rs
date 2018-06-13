@@ -36,11 +36,11 @@ mod example_scene {
         ];
 
         for i in 0..5 {
-            let x = 7.0 + i as f32 * 2.0;
-            let y = -5.0 + i as f32 * 2.0 + (i * i) as f32 * 0.5;
+            let x = 7.0 + i as f32 * 3.2;
+            let y = -5.0 + i as f32 * 0.3 + (i * i) as f32 * 1.0;
 
             scene.add_object(Sphere {
-                c: V3([x, y, 0.0]),
+                c: V3([x, y, 0.5 * i as f32]),
                 r: 1.5,
                 material: Material {
                     surface_color: colors[i],
@@ -54,7 +54,7 @@ mod example_scene {
         }
 
         scene.add_object(ChessBoard {
-            plane: Plane::new(V3([0.0, 0.0, -3.0]), V3([-0.2, 0.0, -1.0])),
+            plane: Plane::new(V3([0.0, 0.0, -1.6]), V3([0.0, 0.0, -1.0])),
             ..ChessBoard::default()
         });
 
