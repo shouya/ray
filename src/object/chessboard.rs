@@ -61,10 +61,11 @@ impl Object for ChessBoard {
 
     fn material(&self, p: V3) -> Cow<Material> {
         let p = self.map_to_2d(p);
-        let a = (p.x() / self.cell_size) as i32 % 2 == 0;
-        let b = (p.y() / self.cell_size) as i32 % 2 == 0;
+        let is_even = |v: f32| (v / self.cell_size) as i32 % 2 == 0;
+        let a = is_even(p.x()) ^ (p.x() < 0.0);
+        let b = is_even(p.y()) ^ (p.y() < 0.0);
 
-        if a && !b || !a && b {
+        if a ^ b {
             Cow::Borrowed(&self.material.0)
         } else {
             Cow::Borrowed(&self.material.1)

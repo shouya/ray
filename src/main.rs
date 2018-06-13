@@ -40,7 +40,7 @@ mod example_scene {
             let y = -5.0 + i as f32 * 0.3 + (i * i) as f32 * 1.0;
 
             scene.add_object(Sphere {
-                c: V3([x, y, 0.5 * i as f32]),
+                c: V3([x, y, -1.0 + 0.5 * i as f32]),
                 r: 1.5,
                 material: Material {
                     surface_color: colors[i],
