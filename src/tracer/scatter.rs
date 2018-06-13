@@ -1,4 +1,4 @@
-use super::*;
+use super::{dist, Color, ImageBuffer, Ray, Rgb, RgbImage, Scene};
 
 const MAX_DEPTH: u32 = 5;
 const SCATTER_AMOUNT: u32 = 20;
@@ -8,7 +8,7 @@ pub fn trace_ray(s: &Scene, ray: Ray, ambient: Color, depth: u32) -> Option<Colo
         return None;
     }
 
-    let hit = s.closet_hit(&ray);
+    let hit = s.nearest_hit(&ray);
     if hit.is_none() {
         return None;
     }

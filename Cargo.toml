@@ -1,9 +1,8 @@
 [package]
+authors = ["Shou Ya <shouya@users.noreply.github.com>"]
 name = "ray"
 version = "0.1.0"
-authors = ["Shou Ya <shouya@users.noreply.github.com>"]
-
 [dependencies]
-# conrod = "0.60.0"
+derive_builder = "0.5.1"
 image = "0.19.0"
 rand = "0.5.1"

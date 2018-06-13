@@ -1,5 +1,6 @@
-use super::*;
+use super::{Cow, Hit, Material, Object, Ray, V3};
 
+#[derive(Debug, Clone)]
 pub struct Sphere {
     pub c: V3,
     pub r: f32,
@@ -25,7 +26,7 @@ impl Object for Sphere {
         }
 
         let t1c = (r2 - d2).sqrt();
-        let mut t1 = tc - t1c;
+        let t1 = tc - t1c;
         let t2 = tc + t1c;
 
         let t = if (t1 < 0.0 && t2 > 0.0) || (t1 > 0.0 && t2 < 0.0) {
@@ -46,7 +47,7 @@ impl Object for Sphere {
         }
     }
 
-    fn material(&self, pos: V3) -> Cow<Material> {
+    fn material(&self, _pos: V3) -> Cow<Material> {
         Cow::Borrowed(&self.material)
     }
 }

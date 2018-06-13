@@ -3,16 +3,6 @@ pub struct V3(pub [f32; 3]);
 #[derive(Debug, Clone, Copy)]
 pub struct Color(pub [f32; 3]);
 
-pub mod color {
-    use super::Color;
-
-    pub const Red: Color = Color([1.0, 0.0, 0.0]);
-    pub const Green: Color = Color([0.0, 1.0, 0.0]);
-    pub const Blue: Color = Color([0.0, 0.0, 1.0]);
-    pub const White: Color = Color([1.0, 1.0, 1.0]);
-    pub const Black: Color = Color([0.0, 0.0, 0.0]);
-}
-
 #[derive(Debug, Clone)]
 pub struct Line(V3, V3);
 #[derive(Debug, Clone)]
@@ -20,6 +10,7 @@ pub struct Plane(V3, V3);
 #[derive(Debug, Clone)]
 pub struct Trig(V3, V3, V3);
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum Projection {
     Orthogonal,
@@ -57,9 +48,6 @@ impl V3 {
     }
     pub fn z(&self) -> f32 {
         self.0[2]
-    }
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
-        V3([x, y, z])
     }
 
     pub fn dot(self, rhs: Self) -> f32 {
@@ -182,7 +170,19 @@ impl Ray {
     }
 }
 
+#[allow(non_upper_case_globals)]
 impl Color {
+    #[allow(dead_code)]
+    pub const Red: Color = Color([1.0, 0.0, 0.0]);
+    #[allow(dead_code)]
+    pub const Green: Color = Color([0.0, 1.0, 0.0]);
+    #[allow(dead_code)]
+    pub const Blue: Color = Color([0.0, 0.0, 1.0]);
+    #[allow(dead_code)]
+    pub const White: Color = Color([1.0, 1.0, 1.0]);
+    #[allow(dead_code)]
+    pub const Black: Color = Color([0.0, 0.0, 0.0]);
+
     pub fn r(&self) -> f32 {
         self.0[0]
     }

@@ -1,7 +1,9 @@
 use common::*;
 use object::Object;
 
+#[derive(Builder)]
 pub struct Scene {
+    #[builder(setter(skip))]
     pub objs: Vec<Box<Object>>,
     // plane w/ center, width, height
     pub vp_plane: Plane,
@@ -12,26 +14,11 @@ pub struct Scene {
 }
 
 impl Scene {
-    pub fn new(camera: V3, vp_plane: Plane, vp_width: f32, vp_height: f32) -> Self {
-        Self {
-            camera,
-            vp_plane,
-            vp_width,
-            vp_height,
-            objs: Vec::new(),
-            projection: Projection::Perspective,
-        }
-    }
-
     pub fn add_object<T: 'static>(&mut self, obj: T)
     where
         T: Object + Sized,
     {
         self.objs.push(Box::new(obj))
-    }
-
-    pub fn projection(&mut self, p: Projection) {
-        self.projection = p;
     }
 
     pub fn vp_from_pixel(&self, x: u32, y: u32, w: u32, h: u32) -> V3 {
@@ -54,7 +41,7 @@ impl Scene {
         Ray::new(orig, dir)
     }
 
-    pub fn closet_hit<'a>(&'a self, ray: &Ray) -> Option<(&'a Box<Object>, Hit)> {
+    pub fn nearest_hit<'a>(&'a self, ray: &Ray) -> Option<(&'a Box<Object>, Hit)> {
         use std::f32;
         let mut min_dist = f32::MAX;
         let mut result = None;

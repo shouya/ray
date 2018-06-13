@@ -1,4 +1,4 @@
-use super::image::{GenericImage, GrayImage, ImageBuffer, Luma, Pixel, Rgb, RgbImage};
+use super::image::{ImageBuffer, Rgb, RgbImage};
 use common::*;
 use scene::Scene;
 

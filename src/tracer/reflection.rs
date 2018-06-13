@@ -1,7 +1,7 @@
-use super::*;
+use super::{dist, Color, ImageBuffer, Ray, Rgb, RgbImage, Scene};
 
 pub fn trace_ray(s: &Scene, ray: Ray, ambient: Color) -> Option<Color> {
-    let hit = s.closet_hit(&ray);
+    let hit = s.nearest_hit(&ray);
     if hit.is_none() {
         return None;
     }
@@ -20,6 +20,7 @@ pub fn trace_ray(s: &Scene, ray: Ray, ambient: Color) -> Option<Color> {
     Some(color)
 }
 
+#[allow(dead_code)]
 pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
     let mut film = ImageBuffer::new(w, h);
     let ambient_color = Color([0.2, 0.2, 0.2]);
