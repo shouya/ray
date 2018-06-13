@@ -13,6 +13,8 @@ mod common {
         pub const Red: Color = Color([1.0, 0.0, 0.0]);
         pub const Green: Color = Color([0.0, 1.0, 0.0]);
         pub const Blue: Color = Color([0.0, 0.0, 1.0]);
+        pub const White: Color = Color([1.0, 1.0, 1.0]);
+        pub const Black: Color = Color([0.0, 0.0, 0.0]);
     }
 
     #[derive(Debug, Clone)]
@@ -39,6 +41,7 @@ mod common {
     pub struct Hit {
         pub pos: V3,
         pub norm: V3,
+        pub inside: bool,
     }
 
     pub fn dist2(a: V3, b: V3) -> f32 {
@@ -162,6 +165,14 @@ mod common {
             Ray::new(hit.pos, self.dir - proj_n_d * 2.0)
         }
 
+        pub fn refract(&self, hit: &Hit, index: f32) -> Ray {
+            let eta = if hit.inside { 1.0 / index } else { index };
+            let cosi = -hit.norm.dot(self.dir);
+            let k = 1.0 - eta * eta * (1.0 - cosi * cosi);
+            let dir = self.dir * eta + hit.norm * (eta * cosi - k.sqrt());
+            Ray::new(hit.pos, dir)
+        }
+
         pub fn drift(&self, std_dev: f32) -> Ray {
             use rand::distributions::Distribution;
             use rand::distributions::Normal;
@@ -227,6 +238,20 @@ mod common {
             ]
         }
     }
+
+    impl Add<Color> for Color {
+        type Output = Color;
+        fn add(self, rhs: Self) -> Color {
+            Color([self.r() + rhs.r(), self.g() + rhs.g(), self.b() + rhs.b()])
+        }
+    }
+
+    impl Mul<f32> for Color {
+        type Output = Color;
+        fn mul(self, rhs: f32) -> Color {
+            Color([self.r() * rhs, self.g() * rhs, self.b() * rhs])
+        }
+    }
 }
 
 mod object {
@@ -238,9 +263,9 @@ mod object {
         pub surface_color: Color,
         pub emission_color: Color,
         pub refractive_index: f32,
-        pub transparency: f32, // 0: opaque, 1: transparent
-        pub reflexivity: f32,  // 0: black body, 1: perfect mirror
-        pub roughness: f32,    // norm of random reflected shadow rays, 0: perfect smooth
+        pub transparency: f32,   // 0: opaque, 1: transparent
+        pub reflexivity: f32,    // 0: black body, 1: perfect mirror
+        pub specular_index: f32, // std dev of reflected shadow rays, 0: perfect smooth
     }
 
     pub trait Object {
@@ -260,6 +285,7 @@ mod object {
         fn intersect(&self, ray: &Ray) -> Option<Hit> {
             let l = self.c - ray.orig;
             let tc = l.dot(ray.dir);
+            let mut inside = false;
 
             if tc < 0.0 {
                 return None;
@@ -276,24 +302,25 @@ mod object {
             let mut t1 = tc - t1c;
             let t2 = tc + t1c;
 
-            if t1 < 0.0 {
-                t1 = t2;
-            }
-            if t2 < t1 {
-                t1 = t2;
-            }
-            let t = if t1 > 0.0 { Some(t1) } else { None };
+            let t = if (t1 < 0.0 && t2 > 0.0) || (t1 > 0.0 && t2 < 0.0) {
+                inside = true;
+                Some(t1.max(t2))
+            } else if t1 > 0.0 && t2 > 0.0 {
+                Some(t1.min(t2))
+            } else {
+                None
+            };
 
             if let Some(t) = t {
                 let pos = ray.orig + ray.dir * t;
                 let norm = (pos - self.c).norm();
-                Some(Hit { pos, norm })
+                Some(Hit { pos, norm, inside })
             } else {
                 None
             }
         }
 
-        fn material(&self, _pos: V3) -> Cow<Material> {
+        fn material(&self, pos: V3) -> Cow<Material> {
             Cow::Borrowed(&self.material)
         }
     }
@@ -421,7 +448,7 @@ mod raytracing {
 
             let color = suf_color.blend(refl_color, material.reflexivity);
             // fog
-            let color = color.blend(ambient, 0.05 * dist);
+            let color = color.blend(ambient, 0.01 * dist);
 
             Some(color)
         }
@@ -448,8 +475,8 @@ mod raytracing {
 
     pub mod scatter {
         use super::*;
-        const MAX_DEPTH: u32 = 3;
-        const SCATTER_AMOUNT: u32 = 100;
+        const MAX_DEPTH: u32 = 10;
+        const SCATTER_AMOUNT: u32 = 20;
 
         pub fn trace_ray(s: &Scene, ray: Ray, ambient: Color, depth: u32) -> Option<Color> {
             if depth >= MAX_DEPTH {
@@ -470,7 +497,10 @@ mod raytracing {
             let mut refl_colors = Vec::new();
 
             for _ in 0..(SCATTER_AMOUNT / depth) {
-                let ray = shadowray.drift(material.roughness);
+                let ray = shadowray.drift(material.specular_index);
+                if ray.dir.dot(hit.norm) <= 0.0 {
+                    continue;
+                }
                 if let Some(color) = trace_ray(s, ray, ambient, depth + 1) {
                     refl_colors.push(color);
                 } else {
@@ -507,6 +537,74 @@ mod raytracing {
             film
         }
     }
+
+    pub mod transparency {
+        use super::*;
+        const MAX_DEPTH: u32 = 3;
+        const SCATTER_AMOUNT: u32 = 30;
+
+        pub fn trace_ray(s: &Scene, ray: Ray, ambient: Color, depth: u32) -> Option<Color> {
+            if depth >= MAX_DEPTH {
+                return None;
+            }
+
+            let hit = s.closet_hit(&ray);
+            if hit.is_none() {
+                return None;
+            }
+
+            let (obj, hit) = hit.unwrap();
+            let material = obj.material(hit.pos);
+
+            let suf_color = material.surface_color;
+
+            let refl_ray = ray.reflect(&hit);
+            let mut refl_color = color::Black;
+
+            for _ in 0..(SCATTER_AMOUNT / depth) {
+                let ray = refl_ray.drift(material.specular_index);
+                if let Some(color) = trace_ray(s, ray, ambient, depth + 1) {
+                    refl_color = refl_color + color;
+                }
+            }
+
+            let refr_ray = ray.refract(&hit, material.refractive_index);
+            let refr_color = trace_ray(s, refr_ray, ambient, depth + 1).unwrap_or(color::Black);
+
+            let color = material.emission_color
+                + suf_color * (1.0 - material.reflexivity - material.transparency)
+                + refl_color * material.reflexivity
+                + refr_color * material.transparency;
+
+            // fog
+            // let color = color.blend(ambient, 0.05 * dist);
+
+            Some(color)
+        }
+
+        pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
+            let mut film = ImageBuffer::new(w, h);
+            let ambient_color = Color([0.0, 0.0, 0.0]);
+
+            for (x, y, pixel) in film.enumerate_pixels_mut() {
+                let ray = s.generate_ray(x, y, w, h);
+                if x == 0 {
+                    print!("Process: {}/{} ({}%)\r\n", y, h, y * 100 / h);
+                }
+                match trace_ray(&s, ray, ambient_color, 1) {
+                    Some(color) => {
+                        *pixel = Rgb(color.into());
+                    }
+                    None => {
+                        *pixel = Rgb(ambient_color.into());
+                    }
+                }
+            }
+
+            println!("");
+            film
+        }
+    }
 }
 
 fn main() {
@@ -524,22 +622,25 @@ fn main() {
         2.0,
     );
 
-    let material = Material {
-        surface_color: color::Green,
-        emission_color: Color([0.1, 0.0, 0.0]),
-        reflexivity: 0.5,
-        refractive_index: 0.0,
-        roughness: 0.2,
-        transparency: 0.0,
-    };
+    let colors = [
+        color::Red,
+        color::Green,
+        color::Blue,
+        color::White,
+        color::Red,
+    ];
 
     for i in 0..5 {
         scene1.add_object(Sphere {
-            c: V3([7.0, (i as f32 - 2.0) * 2.0, 0.0]),
-            r: 0.5 + i as f32 * 0.1,
+            c: V3([7.0 + i as f32 * 2.0, i as f32 * 2.0, 0.0]),
+            r: 1.5,
             material: Material {
-                surface_color: Color([0.0, 0.2 * i as f32, 0.0]),
-                ..material
+                surface_color: colors[i],
+                emission_color: Color([0.1, 0.1, 0.1]),
+                reflexivity: 0.5,
+                refractive_index: 0.9,
+                specular_index: 0.00,
+                transparency: 0.2,
             },
         });
     }
@@ -548,6 +649,6 @@ fn main() {
     //     r: 1.5,
     // });
 
-    let img = raytracing::scatter::trace(scene1, 400, 400);
+    let img = raytracing::transparency::trace(scene1, 400, 400);
     img.save("./trace.png").ok();
 }
