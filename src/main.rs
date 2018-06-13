@@ -64,6 +64,6 @@ mod example_scene {
 
 fn main() {
     let scene = example_scene::five_spheres();
-    let img = tracer::scatter::trace(scene, 400, 400);
+    let img = tracer::scatter::trace(scene, 800, 800);
     img.save("./trace.png").ok();
 }
