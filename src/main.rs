@@ -11,7 +11,7 @@ mod tracer;
 
 mod example_scene {
     use common::*;
-    use object::{Material, Sphere};
+    use object::{ChessBoard, Material, Sphere};
     use scene::{Scene, SceneBuilder};
 
     pub fn five_spheres() -> Scene {
@@ -32,12 +32,15 @@ mod example_scene {
             Color::Green,
             Color::Blue,
             Color::White,
-            Color::Red,
+            Color::Black,
         ];
 
         for i in 0..5 {
+            let x = 7.0 + i as f32 * 1.7;
+            let y = -5.0 + i as f32 * 1.5 + (i * i) as f32 * 0.5;
+
             scene.add_object(Sphere {
-                c: V3([7.0 + i as f32 * 2.0, i as f32 * 2.0, 0.0]),
+                c: V3([x, y, 0.0]),
                 r: 1.5,
                 material: Material {
                     surface_color: colors[i],
@@ -49,6 +52,12 @@ mod example_scene {
                 },
             });
         }
+
+        scene.add_object(ChessBoard {
+            plane: Plane::new(V3([0.0, 0.0, -3.0]), V3([-0.2, 0.0, -1.0])),
+            ..ChessBoard::default()
+        });
+
         scene
     }
 }

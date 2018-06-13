@@ -1,7 +1,7 @@
 use super::{dist, Color, ImageBuffer, Ray, Rgb, RgbImage, Scene};
 
-const MAX_DEPTH: u32 = 5;
-const SCATTER_AMOUNT: u32 = 20;
+const MAX_DEPTH: u32 = 7;
+const SCATTER_AMOUNT: u32 = 50;
 
 pub fn trace_ray(s: &Scene, ray: Ray, ambient: Color, depth: u32) -> Option<Color> {
     if depth >= MAX_DEPTH {
@@ -36,7 +36,7 @@ pub fn trace_ray(s: &Scene, ray: Ray, ambient: Color, depth: u32) -> Option<Colo
 
     let color = suf_color.blend(refl_color, material.reflexivity);
     // fog
-    let color = color.blend(ambient, 0.05 * dist);
+    let color = color.blend(ambient, 0.01 * dist);
 
     Some(color)
 }

@@ -17,6 +17,8 @@ pub trait Object {
     fn material(&self, pos: V3) -> Cow<Material>;
 }
 
+pub mod chessboard;
 pub mod sphere;
 
+pub use self::chessboard::ChessBoard;
 pub use self::sphere::Sphere;
