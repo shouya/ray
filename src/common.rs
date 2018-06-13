@@ -163,6 +163,10 @@ impl Ray {
         use rand::distributions::Normal;
         use rand::thread_rng;
 
+        if std_dev == 0.0 {
+            return self.clone();
+        }
+
         let n = Normal::new(0.0, std_dev as f64);
         let dx = n.sample(&mut thread_rng());
         let dy = n.sample(&mut thread_rng());

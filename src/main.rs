@@ -36,8 +36,8 @@ mod example_scene {
         ];
 
         for i in 0..5 {
-            let x = 7.0 + i as f32 * 1.7;
-            let y = -5.0 + i as f32 * 1.5 + (i * i) as f32 * 0.5;
+            let x = 7.0 + i as f32 * 2.0;
+            let y = -5.0 + i as f32 * 2.0 + (i * i) as f32 * 0.5;
 
             scene.add_object(Sphere {
                 c: V3([x, y, 0.0]),
@@ -47,7 +47,7 @@ mod example_scene {
                     emission_color: Color([0.1, 0.1, 0.1]),
                     reflexivity: 0.5,
                     refractive_index: 0.9,
-                    specular_index: 0.00,
+                    specular_index: 0.01,
                     transparency: 0.2,
                 },
             });
