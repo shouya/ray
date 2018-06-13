@@ -50,7 +50,7 @@ impl Object for ChessBoard {
             return None;
         }
         let pos = ray.orig + ray.dir * d;
-        let norm = V3::zero() - self.plane.n();
+        let norm = -self.plane.n();
 
         Some(Hit {
             pos,

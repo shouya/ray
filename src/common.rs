@@ -1,3 +1,5 @@
+use std::ops::{Add, Div, Mul, Neg, Sub};
+
 #[derive(Debug, Clone, Copy)]
 pub struct V3(pub [f32; 3]);
 #[derive(Debug, Clone, Copy)]
@@ -73,8 +75,6 @@ impl V3 {
     }
 }
 
-use std::ops::{Add, Div, Mul, Sub};
-
 impl Sub<f32> for V3 {
     type Output = V3;
     fn sub(self, rhs: f32) -> V3 {
@@ -85,6 +85,12 @@ impl Add<f32> for V3 {
     type Output = V3;
     fn add(self, rhs: f32) -> V3 {
         V3([self.x() + rhs, self.y() + rhs, self.z() + rhs])
+    }
+}
+impl Neg for V3 {
+    type Output = V3;
+    fn neg(self) -> V3 {
+        V3([-self.x(), -self.y(), -self.z()])
     }
 }
 impl Mul<f32> for V3 {
