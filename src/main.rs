@@ -28,7 +28,7 @@ mod example_scene {
             .build()
             .unwrap();
 
-        scene.add_light(V3([-10.0, 10.0, 10.0]), 0.7);
+        scene.add_light(V3([1.0, -5.0, 10.0]), 0.7);
 
         let colors = [
             Color::Red,
@@ -67,6 +67,6 @@ mod example_scene {
 
 fn main() {
     let scene = example_scene::five_spheres();
-    let img = tracer::transparency::trace(scene, 300, 300);
+    let img = tracer::transparency::trace(scene, 800, 800);
     img.save("./trace.png").ok();
 }

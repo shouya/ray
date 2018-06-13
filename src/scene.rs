@@ -50,12 +50,12 @@ impl Scene {
 
     pub fn nearest_hit<'a>(&'a self, ray: &Ray) -> Option<(&'a Box<Object>, Hit)> {
         use std::f32;
-        let mut min_dist = f32::MAX;
+        let mut min_dist = f32::INFINITY;
         let mut result = None;
 
         for obj in self.objs.iter() {
             if let Some(hit) = obj.intersect(&ray) {
-                if dist2(hit.pos, ray.orig) >= min_dist {
+                if dist2(hit.pos, ray.orig) > min_dist {
                     continue;
                 }
                 result = Some((obj, hit));

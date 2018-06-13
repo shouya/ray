@@ -185,6 +185,10 @@ impl Ray {
         let dz = n.sample(&mut thread_rng());
         Ray::new(self.orig, self.dir + V3([dx as f32, dy as f32, dz as f32]))
     }
+
+    pub fn biased(self, amount: f32) -> Ray {
+        self + self.dir * amount
+    }
 }
 
 impl Add<V3> for Ray {

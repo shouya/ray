@@ -3,9 +3,9 @@ use common::*;
 use object::Material;
 
 const MAX_DEPTH: u32 = 4;
-const SCATTER_AMOUNT: u32 = 100;
+const SCATTER_AMOUNT: u32 = 40;
 const MAX_RETRY_COUNT: u32 = 10;
-const BIAS: f32 = 1e-4;
+const BIAS: f32 = 1e-5;
 
 fn trace_ray(s: &Scene, ray: Ray, depth: u32) -> Color {
     if depth >= MAX_DEPTH {
@@ -28,8 +28,9 @@ fn trace_ray(s: &Scene, ray: Ray, depth: u32) -> Color {
     let m = obj.material(hit.pos);
     let color = match TraceMode::from_material(&m) {
         TraceMode::Diffusive => trace_ray_diffusive(&s, &ray, &hit, &m),
-        TraceMode::Reflective => trace_ray_reflective(&s, &ray, &hit, &m, depth),
-        TraceMode::Transparent => trace_ray_transparent(&s, &ray, &hit, &m, depth),
+        // TraceMode::Reflective => trace_ray_reflective(&s, &ray, &hit, &m, depth),
+        // TraceMode::Transparent => trace_ray_transparent(&s, &ray, &hit, &m, depth),
+        _ => s.ambient,
     };
 
     // fog
@@ -68,16 +69,20 @@ fn trace_ray_diffusive(s: &Scene, _ray: &Ray, hit: &Hit, m: &Material) -> Color 
     let mut brightness = 0.0;
 
     for light in s.lights.iter() {
-        let light_dir = light.pos - hit.pos;
-        let shadowray = Ray::new(hit.pos, light_dir);
+        let shadowray_dir = light.pos - hit.pos;
+        let shadowray = Ray::new(hit.pos, shadowray_dir).biased(BIAS);
+        let angle = (light.pos - hit.pos).norm().dot(hit.norm);
 
-        if let Some((_obj, sr_hit)) = s.nearest_hit(&shadowray) {
-            brightness -= light.brightness;
-        } else {
-            let angle = (light.pos - hit.pos).norm().dot(hit.norm);
-            if angle >= 0.0 {
+        if let Some(_) = s.nearest_hit(&shadowray) {
+            if angle <= 0.0 {
+                // indirect hit
                 brightness += angle * light.brightness;
+            } else {
+                // pixel is in shadow
+                brightness -= light.brightness;
             }
+        } else {
+            brightness += angle * light.brightness;
         }
     }
 
