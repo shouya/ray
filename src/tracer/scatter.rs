@@ -72,6 +72,7 @@ pub fn drift_ray(shadowray: &Ray, hit: &Hit, material: &Material) -> Ray {
     ray
 }
 
+#[allow(dead_code)]
 pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
     let mut film = ImageBuffer::new(w, h);
     let ambient_color = Color([0.8, 0.8, 0.8]);

@@ -33,6 +33,12 @@ pub struct Hit {
     pub inside: bool,
 }
 
+#[derive(Debug, Clone)]
+pub struct PointLight {
+    pub pos: V3,
+    pub brightness: f32 // 0.0 turned off
+}
+
 pub fn dist2(a: V3, b: V3) -> f32 {
     let d = b - a;
     d.dot(d)
@@ -178,6 +184,16 @@ impl Ray {
         let dy = n.sample(&mut thread_rng());
         let dz = n.sample(&mut thread_rng());
         Ray::new(self.orig, self.dir + V3([dx as f32, dy as f32, dz as f32]))
+    }
+}
+
+impl Add<V3> for Ray {
+    type Output = Ray;
+    fn add(self, rhs: V3) -> Ray {
+        Ray {
+            orig: self.orig + rhs,
+            dir: self.dir,
+        }
     }
 }
 

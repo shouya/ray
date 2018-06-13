@@ -5,7 +5,7 @@ use std::borrow::Cow;
 pub struct Material {
     pub surface_color: Color,
     pub emission_color: Color,
-    pub refractive_index: f32,
+    pub ior: f32, // 1: air, 1.3: water, 1.5: glass
     pub transparency: f32,   // 0: opaque, 1: transparent
     pub reflexivity: f32,    // 0: black body, 1: perfect mirror
     pub specular_index: f32, // std dev of reflected shadow rays, 0: perfect smooth

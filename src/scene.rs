@@ -11,6 +11,9 @@ pub struct Scene {
     pub vp_height: f32,
     pub camera: V3,
     pub projection: Projection,
+    pub ambient: Color,
+    #[builder(setter(skip))]
+    pub lights: Vec<PointLight>,
 }
 
 impl Scene {
@@ -19,6 +22,10 @@ impl Scene {
         T: Object + Sized,
     {
         self.objs.push(Box::new(obj))
+    }
+
+    pub fn add_light(&mut self, pos: V3, brightness: f32) {
+        self.lights.push(PointLight { pos, brightness })
     }
 
     pub fn vp_from_pixel(&self, x: u32, y: u32, w: u32, h: u32) -> V3 {

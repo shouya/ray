@@ -24,8 +24,11 @@ mod example_scene {
             .vp_height(2.0)
             .camera(V3::zero())
             .projection(Projection::Perspective)
+            .ambient(Color::White * 0.8)
             .build()
             .unwrap();
+
+        scene.add_light(V3([-10.0, 10.0, 10.0]), 0.7);
 
         let colors = [
             Color::Red,
@@ -45,10 +48,10 @@ mod example_scene {
                 material: Material {
                     surface_color: colors[i],
                     emission_color: Color([0.1, 0.1, 0.1]),
-                    reflexivity: 0.5,
-                    refractive_index: 0.9,
+                    reflexivity: 0.0,
+                    ior: 0.9,
                     specular_index: 0.01,
-                    transparency: 0.2,
+                    transparency: 0.0,
                 },
             });
         }
@@ -64,6 +67,6 @@ mod example_scene {
 
 fn main() {
     let scene = example_scene::five_spheres();
-    let img = tracer::scatter::trace(scene, 800, 800);
+    let img = tracer::transparency::trace(scene, 300, 300);
     img.save("./trace.png").ok();
 }
