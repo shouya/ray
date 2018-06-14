@@ -22,3 +22,35 @@ pub mod sphere;
 
 pub use self::chessboard::ChessBoard;
 pub use self::sphere::Sphere;
+
+#[allow(non_upper_case_globals)]
+impl Material {
+    pub const Mirror: Material = Material {
+        surface_color: Color([0.0, 0.0, 0.0]),
+        emission_color: Color([0.0, 0.0, 0.0]),
+        reflexivity: 0.95,
+        ior: 1.62,
+        specular_index: 0.3,
+        transparency: 0.0,
+    };
+    pub const Glass: Material = Material {
+        transparency: 0.95,
+        ..Material::Mirror
+    };
+    pub const Solid: Material = Material {
+        surface_color: Color([1.0, 1.0, 1.0]),
+        emission_color: Color([0.0, 0.0, 0.0]),
+        reflexivity: 0.0,
+        ior: 1.0,
+        specular_index: 0.5,
+        transparency: 0.0,
+    };
+    pub const FrostedGlass: Material = Material {
+        specular_index: 0.3,
+        ..Material::Glass
+    };
+    pub const FrostedMirror: Material = Material {
+        specular_index: 0.3,
+        ..Material::Mirror
+    };
+}

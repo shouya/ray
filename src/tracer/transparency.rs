@@ -39,7 +39,7 @@ fn trace_ray(s: &Scene, ray: Ray, depth: u32) -> Color {
     color
 }
 
-fn trace_ray_diffusive(s: &Scene, _ray: &Ray, hit: &Hit, m: &Material) -> Color {
+fn trace_ray_diffusive(s: &Scene, ray: &Ray, hit: &Hit, m: &Material) -> Color {
     let mut brightness = 0.0;
 
     for light in s.lights.iter() {
@@ -57,6 +57,13 @@ fn trace_ray_diffusive(s: &Scene, _ray: &Ray, hit: &Hit, m: &Material) -> Color 
             }
         } else {
             brightness += angle * light.brightness;
+        }
+
+        if m.specular_index > 0.0 {
+            // phong
+            let h = (-ray.dir + shadowray_dir).norm();
+            let phong_angle = (h.dot(hit.norm)).max(0.0);
+            brightness += light.brightness * m.specular_index * phong_angle;
         }
     }
 
@@ -77,16 +84,16 @@ fn trace_ray_reflective(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u3
     };
 
     let bias = if hit.inside { -BIAS } else { BIAS };
-    let refl_ray = ray.reflect(&hit.biased(bias)) + hit.norm * BIAS;
-    // let mut refl_colors = Vec::new();
-    // for _ in 0..scatter_amount {
-    //     let ray = drift_ray(&refl_ray, &hit, &m);
-    //     refl_colors.push(trace_ray(s, ray, depth + 1));
-    // }
-    // let refl_color = Color::blend_all(&refl_colors);
-    let refl_color = trace_ray(s, refl_ray, depth + 1);
+    let refl_ray = ray.reflect(&hit.biased(bias));
+    let mut refl_colors = Vec::new();
+    for _ in 0..scatter_amount {
+        let ray = drift_ray(&refl_ray, &hit, &m);
+        refl_colors.push(trace_ray(s, ray, depth + 1));
+    }
+    let refl_color = Color::blend_all(&refl_colors);
 
-    m.surface_color.blend(refl_color, m.reflexivity)
+    let apparence_color = trace_ray_diffusive(s, ray, hit, m);
+    apparence_color.blend(refl_color, m.reflexivity)
 }
 
 fn trace_ray_transparent(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u32) -> Color {
@@ -95,7 +102,7 @@ fn trace_ray_transparent(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u
     // let refl_color = s.ambient;
 
     let bias = if hit.inside { -BIAS } else { BIAS };
-    let refr_ray = ray.refract(&hit.biased(bias), 1.0);
+    let refr_ray = ray.refract(&hit.biased(bias), m.ior);
     let refr_color = if refr_ray.dir.is_zero() {
         // full internal reflection
         refl_color
@@ -105,7 +112,8 @@ fn trace_ray_transparent(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u
 
     let color = refr_color.blend(refl_color, kr);
     let apparence_color = trace_ray_diffusive(s, ray, hit, m);
-    apparence_color.blend(color, m.transparency)
+    let color = apparence_color.blend(color, m.transparency);
+    color
 }
 
 fn drift_ray(shadowray: &Ray, hit: &Hit, material: &Material) -> Ray {
@@ -140,8 +148,6 @@ fn fresnel(ray: &Ray, hit: &Hit, m: &Material) -> f32 {
     let eta = etai / etat;
 
     let sint2 = eta * eta * (1.0 - cosi * cosi).max(0.0);
-    if (1.0 - sint2) * (1.0 - sint2) < 0.0 {
-    }
     if sint2 >= 1.0 {
         return 1.0;
     }

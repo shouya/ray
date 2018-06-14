@@ -30,30 +30,45 @@ mod example_scene {
 
         scene.add_light(V3([1.0, -5.0, 10.0]), 0.7);
 
-        let colors = [
-            Color::Red,
-            Color::Green,
-            Color::Blue,
-            Color::White,
-            Color::Black,
-        ];
-
-        for i in 0..5 {
-            let x = 7.0 + i as f32 * 3.2;
-            let y = -5.0 + i as f32 * 0.3 + (i * i) as f32 * 1.0;
-
-            scene.add_object(Sphere {
-                c: V3([x, y, -1.0 + 0.5 * i as f32]),
+        let spheres = vec![
+            Sphere {
+                c: V3([7.0, 0.0, -0.5]),
                 r: 1.5,
                 material: Material {
-                    surface_color: colors[i],
-                    emission_color: Color([0.1, 0.1, 0.1]),
-                    reflexivity: 0.5,
-                    ior: 1.1,
-                    specular_index: 0.01,
-                    transparency: 0.9,
+                    surface_color: Color::White,
+                    ..Material::Glass
                 },
-            });
+            },
+            Sphere {
+                c: V3([7.0, -3.5, 1.0]),
+                r: 1.5,
+                material: Material {
+                    surface_color: Color::Black,
+                    ..Material::Mirror
+                },
+            },
+            Sphere {
+                c: V3([7.0, 3.5, 1.5]),
+                r: 1.5,
+                material: Material::FrostedGlass,
+            },
+            Sphere {
+                c: V3([12.0, -1.5, 3.5]),
+                r: 1.5,
+                material: Material::FrostedMirror,
+            },
+            Sphere {
+                c: V3([12.0, 3.0, 5.5]),
+                r: 1.5,
+                material: Material {
+                    surface_color: Color::Green,
+                    ..Material::Solid
+                },
+            },
+        ];
+
+        for s in spheres.into_iter() {
+            scene.add_object(s);
         }
 
         scene.add_object(ChessBoard {
