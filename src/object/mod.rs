@@ -29,14 +29,15 @@ impl Material {
     pub const Mirror: Material = Material {
         surface_color: Color([0.0, 0.0, 0.0]),
         emission_color: Color([0.0, 0.0, 0.0]),
-        reflexivity: 0.95,
-        ior: 1.62,
+        reflexivity: 0.5,
         specular_index: 0.3,
+        ior: 1.0,
         transparency: 0.0,
         roughness: 0.0
     };
     pub const Glass: Material = Material {
         transparency: 0.95,
+        ior: 1.62,
         ..Material::Mirror
     };
     pub const Solid: Material = Material {
@@ -44,7 +45,7 @@ impl Material {
         emission_color: Color([0.0, 0.0, 0.0]),
         reflexivity: 0.0,
         ior: 1.0,
-        specular_index: 0.5,
+        specular_index: 0.3,
         transparency: 0.0,
         roughness: 0.0
     };
@@ -54,6 +55,7 @@ impl Material {
     };
     pub const FrostedMirror: Material = Material {
         roughness: 0.3,
+        specular_index: 0.1,
         ..Material::Mirror
     };
 }
