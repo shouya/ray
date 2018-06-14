@@ -28,39 +28,13 @@ fn trace_ray(s: &Scene, ray: Ray, depth: u32) -> Color {
     let m = obj.material(hit.pos);
     let color = match TraceMode::from_material(&m) {
         TraceMode::Diffusive => trace_ray_diffusive(&s, &ray, &hit, &m),
-        // TraceMode::Reflective => trace_ray_reflective(&s, &ray, &hit, &m, depth),
-        // TraceMode::Transparent => trace_ray_transparent(&s, &ray, &hit, &m, depth),
+        TraceMode::Reflective => trace_ray_reflective(&s, &ray, &hit, &m, depth),
+        TraceMode::Transparent => trace_ray_transparent(&s, &ray, &hit, &m, depth),
         _ => s.ambient,
     };
 
     // fog
     let color = color.blend(s.ambient, 0.02 * dist_travel);
-
-    return color;
-
-    let kr = fresnel(&ray, &hit, &m);
-
-    let suf_color = m.surface_color;
-    let shadowray = ray.reflect(&hit) + hit.norm * BIAS;
-
-    let scatter_amount = if m.specular_index == 0.0 {
-        1
-    } else {
-        SCATTER_AMOUNT / depth
-    };
-
-    let mut refl_colors = Vec::new();
-    for _ in 0..scatter_amount {
-        let ray = drift_ray(&shadowray, &hit, &m);
-        refl_colors.push(trace_ray(s, ray, depth + 1));
-    }
-    let refl_color = Color::blend_all(&refl_colors);
-
-    let shadowray = ray.refract(&hit, m.ior);
-    let refr_color = trace_ray(s, shadowray, depth + 1);
-
-    let hitcolor = refl_color.blend(refr_color, kr);
-    let color = suf_color.blend(hitcolor, m.reflexivity);
 
     color
 }
@@ -114,7 +88,24 @@ fn trace_ray_reflective(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u3
 }
 
 fn trace_ray_transparent(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u32) -> Color {
-    m.surface_color
+    let kr = fresnel(ray, hit, m); // reflection ratio
+    // let kr = 0.5;
+    let refl_color = trace_ray_reflective(s, ray, hit, m, depth);
+    // let refl_color = s.ambient;
+
+    let bias = if hit.inside { -BIAS } else { BIAS };
+    let refr_ray = ray.refract(&hit.biased(bias), 1.3);
+    // println!("{:?} {:?}", ray.dir.dot(refr_ray.dir), hit);
+    let refr_color = if kr <= 1.1 {
+        trace_ray(s, refr_ray, depth + 1)
+    } else {
+        s.ambient
+    };
+
+    let color = refr_color.blend(refl_color, kr);
+    let apparence_color = trace_ray_diffusive(s, ray, hit, m);
+    // let apparence_color = m.surface_color;
+    apparence_color.blend(color, m.transparency)
 }
 
 fn drift_ray(shadowray: &Ray, hit: &Hit, material: &Material) -> Ray {

@@ -162,11 +162,26 @@ impl Ray {
         Ray::new(hit.pos, self.dir - proj_n_d * 2.0)
     }
 
-    pub fn refract(&self, hit: &Hit, index: f32) -> Ray {
-        let eta = if hit.inside { 1.0 / index } else { index };
-        let cosi = -hit.norm.dot(self.dir);
+    pub fn refract(&self, hit: &Hit, ior: f32) -> Ray {
+        use std::mem;
+
+        let mut cosi = hit.norm.dot(self.dir);
+        let (mut etai, mut etat) = (1.0, ior);
+        let mut n = hit.norm;
+        if cosi < 0.0 {
+            cosi = -cosi;
+        } else {
+            mem::swap(&mut etai, &mut etat);
+            n = -n;
+        }
+
+        let eta = etai / etat;
         let k = 1.0 - eta * eta * (1.0 - cosi * cosi);
-        let dir = self.dir * eta + hit.norm * (eta * cosi - k.sqrt());
+        let dir = if k < 0.0 {
+            V3::zero()
+        } else {
+            self.dir * eta + n * (eta * cosi - k.sqrt())
+        };
         Ray::new(hit.pos, dir)
     }
 
@@ -277,5 +292,14 @@ impl Mul<f32> for Color {
     type Output = Color;
     fn mul(self, rhs: f32) -> Color {
         Color([self.r() * rhs, self.g() * rhs, self.b() * rhs])
+    }
+}
+
+impl Hit {
+    pub fn biased(self, amount: f32) -> Hit {
+        Hit {
+            pos: self.pos + self.pos * amount,
+            ..self
+        }
     }
 }

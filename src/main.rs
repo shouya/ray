@@ -49,9 +49,9 @@ mod example_scene {
                     surface_color: colors[i],
                     emission_color: Color([0.1, 0.1, 0.1]),
                     reflexivity: 0.0,
-                    ior: 0.9,
+                    ior: 1.1,
                     specular_index: 0.01,
-                    transparency: 0.0,
+                    transparency: 0.9,
                 },
             });
         }
@@ -67,6 +67,6 @@ mod example_scene {
 
 fn main() {
     let scene = example_scene::five_spheres();
-    let img = tracer::transparency::trace(scene, 800, 800);
+    let img = tracer::transparency::trace(scene, 1200, 1200);
     img.save("./trace.png").ok();
 }
