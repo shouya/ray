@@ -68,6 +68,7 @@ fn trace_ray_diffusive(s: &Scene, ray: &Ray, hit: &Hit, m: &Material) -> Color {
     }
 
     let apparence_color = m.surface_color;
+    let brightness = brightness.min(1.0).max(-1.0);
 
     if brightness >= 0.0 {
         apparence_color.blend(Color::White, brightness)
