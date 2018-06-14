@@ -2,7 +2,7 @@ use super::{ImageBuffer, Rgb, RgbImage, Scene, TraceMode};
 use common::*;
 use object::Material;
 
-const MAX_DEPTH: u32 = 4;
+const MAX_DEPTH: u32 = 7;
 const SCATTER_RATIO: f32 = 10.0;
 const MAX_RETRY_COUNT: u32 = 10;
 const BIAS: f32 = 1e-5;
