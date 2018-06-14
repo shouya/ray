@@ -48,7 +48,7 @@ mod example_scene {
                 material: Material {
                     surface_color: colors[i],
                     emission_color: Color([0.1, 0.1, 0.1]),
-                    reflexivity: 0.0,
+                    reflexivity: 0.5,
                     ior: 1.1,
                     specular_index: 0.01,
                     transparency: 0.9,

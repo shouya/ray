@@ -2,7 +2,7 @@ use super::{ImageBuffer, Rgb, RgbImage, Scene, TraceMode};
 use common::*;
 use object::Material;
 
-const MAX_DEPTH: u32 = 4;
+const MAX_DEPTH: u32 = 5;
 const SCATTER_AMOUNT: u32 = 40;
 const MAX_RETRY_COUNT: u32 = 10;
 const BIAS: f32 = 1e-5;
@@ -76,35 +76,35 @@ fn trace_ray_reflective(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u3
         SCATTER_AMOUNT / depth
     };
 
-    let shadowray = ray.reflect(&hit) + hit.norm * BIAS;
-    let mut refl_colors = Vec::new();
-    for _ in 0..scatter_amount {
-        let ray = drift_ray(&shadowray, &hit, &m);
-        refl_colors.push(trace_ray(s, ray, depth + 1));
-    }
-    let refl_color = Color::blend_all(&refl_colors);
+    let bias = if hit.inside { -BIAS } else { BIAS };
+    let refl_ray = ray.reflect(&hit.biased(bias)) + hit.norm * BIAS;
+    // let mut refl_colors = Vec::new();
+    // for _ in 0..scatter_amount {
+    //     let ray = drift_ray(&refl_ray, &hit, &m);
+    //     refl_colors.push(trace_ray(s, ray, depth + 1));
+    // }
+    // let refl_color = Color::blend_all(&refl_colors);
+    let refl_color = trace_ray(s, refl_ray, depth + 1);
 
     m.surface_color.blend(refl_color, m.reflexivity)
 }
 
 fn trace_ray_transparent(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u32) -> Color {
     let kr = fresnel(ray, hit, m); // reflection ratio
-    // let kr = 0.5;
     let refl_color = trace_ray_reflective(s, ray, hit, m, depth);
     // let refl_color = s.ambient;
 
     let bias = if hit.inside { -BIAS } else { BIAS };
-    let refr_ray = ray.refract(&hit.biased(bias), 1.3);
-    // println!("{:?} {:?}", ray.dir.dot(refr_ray.dir), hit);
-    let refr_color = if kr <= 1.1 {
-        trace_ray(s, refr_ray, depth + 1)
+    let refr_ray = ray.refract(&hit.biased(bias), 1.0);
+    let refr_color = if refr_ray.dir.is_zero() {
+        // full internal reflection
+        refl_color
     } else {
-        s.ambient
+        trace_ray(s, refr_ray, depth + 1)
     };
 
     let color = refr_color.blend(refl_color, kr);
     let apparence_color = trace_ray_diffusive(s, ray, hit, m);
-    // let apparence_color = m.surface_color;
     apparence_color.blend(color, m.transparency)
 }
 
@@ -137,13 +137,16 @@ fn fresnel(ray: &Ray, hit: &Hit, m: &Material) -> f32 {
     if cosi > 0.0 {
         mem::swap(&mut etai, &mut etat);
     }
+    let eta = etai / etat;
 
-    let sint = etai / etat * (1.0 - cosi * cosi).max(0.0).sqrt();
-    if sint >= 1.0 {
+    let sint2 = eta * eta * (1.0 - cosi * cosi).max(0.0);
+    if (1.0 - sint2) * (1.0 - sint2) < 0.0 {
+    }
+    if sint2 >= 1.0 {
         return 1.0;
     }
 
-    let cost = (1.0 - sint * sint).max(0.0).sqrt();
+    let cost = (1.0 - sint2).max(0.0).sqrt();
     let cosi = cosi.abs();
     let rs = (etat * cosi - etai * cost) / (etat * cosi + etai * cost);
     let rp = (etai * cosi - etat * cost) / (etai * cosi + etat * cost);

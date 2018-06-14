@@ -79,6 +79,9 @@ impl V3 {
     pub fn zero() -> V3 {
         V3([0.0, 0.0, 0.0])
     }
+    pub fn is_zero(&self) -> bool {
+        self.x() == 0.0 && self.y() == 0.0 && self.z() == 0.0
+    }
 }
 
 impl Sub<f32> for V3 {
@@ -176,11 +179,12 @@ impl Ray {
         }
 
         let eta = etai / etat;
-        let k = 1.0 - eta * eta * (1.0 - cosi * cosi);
-        let dir = if k < 0.0 {
+        let sint2 = eta * eta * (1.0 - cosi * cosi);
+        let trans = 1.0 - sint2;
+        let dir = if trans < 0.0 {
             V3::zero()
         } else {
-            self.dir * eta + n * (eta * cosi - k.sqrt())
+            self.dir * eta + n * (eta * cosi - trans.sqrt())
         };
         Ray::new(hit.pos, dir)
     }
