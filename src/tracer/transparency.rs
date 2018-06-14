@@ -2,8 +2,8 @@ use super::{ImageBuffer, Rgb, RgbImage, Scene, TraceMode};
 use common::*;
 use object::Material;
 
-const MAX_DEPTH: u32 = 5;
-const SCATTER_AMOUNT: u32 = 40;
+const MAX_DEPTH: u32 = 4;
+const SCATTER_RATIO: f32 = 10.0;
 const MAX_RETRY_COUNT: u32 = 10;
 const BIAS: f32 = 1e-5;
 
@@ -77,17 +77,13 @@ fn trace_ray_diffusive(s: &Scene, ray: &Ray, hit: &Hit, m: &Material) -> Color {
 }
 
 fn trace_ray_reflective(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u32) -> Color {
-    let scatter_amount = if m.specular_index == 0.0 {
-        1
-    } else {
-        SCATTER_AMOUNT / depth
-    };
-
     let bias = if hit.inside { -BIAS } else { BIAS };
     let refl_ray = ray.reflect(&hit.biased(bias));
     let mut refl_colors = Vec::new();
+
+    let scatter_amount = scatter_amount(m, depth);
     for _ in 0..scatter_amount {
-        let ray = drift_ray(&refl_ray, &hit, &m);
+        let ray = drift_ray(&refl_ray, &hit, &m, true);
         refl_colors.push(trace_ray(s, ray, depth + 1));
     }
     let refl_color = Color::blend_all(&refl_colors);
@@ -107,7 +103,13 @@ fn trace_ray_transparent(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u
         // full internal reflection
         refl_color
     } else {
-        trace_ray(s, refr_ray, depth + 1)
+        let scatter_amount = scatter_amount(m, depth);
+        let mut refr_colors = Vec::new();
+        for _ in 0..scatter_amount {
+            let ray = drift_ray(&refr_ray, &hit, &m, true);
+            refr_colors.push(trace_ray(s, ray, depth + 1));
+        }
+        Color::blend_all(&refr_colors)
     };
 
     let color = refr_color.blend(refl_color, kr);
@@ -116,21 +118,34 @@ fn trace_ray_transparent(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u
     color
 }
 
-fn drift_ray(shadowray: &Ray, hit: &Hit, material: &Material) -> Ray {
-    if shadowray.dir.dot(hit.norm) <= 0.0 {
-        return *shadowray;
+fn scatter_amount(m: &Material, depth: u32) -> u32 {
+    if m.roughness <= 0.0 {
+        return 1;
+    } else {
+        let roughness = 1.0 + m.roughness;
+        let k = roughness * roughness / (depth * depth) as f32;
+        (k * SCATTER_RATIO).max(1.0) as u32
+    }
+}
+
+fn drift_ray(orig_ray: &Ray, hit: &Hit, material: &Material, refl: bool) -> Ray {
+    if !refl ^ (orig_ray.dir.dot(hit.norm) < 0.0) {
+        return *orig_ray;
     }
 
-    let mut ray = shadowray.drift(material.specular_index);
+    let mut ray = orig_ray.drift(material.roughness);
     let mut count = 0;
     loop {
-        if ray.dir.dot(hit.norm) >= 0.0 {
+        if refl && (ray.dir.dot(hit.norm) >= 0.0) {
+            break;
+        }
+        if !refl && (ray.dir.dot(hit.norm) <= 0.0) {
             break;
         }
         if count >= MAX_RETRY_COUNT {
-            return *shadowray;
+            return *orig_ray;
         }
-        ray = shadowray.drift(material.specular_index);
+        ray = orig_ray.drift(material.roughness);
         count += 1;
     }
     ray

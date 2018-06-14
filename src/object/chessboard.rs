@@ -18,6 +18,7 @@ impl Default for ChessBoard {
             transparency: 0.0,   // 0: opaque, 1: transparent
             reflexivity: 0.0,    // 0: black body, 1: perfect mirror
             specular_index: 0.0, // std dev of reflected shadow rays, 0: perfect smooth
+            roughness: 0.0
         };
         let black = Material {
             surface_color: Color::White * 0.3,

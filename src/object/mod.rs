@@ -8,7 +8,8 @@ pub struct Material {
     pub ior: f32,            // 1: air, 1.3: water, 1.5: glass
     pub transparency: f32,   // 0: opaque, 1: transparent
     pub reflexivity: f32,    // 0: black body, 1: perfect mirror
-    pub specular_index: f32, // std dev of reflected shadow rays, 0: perfect smooth
+    pub specular_index: f32, // specular highlight, 0: turned off
+    pub roughness: f32, // std dev of reflection rays, 0: perfect smooth
 }
 
 pub trait Object {
@@ -32,6 +33,7 @@ impl Material {
         ior: 1.62,
         specular_index: 0.3,
         transparency: 0.0,
+        roughness: 0.0
     };
     pub const Glass: Material = Material {
         transparency: 0.95,
@@ -44,13 +46,14 @@ impl Material {
         ior: 1.0,
         specular_index: 0.5,
         transparency: 0.0,
+        roughness: 0.0
     };
     pub const FrostedGlass: Material = Material {
-        specular_index: 0.3,
+        roughness: 0.3,
         ..Material::Glass
     };
     pub const FrostedMirror: Material = Material {
-        specular_index: 0.3,
+        roughness: 0.3,
         ..Material::Mirror
     };
 }

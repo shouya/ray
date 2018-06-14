@@ -58,7 +58,7 @@ mod example_scene {
                 material: Material::FrostedMirror,
             },
             Sphere {
-                c: V3([12.0, 3.0, 5.5]),
+                c: V3([12.0, 3.0, 2.5]),
                 r: 1.5,
                 material: Material {
                     surface_color: Color::Green,
