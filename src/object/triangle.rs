@@ -62,8 +62,6 @@ impl<'a> Object for Triangle<'a> {
 pub struct Rectangle<'a> {
     pub t1: Triangle<'a>,
     pub t2: Triangle<'a>,
-    pub material: Cow<'a, Material>,
-    pub double_sided: bool,
 }
 
 impl<'a> Rectangle<'a> {
@@ -74,22 +72,21 @@ impl<'a> Rectangle<'a> {
     pub fn new(a: V3, b: V3, c: V3, m: Cow<'a, Material>) -> Self {
         let ba = a - b;
         let bc = c - b;
-        assert!(f32_is_zero(ba.dot(bc)));
+        assert!(f32_eq(ba.dot(bc), 0.0));
 
         let d = c + ba;
         let t1 = Triangle::new(a, b, c, m.clone());
-        let t2 = Triangle::new(c, d, a, m.clone());
+        let t2 = Triangle::new(c, d, a, m);
 
         Rectangle {
             t1,
             t2,
-            material: m,
-            double_sided: false,
         }
     }
 
     pub fn double_sided(mut self, b: bool) -> Self {
-        self.double_sided = b;
+        self.t1 = self.t1.double_sided(b);
+        self.t2 = self.t2.double_sided(b);
         self
     }
 }
@@ -100,11 +97,11 @@ impl<'a> Object for Rectangle<'a> {
     }
 
     fn material(&self, _pos: V3) -> Cow<Material> {
-        Cow::Borrowed(&self.material)
+        self.t1.material(_pos)
     }
 
     fn const_normal(&self) -> Option<V3> {
-        if self.double_sided {
+        if self.t1.double_sided {
             None
         } else {
             Some(self.t1.trig.n())
