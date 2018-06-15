@@ -46,6 +46,10 @@ impl Material {
         ior: 1.62,
         ..Material::Mirror
     };
+    pub const PlaneGlass: Material = Material {
+        ior: 1.0,
+        ..Material::Glass
+    };
     pub const Solid: Material = Material {
         surface_color: Color([1.0, 1.0, 1.0]),
         emission_color: Color([0.0, 0.0, 0.0]),

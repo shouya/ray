@@ -30,7 +30,6 @@ fn trace_ray(s: &Scene, ray: Ray, depth: u32) -> Color {
         TraceMode::Diffusive => trace_ray_diffusive(&s, &ray, &hit, &m),
         TraceMode::Reflective => trace_ray_reflective(&s, &ray, &hit, &m, depth),
         TraceMode::Transparent => trace_ray_transparent(&s, &ray, &hit, &m, depth),
-        _ => s.ambient,
     };
 
     // fog
@@ -47,13 +46,19 @@ fn trace_ray_diffusive(s: &Scene, ray: &Ray, hit: &Hit, m: &Material) -> Color {
         let shadowray = Ray::new(hit.pos, shadowray_dir).biased(BIAS);
         let angle = (light.pos - hit.pos).norm().dot(hit.norm);
 
-        if let Some(_) = s.nearest_hit(&shadowray) {
+        if let Some((obj, hit)) = s.nearest_hit(&shadowray) {
             if angle <= 0.0 {
                 // indirect hit
                 brightness += angle * light.brightness;
             } else {
                 // pixel is in shadow
-                brightness -= light.brightness;
+                let shadowobj_m = obj.material(hit.pos);
+                let mut opaqueness = 1.0 - shadowobj_m.transparency;
+                if opaqueness < 1.0 {
+                    // more rough -> more opaque
+                    opaqueness += shadowobj_m.roughness;
+                }
+                brightness -= opaqueness.min(1.0) * light.brightness;
             }
         } else {
             brightness += angle * light.brightness;

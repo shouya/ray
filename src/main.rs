@@ -38,10 +38,7 @@ mod example_scene {
             Sphere {
                 c: V3([7.0, 0.0, -0.5]),
                 r: 1.5,
-                material: Material {
-                    surface_color: Color::White,
-                    ..Material::Glass
-                },
+                material: Material::Glass,
             },
             Sphere {
                 c: V3([7.0, -3.5, 1.0]),
@@ -86,7 +83,7 @@ mod example_scene {
                 V3([5.0, 3.0, 1.0]),
                 V3([5.0, 2.0, -1.6]),
             ),
-            material: Cow::Owned(Material::Mirror),
+            material: Cow::Owned(Material::PlaneGlass),
         });
 
         scene
