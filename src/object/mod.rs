@@ -18,13 +18,17 @@ pub trait Object {
     fn material(&self, pos: V3) -> Cow<Material>;
 }
 
-pub mod bezier_surface;
-pub mod chessboard;
 pub mod sphere;
+pub mod triangle;
+
+pub mod bezier_surface;
+
+pub mod chessboard;
 
 pub use self::bezier_surface::BezierSurface;
 pub use self::chessboard::ChessBoard;
 pub use self::sphere::Sphere;
+pub use self::triangle::Triangle;
 
 #[allow(non_upper_case_globals)]
 impl Material {

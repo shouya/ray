@@ -14,8 +14,9 @@ mod tracer;
 
 mod example_scene {
     use common::*;
-    use object::{ChessBoard, Material, Sphere};
+    use object::{ChessBoard, Material, Sphere, Triangle};
     use scene::{Scene, SceneBuilder};
+    use std::borrow::Cow;
 
     pub fn five_spheres() -> Scene {
         let mut scene = SceneBuilder::default()
@@ -75,8 +76,17 @@ mod example_scene {
         }
 
         scene.add_object(ChessBoard {
-            plane: Plane::new(V3([0.0, 0.0, -1.6]), V3([0.0, 0.0, -1.0])),
+            plane: Plane::new(V3([0.0, 0.0, -1.6]), V3([0.0, 0.0, 1.0])),
             ..ChessBoard::default()
+        });
+
+        scene.add_object(Triangle {
+            trig: Trig(
+                V3([3.0, 2.0, -1.6]),
+                V3([5.0, 3.0, 1.0]),
+                V3([5.0, 2.0, -1.6]),
+            ),
+            material: Cow::Owned(Material::Mirror),
         });
 
         scene

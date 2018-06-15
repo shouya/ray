@@ -1,5 +1,7 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
+pub const F32_EPSILON: f32 = 1e-10;
+
 #[derive(Debug, Clone, Copy)]
 pub struct V3(pub [f32; 3]);
 #[derive(Debug, Clone, Copy)]
@@ -7,9 +9,9 @@ pub struct Color(pub [f32; 3]);
 
 #[derive(Debug, Clone)]
 pub struct Line(V3, V3);
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Plane(V3, V3);
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Trig(pub V3, pub V3, pub V3);
 
 #[derive(Debug, Clone)]
@@ -152,6 +154,72 @@ impl Plane {
     pub fn secondary_axis(&self) -> V3 {
         self.primary_axis().cross(self.n())
         // self.n().cross(self.primary_axis())
+    }
+
+    pub fn intersect(&self, ray: &Ray) -> Option<V3> {
+        let det = ray.dir.dot(self.n());
+        if (det - 0.0).abs() < F32_EPSILON {
+            // parallel to plane
+            return None;
+        }
+
+        let d = (self.r0() - ray.orig).dot(self.n()) / det;
+        if d <= 0.0 {
+            // plane is behind
+            return None;
+        }
+        let pos = ray.orig + ray.dir * d;
+
+        Some(pos)
+    }
+}
+
+impl Trig {
+    pub fn a(&self) -> V3 {
+        self.0
+    }
+    pub fn b(&self) -> V3 {
+        self.1
+    }
+    pub fn c(&self) -> V3 {
+        self.2
+    }
+
+    pub fn cb(&self) -> V3 {
+        self.b() - self.c()
+    }
+    pub fn ca(&self) -> V3 {
+        self.a() - self.c()
+    }
+
+    // we use CCW system
+    pub fn n(&self) -> V3 {
+        self.ca().cross(self.cb()).norm()
+    }
+
+    pub fn to_plane(&self) -> Plane {
+        Plane::new(self.a(), self.n())
+    }
+
+    pub fn contains(&self, p: V3) -> bool {
+        let test_edge = |v1: V3, v2: V3| {
+            let c = (v2 - v1).cross(p - v1);
+            self.n().dot(c) < 0.0
+        };
+        if test_edge(self.a(), self.b()) {
+            return false;
+        }
+        if test_edge(self.b(), self.c()) {
+            return false;
+        }
+        if test_edge(self.c(), self.a()) {
+            return false;
+        }
+        true
+    }
+
+    pub fn flip(&self) -> Trig {
+        Trig(self.a(), self.c(), self.b())
     }
 }
 

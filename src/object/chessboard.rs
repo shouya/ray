@@ -18,7 +18,7 @@ impl Default for ChessBoard {
             transparency: 0.0,   // 0: opaque, 1: transparent
             reflexivity: 0.0,    // 0: black body, 1: perfect mirror
             specular_index: 0.0, // std dev of reflected shadow rays, 0: perfect smooth
-            roughness: 0.0
+            roughness: 0.0,
         };
         let black = Material {
             surface_color: Color::White * 0.3,
@@ -40,23 +40,10 @@ impl Default for ChessBoard {
 impl Object for ChessBoard {
     // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
-        // parallel to plane
-        let det = ray.dir.dot(self.plane.n());
-        if det <= 0.0 {
-            return None;
-        }
-
-        let d = (self.plane.r0() - ray.orig).dot(self.plane.n()) / det;
-        if d < 0.0 {
-            return None;
-        }
-        let pos = ray.orig + ray.dir * d;
-        let norm = -self.plane.n();
-
-        Some(Hit {
+        self.plane.intersect(ray).map(|pos| Hit {
             pos,
-            norm,
             inside: false,
+            norm: self.plane.n(),
         })
     }
 
