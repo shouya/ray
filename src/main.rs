@@ -83,7 +83,7 @@ mod example_scene {
                 V3([5.0, 3.0, 1.0]),
                 V3([5.0, 2.0, -1.6]),
             ),
-            material: Cow::Owned(Material::PlaneGlass),
+            material: Cow::Owned(Material::Mirror),
         });
 
         scene

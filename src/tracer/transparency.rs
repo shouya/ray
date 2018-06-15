@@ -83,8 +83,7 @@ fn trace_ray_diffusive(s: &Scene, ray: &Ray, hit: &Hit, m: &Material) -> Color {
 }
 
 fn trace_ray_reflective(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u32) -> Color {
-    let bias = if hit.inside { -BIAS } else { BIAS };
-    let refl_ray = ray.reflect(&hit.biased(bias));
+    let refl_ray = ray.reflect(&hit.biased(-BIAS));
     let mut refl_colors = Vec::new();
 
     let scatter_amount = scatter_amount(m, depth);
@@ -102,8 +101,7 @@ fn trace_ray_transparent(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u
     let kr = fresnel(ray, hit, m); // reflection ratio
     let refl_color = trace_ray_reflective(s, ray, hit, m, depth);
 
-    let bias = if hit.inside { -BIAS } else { BIAS };
-    let refr_ray = ray.refract(&hit.biased(bias), m.ior);
+    let refr_ray = ray.refract(&hit.biased(BIAS), m.ior);
     let refr_color = if refr_ray.dir.is_zero() {
         // full internal reflection
         refl_color
@@ -118,6 +116,7 @@ fn trace_ray_transparent(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u
     };
 
     let color = refr_color.blend(refl_color, kr);
+
     let apparence_color = trace_ray_diffusive(s, ray, hit, m);
     let color = apparence_color.blend(color, m.transparency);
     color
@@ -156,13 +155,14 @@ fn drift_ray(orig_ray: &Ray, hit: &Hit, material: &Material, refl: bool) -> Ray 
     ray
 }
 
+// returns reflection ratio
 fn fresnel(ray: &Ray, hit: &Hit, m: &Material) -> f32 {
     use std::mem;
 
     let cosi = ray.dir.dot(hit.norm);
-    let mut etai = 1.0;
-    let mut etat = m.ior;
-    if cosi > 0.0 {
+    let mut etai = m.ior;
+    let mut etat = 1.0;
+    if cosi < 0.0 {
         mem::swap(&mut etai, &mut etat);
     }
     let eta = etai / etat;

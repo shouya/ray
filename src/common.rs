@@ -153,7 +153,6 @@ impl Plane {
     }
     pub fn secondary_axis(&self) -> V3 {
         self.primary_axis().cross(self.n())
-        // self.n().cross(self.primary_axis())
     }
 
     pub fn intersect(&self, ray: &Ray) -> Option<V3> {
@@ -253,6 +252,7 @@ impl Ray {
         let sint2 = eta * eta * (1.0 - cosi * cosi);
         let trans = 1.0 - sint2;
         let dir = if trans < 0.0 {
+            // full internal refl
             V3::zero()
         } else {
             self.dir * eta + n * (eta * cosi - trans.sqrt())
