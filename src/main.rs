@@ -21,8 +21,8 @@ mod example_scene {
     pub fn five_spheres() -> Scene {
         let mut scene = SceneBuilder::default()
             .vp_plane(Plane::new(
-                V3([0.0, 2.0, 0.0]), // r0
-                V3([0.0, 1.0, 0.0]), // n
+                V3([0.0, 0.0, -2.0]), // r0
+                V3([0.0, 0.0, 1.0]), // n
             ))
             .vp_width(2.0)
             .vp_height(2.0)
@@ -32,16 +32,16 @@ mod example_scene {
             .build()
             .unwrap();
 
-        scene.add_light(V3([-5.0, 0.0, 10.0]), 0.7);
+        scene.add_light(V3([-5.0, 10.0, 0.0]), 0.7);
 
         let spheres = vec![
             Sphere {
-                c: V3([0.0, 7.0, -0.5]),
+                c: V3([0.0, -0.5, -7.0]),
                 r: 1.5,
                 material: Material::Glass,
             },
             Sphere {
-                c: V3([-2.5, 6.0, 1.0]),
+                c: V3([-2.5, 1.0, -6.0]),
                 r: 1.5,
                 material: Material {
                     surface_color: Color::Black,
@@ -49,17 +49,17 @@ mod example_scene {
                 },
             },
             Sphere {
-                c: V3([3.5, 7.0, 1.5]),
+                c: V3([3.5, 1.5, -7.0]),
                 r: 1.5,
                 material: Material::FrostedGlass,
             },
             Sphere {
-                c: V3([-1.5, 12.0, 3.5]),
+                c: V3([-1.5, 3.5, -12.0]),
                 r: 1.5,
                 material: Material::FrostedMirror,
             },
             Sphere {
-                c: V3([3.0, 12.0, 2.5]),
+                c: V3([3.0, 2.5, -12.0]),
                 r: 1.5,
                 material: Material {
                     surface_color: Color::Green,
@@ -73,9 +73,9 @@ mod example_scene {
         }
 
         scene.add_object(Triangle::new(
-            V3([2.1, 3.0, -1.6]),
-            V3([2.0, 5.0, 1.0]),
-            V3([2.0, 5.0, -1.6]),
+            V3([2.1, -1.6, -3.0]),
+            V3([2.0, 1.0, -5.0]),
+            V3([2.0, -1.6, -5.0]),
             Cow::Owned(Material {
                 surface_color: Color::Red,
                 transparency: 0.4,
@@ -85,7 +85,7 @@ mod example_scene {
         ));
 
         scene.add_object(ChessBoard {
-            plane: Plane::new(V3([0.0, 0.0, -1.6]), V3([0.0, 0.0, 1.0])),
+            plane: Plane::new(V3([0.0, -1.6, 0.0]), V3([0.0, 1.0, 0.0])),
             ..ChessBoard::default()
         });
 
