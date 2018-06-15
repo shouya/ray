@@ -14,7 +14,7 @@ mod tracer;
 
 mod example_scene {
     use common::*;
-    use object::{ChessBoard, Material, Sphere, Triangle};
+    use object::{ChessBoard, Material, Sphere, Rectangle};
     use scene::{Scene, SceneBuilder};
     use std::borrow::Cow;
 
@@ -73,10 +73,10 @@ mod example_scene {
         }
 
         scene.add_object(
-            Triangle::new(
-                V3([2.1, -1.6, -3.0]),
+            Rectangle::new(
                 V3([2.0, 1.0, -5.0]),
                 V3([2.0, -1.6, -5.0]),
+                V3([2.1, -1.6, -3.0]),
                 Cow::Owned(Material {
                     surface_color: Color::Red,
                     transparency: 0.4,

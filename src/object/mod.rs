@@ -32,7 +32,7 @@ pub mod chessboard;
 pub use self::bezier_surface::BezierSurface;
 pub use self::chessboard::ChessBoard;
 pub use self::sphere::Sphere;
-pub use self::triangle::Triangle;
+pub use self::triangle::{Triangle, Rectangle};
 
 #[allow(non_upper_case_globals)]
 impl Material {

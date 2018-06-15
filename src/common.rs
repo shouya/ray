@@ -52,6 +52,14 @@ pub fn dist(a: V3, b: V3) -> f32 {
     dist2(a, b).sqrt()
 }
 
+pub fn f32_is_zero(f: f32) -> bool {
+    f.abs() < F32_EPSILON
+}
+
+pub fn f32_eq(a: f32, b: f32) -> bool {
+    f32_is_zero(a - b)
+}
+
 impl V3 {
     #[inline]
     pub fn x(&self) -> f32 {
