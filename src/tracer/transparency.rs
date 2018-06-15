@@ -96,7 +96,6 @@ fn trace_ray_reflective(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u3
 fn trace_ray_transparent(s: &Scene, ray: &Ray, hit: &Hit, m: &Material, depth: u32) -> Color {
     let kr = fresnel(ray, hit, m); // reflection ratio
     let refl_color = trace_ray_reflective(s, ray, hit, m, depth);
-    // let refl_color = s.ambient;
 
     let bias = if hit.inside { -BIAS } else { BIAS };
     let refr_ray = ray.refract(&hit.biased(bias), m.ior);

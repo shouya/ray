@@ -1,3 +1,6 @@
+#![feature(exact_chunks)]
+#![feature(try_from)]
+
 extern crate image;
 extern crate rand;
 

@@ -10,7 +10,10 @@ pub struct Line(V3, V3);
 #[derive(Debug, Clone)]
 pub struct Plane(V3, V3);
 #[derive(Debug, Clone)]
-pub struct Trig(V3, V3, V3);
+pub struct Trig(pub V3, pub V3, pub V3);
+
+#[derive(Debug, Clone)]
+pub struct M33(pub V3, pub V3, pub V3);
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -36,7 +39,7 @@ pub struct Hit {
 #[derive(Debug, Clone)]
 pub struct PointLight {
     pub pos: V3,
-    pub brightness: f32 // 0.0 turned off
+    pub brightness: f32, // 0.0 turned off
 }
 
 pub fn dist2(a: V3, b: V3) -> f32 {

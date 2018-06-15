@@ -9,7 +9,7 @@ pub struct Material {
     pub transparency: f32,   // 0: opaque, 1: transparent
     pub reflexivity: f32,    // 0: black body, 1: perfect mirror
     pub specular_index: f32, // specular highlight, 0: turned off
-    pub roughness: f32, // std dev of reflection rays, 0: perfect smooth
+    pub roughness: f32,      // std dev of reflection rays, 0: perfect smooth
 }
 
 pub trait Object {
@@ -18,9 +18,11 @@ pub trait Object {
     fn material(&self, pos: V3) -> Cow<Material>;
 }
 
+pub mod bezier_surface;
 pub mod chessboard;
 pub mod sphere;
 
+pub use self::bezier_surface::BezierSurface;
 pub use self::chessboard::ChessBoard;
 pub use self::sphere::Sphere;
 
@@ -33,7 +35,7 @@ impl Material {
         specular_index: 0.3,
         ior: 1.0,
         transparency: 0.0,
-        roughness: 0.0
+        roughness: 0.0,
     };
     pub const Glass: Material = Material {
         transparency: 0.95,
@@ -47,7 +49,7 @@ impl Material {
         ior: 1.0,
         specular_index: 0.3,
         transparency: 0.0,
-        roughness: 0.0
+        roughness: 0.0,
     };
     pub const FrostedGlass: Material = Material {
         roughness: 0.3,
