@@ -79,11 +79,15 @@ mod example_scene {
 
         scene.add_object(Triangle {
             trig: Trig(
-                V3([3.0, 2.0, -1.6]),
-                V3([5.0, 3.0, 1.0]),
+                V3([3.0, 2.1, -1.6]),
+                V3([5.0, 2.0, 1.0]),
                 V3([5.0, 2.0, -1.6]),
             ),
-            material: Cow::Owned(Material::Mirror),
+            material: Cow::Owned(Material {
+                surface_color: Color::Red,
+                transparency: 0.4,
+                ..Material::PlaneGlass
+            }),
         });
 
         scene
