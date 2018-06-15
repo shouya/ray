@@ -261,19 +261,18 @@ impl Ray {
     }
 
     pub fn drift(&self, std_dev: f32) -> Ray {
-        use rand::distributions::Distribution;
-        use rand::distributions::Normal;
+        use rand::distributions::{Distribution, StandardNormal};
         use rand::thread_rng;
 
         if std_dev == 0.0 {
             return self.clone();
         }
 
-        let n = Normal::new(0.0, std_dev as f64);
-        let dx = n.sample(&mut thread_rng());
-        let dy = n.sample(&mut thread_rng());
-        let dz = n.sample(&mut thread_rng());
-        Ray::new(self.orig, self.dir + V3([dx as f32, dy as f32, dz as f32]))
+        let n = StandardNormal;
+        let dx = n.sample(&mut thread_rng()) as f32 * std_dev;
+        let dy = n.sample(&mut thread_rng()) as f32 * std_dev;
+        let dz = n.sample(&mut thread_rng()) as f32 * std_dev;
+        Ray::new(self.orig, self.dir + V3([dx, dy, dz]))
     }
 
     pub fn biased(self, amount: f32) -> Ray {
