@@ -22,7 +22,7 @@ mod example_scene {
         let mut scene = SceneBuilder::default()
             .vp_plane(Plane::new(
                 V3([0.0, 0.0, -2.0]), // r0
-                V3([0.0, 0.0, 1.0]), // n
+                V3([0.0, 0.0, -1.0]), // n
             ))
             .vp_width(2.0)
             .vp_height(2.0)
@@ -72,17 +72,19 @@ mod example_scene {
             scene.add_object(s);
         }
 
-        scene.add_object(Triangle::new(
-            V3([2.1, -1.6, -3.0]),
-            V3([2.0, 1.0, -5.0]),
-            V3([2.0, -1.6, -5.0]),
-            Cow::Owned(Material {
-                surface_color: Color::Red,
-                transparency: 0.4,
-                roughness: 0.005,
-                ..Material::PlaneGlass
-            }),
-        ));
+        scene.add_object(
+            Triangle::new(
+                V3([2.1, -1.6, -3.0]),
+                V3([2.0, 1.0, -5.0]),
+                V3([2.0, -1.6, -5.0]),
+                Cow::Owned(Material {
+                    surface_color: Color::Red,
+                    transparency: 0.4,
+                    roughness: 0.005,
+                    ..Material::PlaneGlass
+                }),
+            ).double_sided(true),
+        );
 
         scene.add_object(ChessBoard {
             plane: Plane::new(V3([0.0, -1.6, 0.0]), V3([0.0, 1.0, 0.0])),

@@ -17,8 +17,9 @@ impl<'a> Triangle<'a> {
         }
     }
 
-    pub fn double_sided(&mut self, b: bool) {
+    pub fn double_sided(mut self, b: bool) -> Self {
         self.double_sided = b;
+        self
     }
 }
 
@@ -46,5 +47,13 @@ impl<'a> Object for Triangle<'a> {
 
     fn material(&self, _pos: V3) -> Cow<Material> {
         Cow::Borrowed(&self.material)
+    }
+
+    fn const_normal(&self) -> Option<V3> {
+        if self.double_sided {
+            None
+        } else {
+            Some(self.trig.n())
+        }
     }
 }

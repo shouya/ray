@@ -15,7 +15,11 @@ pub struct Material {
 pub trait Object {
     // returns hit and norm
     fn intersect(&self, ray: &Ray) -> Option<Hit>;
+    // returns material at the point
     fn material(&self, pos: V3) -> Cow<Material>;
+
+    // implement this method to allow back-face bulling
+    fn const_normal(&self) -> Option<V3> { None }
 }
 
 pub mod sphere;

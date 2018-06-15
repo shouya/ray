@@ -30,6 +30,7 @@ impl Object for Sphere {
         let t2 = tc + t1c;
 
         let t = if (t1 < 0.0) && (t2 > 0.0) || (t1 > 0.0 && t2 < 0.0) {
+            // hits inside
             inside = true;
             Some(t1.max(t2))
         } else if t1 > 0.0 && t2 > 0.0 {

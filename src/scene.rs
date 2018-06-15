@@ -30,7 +30,8 @@ impl Scene {
 
     pub fn vp_from_pixel(&self, x: u32, y: u32, w: u32, h: u32) -> V3 {
         let dx = self.vp_width * 2.0 / (w as f32);
-        let dy = self.vp_height * 2.0 / (h as f32);
+        // y on screen coordinate system is inverted, down is positive
+        let dy = -self.vp_height * 2.0 / (h as f32);
         let plane = &self.vp_plane;
         let (x, y, w, h) = (x as i64, y as i64, w as i64, h as i64);
 
@@ -54,6 +55,12 @@ impl Scene {
         let mut result = None;
 
         for obj in self.objs.iter() {
+            // back-face bulling for optimizing rendering speed
+            if let Some(n) = obj.const_normal() {
+                if ray.dir.dot(n) > 0.0 {
+                    continue;
+                }
+            }
             if let Some(hit) = obj.intersect(&ray) {
                 if dist2(hit.pos, ray.orig) > min_dist {
                     continue;
