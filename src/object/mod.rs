@@ -60,11 +60,11 @@ impl Material {
         roughness: 0.0,
     };
     pub const FrostedGlass: Material = Material {
-        roughness: 0.3,
+        roughness: 0.05,
         ..Material::Glass
     };
     pub const FrostedMirror: Material = Material {
-        roughness: 0.3,
+        roughness: 0.05,
         specular_index: 0.1,
         ..Material::Mirror
     };

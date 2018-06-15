@@ -32,7 +32,7 @@ mod example_scene {
             .build()
             .unwrap();
 
-        scene.add_light(V3([1.0, -5.0, 10.0]), 0.7);
+        scene.add_light(V3([0.0, -5.0, 10.0]), 0.7);
 
         let spheres = vec![
             Sphere {
@@ -41,7 +41,7 @@ mod example_scene {
                 material: Material::Glass,
             },
             Sphere {
-                c: V3([7.0, -3.5, 1.0]),
+                c: V3([6.0, -2.5, 1.0]),
                 r: 1.5,
                 material: Material {
                     surface_color: Color::Black,
@@ -86,6 +86,7 @@ mod example_scene {
             material: Cow::Owned(Material {
                 surface_color: Color::Red,
                 transparency: 0.4,
+                roughness: 0.005,
                 ..Material::PlaneGlass
             }),
         });
