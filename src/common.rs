@@ -53,6 +53,7 @@ pub fn dist(a: V3, b: V3) -> f32 {
 }
 
 impl V3 {
+    #[inline]
     pub fn x(&self) -> f32 {
         self.0[0]
     }
@@ -147,12 +148,12 @@ impl Plane {
         Plane(r0, n.norm())
     }
     pub fn primary_axis(&self) -> V3 {
-        let shift = V3([0.0, 1.0, 0.0]);
+        let shift = V3([1.0, 0.0, 0.0]);
         let dist = shift.dot(self.n());
         (shift - self.n() * dist).norm()
     }
     pub fn secondary_axis(&self) -> V3 {
-        self.primary_axis().cross(self.n())
+        self.n().cross(self.primary_axis())
     }
 
     pub fn intersect(&self, ray: &Ray) -> Option<V3> {
@@ -205,16 +206,14 @@ impl Trig {
             let c = (v2 - v1).cross(p - v1);
             self.n().dot(c) < 0.0
         };
-        if test_edge(self.a(), self.b()) {
-            return false;
+        if test_edge(self.a(), self.b())
+            || test_edge(self.b(), self.c())
+            || test_edge(self.c(), self.a())
+        {
+            false
+        } else {
+            true
         }
-        if test_edge(self.b(), self.c()) {
-            return false;
-        }
-        if test_edge(self.c(), self.a()) {
-            return false;
-        }
-        true
     }
 
     pub fn flip(&self) -> Trig {
