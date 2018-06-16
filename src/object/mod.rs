@@ -24,6 +24,10 @@ pub trait Object {
     }
 }
 
+pub trait Transform {
+    fn translate(self, d: V3) -> Self;
+}
+
 pub mod bezier_surface;
 pub mod chessboard;
 pub mod polygon_mesh;

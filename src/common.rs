@@ -57,7 +57,6 @@ pub fn f32_eq(a: f32, b: f32) -> bool {
     (a - b).abs() < F32_EPSILON
 }
 
-#[allow(unused)]
 pub fn f32_ge(a: f32, b: f32) -> bool {
     a > b || f32_eq(a, b)
 }
@@ -223,6 +222,12 @@ impl Trig {
         self.2
     }
 
+    pub fn ab(&self) -> V3 {
+        self.b() - self.a()
+    }
+    pub fn ac(&self) -> V3 {
+        self.c() - self.a()
+    }
     pub fn cb(&self) -> V3 {
         self.b() - self.c()
     }
@@ -239,7 +244,38 @@ impl Trig {
         Plane::new(self.a(), self.n())
     }
 
+    // Möller–Trumbore intersection algorithm
     pub fn intersect(&self, ray: &Ray) -> Option<V3> {
+        let e1 = self.ab();
+        let e2 = self.ac();
+        let h = ray.dir.cross(e2);
+        let a = e1.dot(h);
+
+        if f32_eq(a, 0.0) {
+            return None;
+        }
+
+        let f = 1.0 / a;
+        let s = ray.orig - self.a();
+        let u = f * (s.dot(h));
+        if u < 0.0 || u > 1.0 {
+            return None;
+        }
+        let q = s.cross(e1);
+        let v = f * (ray.dir.dot(q));
+        if v < 0.0 || u + v > 1.0 {
+            return None;
+        }
+        let t = f * e2.dot(q);
+        if t <= 0.0 {
+            // behind the ray
+            return None;
+        }
+        Some(ray.orig + ray.dir * t)
+    }
+
+    #[allow(dead_code)]
+    pub fn intersect_slow(&self, ray: &Ray) -> Option<V3> {
         self.to_plane().intersect(ray).filter(|p| self.contains(*p))
     }
 
