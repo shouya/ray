@@ -24,10 +24,10 @@ pub trait Object {
 
 pub mod sphere;
 pub mod triangle;
-
+pub mod chessboard;
+pub mod polygon_mesh;
 pub mod bezier_surface;
 
-pub mod chessboard;
 
 pub use self::bezier_surface::BezierSurface;
 pub use self::chessboard::ChessBoard;

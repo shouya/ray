@@ -209,6 +209,10 @@ impl Trig {
         Plane::new(self.a(), self.n())
     }
 
+    pub fn intersect(&self, ray: &Ray) -> Option<V3> {
+        self.to_plane().intersect(ray).filter(|p| self.contains(*p))
+    }
+
     pub fn contains(&self, p: V3) -> bool {
         let test_edge = |v1: V3, v2: V3| {
             let c = (v2 - v1).cross(p - v1);

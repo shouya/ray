@@ -25,12 +25,7 @@ impl<'a> Triangle<'a> {
 
 impl<'a> Object for Triangle<'a> {
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
-        let pos = self.trig.to_plane().intersect(ray)?;
-
-        // check if pos is inside the triangle
-        if !self.trig.contains(pos) {
-            return None;
-        }
+        let pos = self.trig.intersect(ray)?;
 
         let norm = self.trig.n();
         let cosi = ray.dir.dot(norm);
@@ -67,8 +62,8 @@ pub struct Rectangle<'a> {
 impl<'a> Rectangle<'a> {
     // follows CCW order, b is the right angle
     // c -> +--+ <- b
-    //      |  |
-    //      +--+ <- a
+    //       \ |
+    //      .  + <- a
     pub fn new(a: V3, b: V3, c: V3, m: Cow<'a, Material>) -> Self {
         let ba = a - b;
         let bc = c - b;
