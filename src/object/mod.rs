@@ -19,20 +19,22 @@ pub trait Object {
     fn material(&self, pos: V3) -> Cow<Material>;
 
     // implement this method to allow back-face bulling
-    fn const_normal(&self) -> Option<V3> { None }
+    fn const_normal(&self) -> Option<V3> {
+        None
+    }
 }
 
-pub mod sphere;
-pub mod triangle;
+pub mod bezier_surface;
 pub mod chessboard;
 pub mod polygon_mesh;
-pub mod bezier_surface;
-
+pub mod sphere;
+pub mod triangle;
 
 pub use self::bezier_surface::BezierSurface;
 pub use self::chessboard::ChessBoard;
+pub use self::polygon_mesh::{PolygonMesh, TrigMesh};
 pub use self::sphere::Sphere;
-pub use self::triangle::{Triangle, Rectangle};
+pub use self::triangle::{Rectangle, Triangle};
 
 #[allow(non_upper_case_globals)]
 impl Material {

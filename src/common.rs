@@ -57,6 +57,7 @@ pub fn f32_eq(a: f32, b: f32) -> bool {
     (a - b).abs() < F32_EPSILON
 }
 
+#[allow(unused)]
 pub fn f32_ge(a: f32, b: f32) -> bool {
     a > b || f32_eq(a, b)
 }
