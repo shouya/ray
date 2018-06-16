@@ -1,3 +1,4 @@
+use std::cmp::PartialEq;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 pub const F32_EPSILON: f32 = 1e-10;
@@ -145,6 +146,12 @@ impl Add<V3> for V3 {
     }
 }
 
+impl PartialEq for V3 {
+    fn eq(&self, other: &V3) -> bool {
+        f32_eq(self.x(), other.x()) && f32_eq(self.y(), other.y()) && f32_eq(self.z(), other.z())
+    }
+}
+
 impl Plane {
     pub fn r0(&self) -> V3 {
         self.0
@@ -179,6 +186,28 @@ impl Plane {
         let pos = ray.orig + ray.dir * d;
 
         Some(pos)
+    }
+
+    pub fn from_points(ps: &[V3]) -> Option<Self> {
+        if ps.len() < 3 {
+            return None;
+        }
+        // test all trigs are coplane
+        if !ps
+            .windows(3)
+            .map(|t| Trig(t[0], t[1], t[2]).n())
+            .collect::<Vec<_>>()
+            .windows(2)
+            .map(|n| n[0] == n[1])
+            .all(|t| t)
+        {
+            return None;
+        }
+
+        let n = Trig(ps[0], ps[1], ps[2]).n();
+        let r0 = ps[0];
+
+        Some(Plane(r0, n))
     }
 }
 

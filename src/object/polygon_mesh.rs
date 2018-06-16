@@ -5,21 +5,36 @@ use common::*;
 type I = u16;
 
 pub struct PolygonMesh {
-  v: Vec<V3>,
+  vs: Vec<V3>,
   // each face composes of a number of vertices
-  f: Vec<Vec<I>>,
+  fs: Vec<Vec<I>>,
   material: Material,
 }
 
 impl PolygonMesh {
+  pub fn new(vs: Vec<V3>, fs: Vec<Vec<I>>, m: Material) -> PolygonMesh {
+    for f in fs.iter() {
+      assert!(f.len() >= 3);
+
+      let ps = f.iter().map(|i| vs[*i as usize]).collect::<Vec<_>>();
+      assert!(Plane::from_points(ps.as_slice()).is_some());
+    }
+
+    PolygonMesh {
+      vs,
+      fs,
+      material: m,
+    }
+  }
+
   pub fn trigs<'a>(&'a self) -> impl Iterator<Item = Trig> + 'a {
-    let trig_idxs = self.f.iter().flat_map(Self::face_to_trigs);
+    let trig_idxs = self.fs.iter().flat_map(Self::face_to_trigs);
 
     trig_idxs.map(move |(ai, bi, ci)| {
       Trig(
-        self.v[ai as usize],
-        self.v[bi as usize],
-        self.v[ci as usize],
+        self.vs[ai as usize],
+        self.vs[bi as usize],
+        self.vs[ci as usize],
       )
     })
   }
