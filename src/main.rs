@@ -1,8 +1,13 @@
 #![feature(exact_chunks)]
 #![feature(try_from)]
+// #![feature(plugin, custom_attribute)]
+// #![plugin(flamer)]
 
 extern crate image;
 extern crate rand;
+
+// extern crate flame;
+
 
 #[macro_use]
 extern crate derive_builder;
@@ -72,37 +77,39 @@ mod example_scene {
         ];
 
         for s in spheres.into_iter() {
-            // scene.add_object(s);
+            scene.add_object(s);
         }
 
-        // scene.add_object(
-        //     Rectangle::new(
-        //         V3([2.0, 1.0, -5.0]),
-        //         V3([2.0, -1.6, -5.0]),
-        //         V3([2.1, -1.6, -3.0]),
-        //         Cow::Owned(Material {
-        //             surface_color: Color::Red,
-        //             transparency: 0.4,
-        //             roughness: 0.005,
-        //             ..Material::PlaneGlass
-        //         }),
-        //     ).double_sided(true),
-        // );
+        scene.add_object(
+            Rectangle::new(
+                V3([2.0, 1.0, -5.0]),
+                V3([2.0, -1.6, -5.0]),
+                V3([2.1, -1.6, -3.0]),
+                Cow::Owned(Material {
+                    surface_color: Color::Red,
+                    transparency: 0.4,
+                    roughness: 0.005,
+                    ..Material::PlaneGlass
+                }),
+            ).double_sided(true),
+        );
 
         let model = ObjModel::from_file("models/torus_t.obj");
         let torus = TrigMesh::from_model(&model.unwrap(), Material::Solid);
-        scene.add_object(torus.translate(V3([0.0, 3.0, -9.0])));
+        scene.add_object(torus.translate(V3([0.0, 3.0, -5.0])));
 
-        // scene.add_object(ChessBoard {
-        //     plane: Plane::new(V3([0.0, -1.6, 0.0]), V3([0.0, 1.0, 0.0])),
-        //     ..ChessBoard::default()
-        // });
+        scene.add_object(ChessBoard {
+            plane: Plane::new(V3([0.0, -1.6, 0.0]), V3([0.0, 1.0, 0.0])),
+            ..ChessBoard::default()
+        });
 
         scene
     }
 }
 
 fn main() {
+    use std::fs::File;
+
     let scene = example_scene::five_spheres();
     let img = tracer::transparency::trace(scene, 1200, 1200);
     img.save("./trace.png").ok();

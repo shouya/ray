@@ -1,6 +1,8 @@
 use super::*;
 use obj_model::ObjModel;
+use std::cell::Ref;
 use std::cell::RefCell;
+use std::ops::Deref;
 
 // index type, if more than 65535 points are needed, use u32 here
 type I = u16;
@@ -15,8 +17,26 @@ pub struct PolygonMesh {
 pub struct TrigMesh {
   vs: Vec<V3>,
   ts: Vec<[I; 3]>,
-  ts_cache: RefCell<Vec<Trig>>,
   material: Material,
+  // we cache the vertices of trigs and the bounding box of the whole object
+  cache: RefCell<Option<TrigMeshCache>>,
+}
+
+pub struct TrigMeshCache {
+  trigs: Vec<Trig>,
+  subparts: Subpart
+}
+
+enum SubpartKind {
+  // trig -> index in ts
+  Trigs(Trig, usize),
+  Subpart(Subpart),
+}
+
+struct Subpart {
+  // further optimizate computation of intersection
+  trigs: Vec<SubpartKind>,
+  bbox: BoundingBox,
 }
 
 impl PolygonMesh {
@@ -95,7 +115,7 @@ impl TrigMesh {
     TrigMesh {
       vs,
       ts,
-      ts_cache: RefCell::new(Vec::new()),
+      cache: RefCell::new(None),
       material: m,
     }
   }
@@ -129,21 +149,35 @@ impl TrigMesh {
     })
   }
 
-  pub fn save_cache(&self) {
-    if self.ts_cache.borrow().len() > 0 {
-      return;
+  pub fn get_cache<'a>(&'a self) -> Ref<'a, TrigMeshCache> {
+    if self.cache.borrow().is_some() {
+      return Ref::map(self.cache.borrow(), |x| x.as_ref().unwrap());
     }
-    *self.ts_cache.borrow_mut() = self.trigs().collect();
+
+    let mut trigs = Vec::new();
+    let mut sparts = Subpart::from_trigs(self.trigs());
+
+    *self.cache.borrow_mut() = Some(TrigMeshCache {
+      trigs:
+    });
+
+    Ref::map(self.cache.borrow(), |x| x.as_ref().unwrap())
   }
   pub fn clear_cache(&self) {
-    *self.ts_cache.borrow_mut() = Vec::new();
+    *self.cache.borrow_mut() = None;
   }
 }
 
 impl Object for TrigMesh {
   fn intersect(&self, ray: &Ray) -> Option<Hit> {
-    self.save_cache();
-    for t in self.ts_cache.borrow().iter() {
+    let cache = self.get_cache();
+    let (trigs, box_) = cache.deref();
+
+    if !box_.intersect(ray) {
+      return None;
+    }
+
+    for t in trigs {
       if let Some(pos) = t.intersect(ray) {
         let norm = t.n();
         return Some(Hit {
@@ -170,3 +204,6 @@ impl Transform for TrigMesh {
   }
 }
 
+
+impl Subpart {
+}
