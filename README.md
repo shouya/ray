@@ -1,6 +1,6 @@
 ## Ray
 
-A toy ray tracer engine (and probably) as a practice of computer graphics.
+A toy ray tracer engine as a practice to introductory computer graphics.
 
 ![](https://raw.githubusercontent.com/shouya/ray/master/gallery/triangle.png)
 
