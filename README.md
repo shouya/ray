@@ -1,3 +1,72 @@
+## Ray
+
+A toy ray tracer engine (and probably) as a practice of computer graphics.
+
+![](https://raw.githubusercontent.com/shouya/ray/master/gallery/triangle.png)
+
+Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
+
+## Roadmap
+
+- Basic types
+  - [x] V3
+  - [x] Color
+  - [x] Trig/Plane
+  - [x] Ray
+  - [x] Hit
+  - [x] Bounding box
+- Scene
+  - [x] Screen-Camera coordinates translation
+  - [x] Ray generation for a screen pixel
+  - [x] Support both orthogonal and perspective view
+  - [x] Multiple light sources
+- Objects
+  - [x] Sphere
+  - [x] Chessboard background
+  - [x] Triangle
+  - [x] Rectangle
+  - [x] Triangular mesh
+  - [ ] Polygon-faced mesh (optional)
+  - [ ] Bezier mesh
+- Lights
+  - [x] AmbientLight
+  - [x] PointLight
+  - [ ] SpotLight
+- Material support
+  - [x] Solid diffusive object (Material::Solid)
+  - [x] Reflective object (Material::Mirror)
+  - [x] Transparent object (Material::Glass)
+  - [x] Rough reflective object (Material::FrostedMirror)
+  - [x] Rough transparent object (Material::FrostedGlass)
+  - [ ] Metal-like objeect (Material::Metal)
+- Ray tracer
+  - [x] Shadows
+  - [x] Render diffusive surface
+  - [x] Render specular reflection
+  - [x] General reflection (e.g. mirror)
+  - [x] Rough surface reflection (e.g. frosted mirror)
+  - [x] Support refraction
+  - [x] Fresnel effect
+  - [x] Rough surface refraction (e.g. frosted glass)
+  - [ ] Correct shadow for transparent objects
+  - [ ] Texture mapping
+- [ ] Rasterization
+- Intersection detection
+  - [x] Sphere
+  - [x] Triangle
+  - [x] Plane
+  - [x] Mesh (Trig/Poly)
+  - [x] Bounding box
+  - [x] Subdividing clusters for mesh
+  - [x] Möller–Trumbore algorithm for triangles
+- Misc
+  - [x] Load triangular mesh from .obj model
+  - [ ] Load poly-faced mesh from .obj model
+  - [ ] Load bezier mesh from .obj model
+  - [ ] Animation generation
+  - [ ] Load scene from a DSL (or [dyon](https://github.com/PistonDevelopers/dyon)?)
+
+
 ## References
 
 - [Introduction to Ray Tracing: a Simple Method for Creating 3D Images](https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-ray-tracing/how-does-it-work)
