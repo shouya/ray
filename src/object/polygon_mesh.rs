@@ -23,19 +23,18 @@ pub struct TrigMesh {
 }
 
 pub struct TrigMeshCache {
-  trigs: Vec<Trig>,
-  subparts: Subpart
+  cluster: Cluster,
 }
 
-enum SubpartKind {
+enum ClusterKind {
   // trig -> index in ts
-  Trigs(Trig, usize),
-  Subpart(Subpart),
+  Trig(Trig),
+  Cluster(Cluster),
 }
 
-struct Subpart {
+struct Cluster {
   // further optimizate computation of intersection
-  trigs: Vec<SubpartKind>,
+  clusters: Vec<ClusterKind>,
   bbox: BoundingBox,
 }
 
@@ -154,12 +153,10 @@ impl TrigMesh {
       return Ref::map(self.cache.borrow(), |x| x.as_ref().unwrap());
     }
 
-    let mut trigs = Vec::new();
-    let mut sparts = Subpart::from_trigs(self.trigs());
+    let trigs = self.trigs().collect::<Vec<_>>();
+    let cluster = Cluster::from_trigs(trigs.as_slice());
 
-    *self.cache.borrow_mut() = Some(TrigMeshCache {
-      trigs:
-    });
+    *self.cache.borrow_mut() = Some(TrigMeshCache { cluster });
 
     Ref::map(self.cache.borrow(), |x| x.as_ref().unwrap())
   }
@@ -171,24 +168,7 @@ impl TrigMesh {
 impl Object for TrigMesh {
   fn intersect(&self, ray: &Ray) -> Option<Hit> {
     let cache = self.get_cache();
-    let (trigs, box_) = cache.deref();
-
-    if !box_.intersect(ray) {
-      return None;
-    }
-
-    for t in trigs {
-      if let Some(pos) = t.intersect(ray) {
-        let norm = t.n();
-        return Some(Hit {
-          pos,
-          norm,
-          inside: ray.dir.dot(norm) > 0.0,
-        });
-      }
-    }
-
-    None
+    cache.cluster.intersect(ray)
   }
 
   fn material(&self, _pos: V3) -> Cow<Material> {
@@ -204,6 +184,89 @@ impl Transform for TrigMesh {
   }
 }
 
+impl Cluster {
+  const CLUSTER_LIMIT: usize = 5;
 
-impl Subpart {
+  pub fn from_trigs(ts: &[Trig]) -> Cluster {
+    use std::iter::repeat;
+    let bbox = Self::bbox_for_trigs(ts);
+
+    if ts.len() <= Self::CLUSTER_LIMIT {
+      return Cluster {
+        bbox,
+        clusters: ClusterKind::from_trigs(ts),
+      };
+    }
+
+    // cluster center
+    let sum_fn = |a: V3, t: &Trig| a + t.center();
+    let cc: V3 = ts.iter().fold(V3::zero(), sum_fn) / (ts.len() as f32);
+    let mut quadrants: Vec<Vec<Trig>> = repeat(Vec::new()).take(8).collect();
+
+    // split trigs into 8 quadrant
+    for t in ts.iter() {
+      let tc = t.center();
+      let x_part = (tc.x() < cc.x()) as usize;
+      let y_part = (tc.y() < cc.y()) as usize;
+      let z_part = (tc.z() < cc.z()) as usize;
+      let idx = z_part * 1 + y_part * 2 + x_part * 4;
+      quadrants[idx].push(*t);
+    }
+
+    let mut clusters = Vec::new();
+    for p in quadrants.into_iter() {
+      if p.len() == 0 {
+        continue;
+      }
+      let part = Cluster::from_trigs(&p);
+      clusters.push(ClusterKind::Cluster(part));
+    }
+
+    Cluster { bbox, clusters }
+  }
+
+  pub fn bbox_for_trigs(ts: &[Trig]) -> BoundingBox {
+    let mut bbox = BoundingBox::new();
+    for t in ts.iter() {
+      bbox.extend(t.a());
+      bbox.extend(t.b());
+      bbox.extend(t.c());
+    }
+    bbox
+  }
+
+  fn intersect(&self, ray: &Ray) -> Option<Hit> {
+    // Magic!
+    if !self.bbox.intersect(ray) {
+      return None;
+    }
+
+    for c in self.clusters.iter() {
+      match c {
+        ClusterKind::Trig(t) => {
+          if let Some(pos) = t.intersect(ray) {
+            let norm = t.n();
+            return Some(Hit {
+              pos,
+              norm,
+              inside: ray.dir.dot(norm) < 0.0,
+            });
+          }
+        }
+        ClusterKind::Cluster(c) => {
+          if let Some(hit) = c.intersect(ray) {
+            return Some(hit);
+          }
+        }
+      }
+    }
+
+    None
+  }
+}
+
+impl ClusterKind {
+  pub fn from_trigs(ts: &[Trig]) -> Vec<ClusterKind> {
+    ts.iter().map(|t| ClusterKind::Trig(*t)).collect()
+  }
 }

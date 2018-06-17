@@ -243,6 +243,10 @@ impl Trig {
         self.a() - self.c()
     }
 
+    pub fn center(&self) -> V3 {
+        (self.a() + self.b() + self.c()) / 3.0
+    }
+
     // we use CCW system
     pub fn n(&self) -> V3 {
         self.ca().cross(self.cb()).norm()
