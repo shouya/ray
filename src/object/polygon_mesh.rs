@@ -241,12 +241,14 @@ impl Cluster {
       return None;
     }
 
+    let mut hits = Vec::new();
+
     for c in self.clusters.iter() {
       match c {
         ClusterKind::Trig(t) => {
           if let Some(pos) = t.intersect(ray) {
             let norm = t.n();
-            return Some(Hit {
+            hits.push(Hit {
               pos,
               norm,
               inside: ray.dir.dot(norm) < 0.0,
@@ -255,13 +257,18 @@ impl Cluster {
         }
         ClusterKind::Cluster(c) => {
           if let Some(hit) = c.intersect(ray) {
-            return Some(hit);
+            hits.push(hit);
           }
         }
       }
     }
 
-    None
+    hits.into_iter().min_by(|hit1, hit2| {
+      use std::cmp::Ordering;
+      dist2(hit1.pos, ray.orig)
+        .partial_cmp(&dist2(hit2.pos, ray.orig))
+        .unwrap_or(Ordering::Less)
+    })
   }
 }
 

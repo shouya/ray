@@ -11,12 +11,12 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 - Basic types
   - [x] V3
   - [x] Color
-  - [x] Trig/Plane
+  - [x] Trig/Plane/Line
   - [x] Ray
   - [x] Hit
   - [x] Bounding box
 - Scene
-  - [x] Screen-Camera coordinates translation
+  - [x] Screen-camera coordinates translation
   - [x] Ray generation for a screen pixel
   - [x] Support both orthogonal and perspective view
   - [x] Multiple light sources
@@ -50,7 +50,8 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
   - [x] Rough surface refraction (e.g. frosted glass)
   - [ ] Correct shadow for transparent objects
   - [ ] Texture mapping
-- [ ] Rasterization
+- Rasterization
+  - [ ] More to come
 - Intersection detection
   - [x] Sphere
   - [x] Triangle
