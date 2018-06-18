@@ -30,13 +30,13 @@ pub trait Transform {
 
 pub mod bezier_surface;
 pub mod chessboard;
-pub mod polygon_mesh;
+pub mod mesh;
 pub mod sphere;
 pub mod triangle;
 
 pub use self::bezier_surface::BezierSurface;
 pub use self::chessboard::ChessBoard;
-pub use self::polygon_mesh::{PolygonMesh, TrigMesh};
+pub use self::mesh::{TrigMesh};
 pub use self::sphere::Sphere;
 pub use self::triangle::{Rectangle, Triangle};
 

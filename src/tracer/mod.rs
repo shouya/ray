@@ -14,6 +14,9 @@ pub mod scatter;
 // w/ transparency
 pub mod transparency;
 
+// w/ proper shading
+pub mod shading;
+
 enum TraceMode {
   Diffusive,
   Reflective,

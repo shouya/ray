@@ -95,7 +95,7 @@ mod example_scene {
         );
 
         let model = ObjModel::from_file("models/torus_t.obj");
-        let torus = TrigMesh::from_model(&model.unwrap(), Material::Solid);
+        let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedGlass);
         scene.add_object(torus.translate(V3([0.0, 3.0, -5.0])));
 
         scene.add_object(ChessBoard {
@@ -108,9 +108,7 @@ mod example_scene {
 }
 
 fn main() {
-    use std::fs::File;
-
     let scene = example_scene::five_spheres();
-    let img = tracer::transparency::trace(scene, 1200, 1200);
+    let img = tracer::shading::trace(scene, 1200, 1200);
     img.save("./trace.png").ok();
 }
