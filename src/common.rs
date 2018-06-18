@@ -1,4 +1,4 @@
-use std::cmp::PartialEq;
+src/obj_model.rs use std::cmp::PartialEq;
 use std::f32;
 use std::mem;
 use std::ops::{Add, Div, Mul, Neg, Sub};
@@ -7,6 +7,18 @@ pub const F32_EPSILON: f32 = 1e-10;
 
 #[derive(Debug, Clone, Copy)]
 pub struct V3(pub [f32; 3]);
+
+// Represents barycentric coordinates or planar coordinates
+#[derive(Debug, Clone, Copy)]
+pub struct V2(pub [f32; 2]);
+
+// V3 with normal
+#[derive(Debug, Clone, Copy)]
+pub struct V3N {
+    pub v: V3,
+    pub n: V3,
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Color(pub [f32; 3]);
 
@@ -16,6 +28,13 @@ pub struct Line(V3, V3);
 pub struct Plane(V3, V3);
 #[derive(Debug, Clone, Copy)]
 pub struct Trig(pub V3, pub V3, pub V3);
+
+// trig with vertex normals
+#[derive(Debug, Clone, Copy)]
+pub struct TrigN {
+    pub v: Trig,
+    pub n: Trig,
+}
 
 #[derive(Debug, Clone)]
 pub struct M33(pub V3, pub V3, pub V3);
@@ -69,8 +88,19 @@ pub fn f32_ge(a: f32, b: f32) -> bool {
     a > b || f32_eq(a, b)
 }
 
+impl V2 {
+    pub fn u(&self) -> f32 {
+        self.0[0]
+    }
+    pub fn v(&self) -> f32 {
+        self.0[1]
+    }
+    pub fn w(&self) -> f32 {
+        1.0 - self.u() - self.v()
+    }
+}
+
 impl V3 {
-    #[inline]
     pub fn x(&self) -> f32 {
         self.0[0]
     }
@@ -309,6 +339,24 @@ impl Trig {
     pub fn flip(&self) -> Trig {
         Trig(self.a(), self.c(), self.b())
     }
+
+    pub fn area(&self) -> f32 {
+        self.ab().cross(self.ac()).magn() / 2.0
+    }
+
+    pub fn at_uv(&self, uv: V2) -> V3 {
+        self.a() * uv.w() + self.b() * uv.u() + self.c() * uv.v()
+    }
+
+    pub fn to_uv(&self, p: V3) -> V2 {
+        let ap = p - self.a();
+        let apc_area = ap.cross(self.ac()).magn() / 2.0;
+        let u = apc_area / self.area();
+        let apb_area = ap.cross(self.ab()).magn() / 2.0;
+        let v = apb_area / self.area();
+
+        V2([u, v])
+    }
 }
 
 impl Ray {
@@ -523,12 +571,16 @@ impl BoundingBox {
         if tzmin > tmin {
             tmin = tzmin;
         }
-        if tzmax < tmax {
-            tmax = tzmax;
-        }
         if tmin < 0.0 {
             return false;
         }
         true
+    }
+}
+
+impl TrigN {
+    pub fn norm_at(&self, p: V3) -> V3 {
+        let uv = self.v.to_uv(p);
+        self.n.at_uv(uv)
     }
 }

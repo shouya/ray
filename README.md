@@ -36,18 +36,18 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
   - [x] Solid diffusive object (Material::Solid)
   - [x] Reflective object (Material::Mirror)
   - [x] Transparent object (Material::Glass)
-  - [x] Rough reflective object (Material::FrostedMirror)
-  - [x] Rough transparent object (Material::FrostedGlass)
+  - [x] Glossy reflective object (Material::FrostedMirror)
+  - [x] Glossy transparent object (Material::FrostedGlass)
   - [ ] Metal-like objeect (Material::Metal)
 - Ray tracer
   - [x] Shadows
   - [x] Render diffusive surface
   - [x] Render specular reflection
   - [x] General reflection (e.g. mirror)
-  - [x] Rough surface reflection (e.g. frosted mirror)
+  - [x] Glossy surface reflection (e.g. frosted mirror)
   - [x] Support refraction
   - [x] Fresnel effect
-  - [x] Rough surface refraction (e.g. frosted glass)
+  - [x] Glossy surface refraction (e.g. frosted glass)
   - [ ] Correct shadow for transparent objects
   - [ ] Texture mapping
 - Rasterization
@@ -78,3 +78,4 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 - [Cornell CS4620/5620: Lecture 35](http://www.cs.cornell.edu/courses/cs4620/2012fa/lectures/35raytracing.pdf)
 - [Bézier Curves and Surfaces: the Utah Teapot](https://www.scratchapixel.com/lessons/advanced-rendering/bezier-curve-rendering-utah-teapot/bezier-surface)
 - [Learn Computer Graphics From Scratch!](https://www.scratchapixel.com/index.php?redirect)
+- [Countless articles on scratchapixel](https://www.scratchapixel.com)

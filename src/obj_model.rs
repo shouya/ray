@@ -8,6 +8,7 @@ use std::path::Path;
 pub struct ObjModel {
   pub o: Option<String>, // name
   pub v: Vec<V3>,
+  pub vn: Vec<V3>,
   pub f: Vec<Vec<usize>>,
 }
 
@@ -24,21 +25,20 @@ impl ObjModel {
       let line = line.unwrap();
       let elem: Vec<_> = line.split(' ').collect();
       match elem[0] {
-        "#" => {}
+        "#" => {
+          // comment
+        }
         "o" => {
           obj.o = Some(line[2..line.len()].into());
         }
         "v" => {
-          let v: Vec<f32> = elem[1..].iter().map(|x| x.parse().unwrap()).collect();
-          obj.v.push(V3([v[0], v[1], v[2]]));
+          obj.v.push(Self::parse_v3(&elem[1..]));
+        }
+        "vn" => {
+          obj.vn.push(Self::parse_v3(&elem[1..]));
         }
         "f" => {
-          let f: Vec<usize> = elem[1..]
-            .iter()
-            .map(|x| x.parse().unwrap())
-            .map(|x: usize| x - 1) // .obj file's array starts at 1 :)
-            .collect();
-          obj.f.push(f);
+          obj.f.push(Self::parse_face(&elem[1..]));
         }
         "s" => {
           // ignore
@@ -50,5 +50,18 @@ impl ObjModel {
     }
 
     Some(obj)
+  }
+
+  fn parse_v3(s: &[&str]) -> V3 {
+    assert!(s.len() == 3);
+    let v: Vec<f32> = s.iter().map(|x| x.parse().unwrap()).collect();
+    V3([v[0], v[1], v[2]])
+  }
+
+  fn parse_face(s: &[&str]) -> Vec<usize> {
+    s.iter()
+     .map(|x| x.parse().unwrap())
+     .map(|x: usize| x - 1) // .obj file's array starts at 1 :)
+     .collect()
   }
 }
