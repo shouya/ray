@@ -9,7 +9,8 @@ type I = u16;
 
 pub struct TrigMesh {
   vs: Vec<V3>,
-  ts: Vec<[I; 3]>,
+  vns: Option<Vec<V3>>,
+  ts: Vec<([I; 3], [I; 3])>,
   material: Material,
   // we cache the vertices of trigs and the bounding box of the whole object
   cache: RefCell<Option<TrigMeshCache>>,
@@ -21,7 +22,7 @@ pub struct TrigMeshCache {
 
 enum ClusterKind {
   // trig -> index in ts
-  Trig(Trig),
+  Trig(TrigGen),
   Cluster(Cluster),
 }
 
@@ -32,10 +33,11 @@ struct Cluster {
 }
 
 impl TrigMesh {
-  pub fn new(vs: Vec<V3>, ts: Vec<[I; 3]>, m: Material) -> Self {
+  pub fn new(vs: Vec<V3>, ts: Vec<([I; 3], [I; 3])>, m: Material) -> Self {
     TrigMesh {
       vs,
       ts,
+      vns: None,
       cache: RefCell::new(None),
       material: m,
     }
@@ -43,30 +45,44 @@ impl TrigMesh {
 
   pub fn from_model(model: &ObjModel, m: Material) -> Self {
     let mut mesh = TrigMesh::new(vec![], vec![], m);
+    let mut vns = Vec::new();
 
     for v in model.v.iter() {
       mesh.vs.push(*v);
     }
+    for vn in model.vn.iter() {
+      vns.push(*vn);
+    }
+
     for f in model.f.iter() {
-      if f.len() != 3 {
+      let (tv, tvn): (Vec<_>, Vec<_>) = f.iter().cloned().unzip();
+      if tv.len() != 3 {
         panic!("Model has non-trig faces. Please import as PolygonMesh.");
       }
-      let f: Vec<_> = f.iter().map(|v| *v as I).collect();
-      mesh.ts.push([f[0], f[1], f[2]]);
+      let tv = [tv[0] as I, tv[1] as I, tv[2] as I];
+      let tvn = [tvn[0] as I, tvn[1] as I, tvn[2] as I];
+      mesh.ts.push((tv, tvn));
+    }
+
+    if vns.len() > 0 {
+      mesh.vns = Some(vns);
     }
 
     mesh
   }
 
-  pub fn trigs<'a>(&'a self) -> impl Iterator<Item = Trig> + 'a {
+  fn trigs<'a>(&'a self) -> impl Iterator<Item = TrigGen> + 'a {
     let trig_idxs = self.ts.iter();
+    let vns = self.vns.as_ref();
 
-    trig_idxs.map(move |[ai, bi, ci]| {
-      Trig(
+    trig_idxs.map(move |([ai, bi, ci], [ani, bni, cni])| {
+      let t = Trig(
         self.vs[*ai as usize],
         self.vs[*bi as usize],
         self.vs[*ci as usize],
-      )
+      );
+      let n = vns.map(|vns| Trig(vns[*ani as usize], vns[*bni as usize], vns[*cni as usize]));
+      TrigGen::new(t, n)
     })
   }
 
@@ -109,9 +125,10 @@ impl Transform for TrigMesh {
 impl Cluster {
   const CLUSTER_LIMIT: usize = 4;
 
-  pub fn from_trigs(ts: &[Trig]) -> Cluster {
+  pub fn from_trigs(ts: &[TrigGen]) -> Cluster {
     use std::iter::repeat;
-    let bbox = Self::bbox_for_trigs(ts);
+    let trigs: Vec<Trig> = ts.iter().map(|x| *x.trig()).collect();
+    let bbox = Self::bbox_for_trigs(&trigs);
 
     if ts.len() <= Self::CLUSTER_LIMIT {
       return Cluster {
@@ -122,17 +139,17 @@ impl Cluster {
 
     // cluster center
     let sum_fn = |a: V3, t: &Trig| a + t.center();
-    let cc: V3 = ts.iter().fold(V3::zero(), sum_fn) / (ts.len() as f32);
-    let mut quadrants: Vec<Vec<Trig>> = repeat(Vec::new()).take(8).collect();
+    let cc: V3 = trigs.iter().fold(V3::zero(), sum_fn) / (ts.len() as f32);
+    let mut quadrants: Vec<Vec<TrigGen>> = repeat(Vec::new()).take(8).collect();
 
     // split trigs into 8 quadrant
-    for t in ts.iter() {
-      let tc = t.center();
+    for t in ts.into_iter() {
+      let tc = t.trig().center();
       let x_part = (tc.x() < cc.x()) as usize;
       let y_part = (tc.y() < cc.y()) as usize;
       let z_part = (tc.z() < cc.z()) as usize;
       let idx = z_part * 1 + y_part * 2 + x_part * 4;
-      quadrants[idx].push(*t);
+      quadrants[idx].push(t.clone());
     }
 
     let mut clusters = Vec::new();
@@ -168,8 +185,9 @@ impl Cluster {
     for c in self.clusters.iter() {
       match c {
         ClusterKind::Trig(t) => {
-          if let Some(pos) = t.intersect(ray) {
-            let norm = t.n();
+          let trig = t.trig();
+          if let Some(pos) = trig.intersect(ray) {
+            let norm = t.trig_n().map(|n| n.norm_at(pos)).unwrap();
             hits.push(Hit {
               pos,
               norm,
@@ -195,7 +213,7 @@ impl Cluster {
 }
 
 impl ClusterKind {
-  pub fn from_trigs(ts: &[Trig]) -> Vec<ClusterKind> {
-    ts.iter().map(|t| ClusterKind::Trig(*t)).collect()
+  pub fn from_trigs(ts: &[TrigGen]) -> Vec<ClusterKind> {
+    ts.iter().map(|t| ClusterKind::Trig(t.clone())).collect()
   }
 }

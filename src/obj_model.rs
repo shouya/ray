@@ -9,7 +9,7 @@ pub struct ObjModel {
   pub o: Option<String>, // name
   pub v: Vec<V3>,
   pub vn: Vec<V3>,
-  pub f: Vec<Vec<usize>>,
+  pub f: Vec<Vec<(usize, usize)>>,
 }
 
 impl ObjModel {
@@ -58,10 +58,12 @@ impl ObjModel {
     V3([v[0], v[1], v[2]])
   }
 
-  fn parse_face(s: &[&str]) -> Vec<usize> {
+  fn parse_face(s: &[&str]) -> Vec<(usize, usize)> {
+    let parse_idx = |x: &str| x.parse::<usize>().unwrap() - 1;
     s.iter()
-     .map(|x| x.parse().unwrap())
-     .map(|x: usize| x - 1) // .obj file's array starts at 1 :)
-     .collect()
+      .map(|x| x.split(r"//").collect())
+      .map(|x: Vec<_>| x.into_iter().map(parse_idx).collect())
+      .map(|x: Vec<_>| (x[0], x[1]))
+      .collect()
   }
 }

@@ -94,9 +94,10 @@ mod example_scene {
             ).double_sided(true),
         );
 
-        let model = ObjModel::from_file("models/torus_t.obj");
-        let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedGlass);
-        scene.add_object(torus.translate(V3([0.0, 3.0, -5.0])));
+        let model = ObjModel::from_file("models/torus.obj");
+        // let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedGlass);
+        let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedMirror);
+        scene.add_object(torus.translate(V3([0.0, 2.0, -5.0])));
 
         scene.add_object(ChessBoard {
             plane: Plane::new(V3([0.0, -1.6, 0.0]), V3([0.0, 1.0, 0.0])),
