@@ -48,6 +48,7 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
   - [x] Support refraction
   - [x] Fresnel effect
   - [x] Glossy surface refraction (e.g. frosted glass)
+  - [x] Lambertian shading
   - [ ] Correct shadow for transparent objects
   - [ ] Texture mapping
 - Rasterization
