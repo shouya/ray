@@ -17,6 +17,7 @@ mod object;
 mod scene;
 mod tracer;
 mod obj_model;
+mod shader;
 
 mod example_scene {
     use common::*;
