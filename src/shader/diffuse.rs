@@ -16,7 +16,7 @@ impl Diffuse {
 const BIAS: f32 = 1e-4;
 
 impl Shader for Diffuse {
-  fn shade(&self, s: &Scene, i: &Incidence) -> Color {
+  fn render(&self, s: &Scene, i: &Incidence) -> Color {
     let mut brightness = 0.0;
     let color = self.color.get(s, i);
 

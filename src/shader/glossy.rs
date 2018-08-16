@@ -17,10 +17,10 @@ impl Glossy {
 const BIAS: f32 = 1e-4;
 
 impl Shader for Glossy {
-  fn shade(&self, s: &Scene, i: &Incidence) -> Color {
+  fn render(&self, s: &Scene, i: &Incidence) -> Color {
     let color = self.color.get(s, i);
     let diffuse = Diffuse::new(DynValue::Const(color), DynValue::Const(0.0));
-    let diffuse_color = diffuse.shade(s, i);
+    let diffuse_color = diffuse.render(s, i);
     diffuse_color
   }
 }

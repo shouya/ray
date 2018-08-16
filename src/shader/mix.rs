@@ -15,10 +15,10 @@ impl MixShader {
 }
 
 impl Shader for MixShader {
-  fn shade(&self, s: &Scene, i: &Incidence) -> Color {
+  fn render(&self, s: &Scene, i: &Incidence) -> Color {
     let f = self.frac.get(s, i);
-    let color_a = self.a.shade(s, i);
-    let color_b = self.b.shade(s, i);
+    let color_a = self.a.render(s, i);
+    let color_b = self.b.render(s, i);
     color_a.blend(color_b, f)
   }
 }

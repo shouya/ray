@@ -2,11 +2,17 @@ use common::{Color, Hit, Ray};
 use object::Object;
 use scene::Scene;
 
-mod preset;
+pub mod preset;
 
-mod diffuse;
-mod glossy;
-mod mix;
+pub mod diffuse;
+pub mod glossy;
+pub mod mix;
+pub mod plain;
+
+pub use self::diffuse::Diffuse;
+pub use self::glossy::Glossy;
+pub use self::mix::MixShader;
+pub use self::plain::Plain;
 
 pub struct Incidence<'r, 'h, 'o> {
   pub ray: &'r Ray,
@@ -20,7 +26,7 @@ pub enum DynValue<T> {
 }
 
 pub trait Shader {
-  fn shade(&self, s: &Scene, _i: &Incidence) -> Color {
+  fn render(&self, s: &Scene, _i: &Incidence) -> Color {
     s.ambient
   }
 }

@@ -111,6 +111,6 @@ mod example_scene {
 
 fn main() {
     let scene = example_scene::five_spheres();
-    let img = tracer::shading::trace(scene, 1200, 1200);
+    let img = tracer::modular::trace(scene, 1200, 1200);
     img.save("./trace.png").ok();
 }

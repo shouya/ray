@@ -17,6 +17,9 @@ pub mod transparency;
 // w/ proper shading
 pub mod shading;
 
+// w/ modularized shaders
+pub mod modular;
+
 enum TraceMode {
   Diffusive,
   Reflective,

@@ -1,4 +1,5 @@
 use common::*;
+use shader::Shader;
 use std::borrow::Cow;
 
 #[derive(Debug, Clone, Copy)]
@@ -18,6 +19,12 @@ pub trait Object {
     // returns material at the point
     fn material(&self, pos: V3) -> Cow<Material>;
 
+    // returns a shader
+    fn shader(&self, pos: V3) -> Box<dyn Shader> {
+        use shader;
+        Box::new(shader::preset::blank())
+    }
+
     // implement this method to allow back-face bulling
     fn const_normal(&self) -> Option<V3> {
         None
@@ -36,7 +43,7 @@ pub mod triangle;
 
 pub use self::bezier_surface::BezierSurface;
 pub use self::chessboard::ChessBoard;
-pub use self::mesh::{TrigMesh};
+pub use self::mesh::TrigMesh;
 pub use self::sphere::Sphere;
 pub use self::triangle::{Rectangle, Triangle};
 
