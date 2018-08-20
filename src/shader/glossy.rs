@@ -20,7 +20,10 @@ impl Glossy {
   pub fn pure_glossy(&self, s: &Scene, i: &Incidence, d: usize) -> Color {
     let roughness = self.roughness.get(s, i);
     let color = self.color.get(s, i);
-    let refl_rays = i.ray.drift_array(roughness, REFL_COUNT, BIAS);
+    let refl_rays = i
+      .ray
+      .reflect(i.hit)
+      .drift_array(roughness, REFL_COUNT, BIAS);
     let mut brit = color;
 
     for ray in refl_rays.into_iter() {
@@ -31,7 +34,7 @@ impl Glossy {
           ray: &ray,
         };
 
-        if let Some(obj_color) = obj.render_depth(s, &inci, d+1) {
+        if let Some(obj_color) = obj.render_depth(s, &inci, d + 1) {
           brit = brit.mult(obj_color);
         }
       }
@@ -51,13 +54,13 @@ impl Glossy {
 impl Shader for Glossy {
   fn render_depth(&self, s: &Scene, i: &Incidence, d: usize) -> Option<Color> {
     if d > MAX_DEPTH {
-      return Some(self.color.get(s, i))
+      return Some(self.color.get(s, i));
     }
     let roughness = self.roughness.get(s, i);
     let glossy_color = self.pure_glossy(s, i, d);
     let diffusive_color = self.pure_diffusive(s, i);
     let color = glossy_color.mix_with(diffusive_color, |a, b| {
-      a * (1.0-roughness) + b * roughness
+      a * (1.0 - roughness) + b * roughness
     });
 
     Some(color)
