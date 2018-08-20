@@ -419,6 +419,21 @@ impl Ray {
         Ray::new(self.orig, self.dir + V3([dx, dy, dz]))
     }
 
+    // amount = 0: no drift
+    // amount = 1: scattered everywhere
+    pub fn drift_array(&self, amount: f32, count: usize, bias: f32) -> Vec<Ray> {
+        let mut v = Vec::new();
+        if amount == 0.0 {
+            return vec![self.biased(bias)];
+        }
+
+        for _ in 1..count {
+            v.push(self.drift(amount * f32::consts::PI).biased(bias))
+        }
+
+        v
+    }
+
     pub fn biased(self, amount: f32) -> Ray {
         self + self.dir * amount
     }
@@ -460,11 +475,7 @@ impl Color {
     // transparency: 0: all self, 1: all rhs
     pub fn blend(&self, rhs: Color, transparency: f32) -> Color {
         let (t0, t1) = (transparency, 1.0 - transparency);
-        Color([
-            rhs.r() * t0 + self.r() * t1,
-            rhs.g() * t0 + self.g() * t1,
-            rhs.b() * t0 + self.b() * t1,
-        ])
+        self.mix_with(rhs, |l, r| r * t0 + l * t1)
     }
 
     pub fn blend_all(colors: &[Color]) -> Color {
@@ -477,6 +488,32 @@ impl Color {
         let g: f32 = colors.iter().map(|x| x.g()).sum();
         let b: f32 = colors.iter().map(|x| x.b()).sum();
         Color([r / n, g / n, b / n])
+    }
+
+    pub fn mix_with<F>(&self, rhs: Color, f: F) -> Color
+    where
+        F: Fn(f32, f32) -> f32,
+    {
+        Color([
+            f(self.r(), rhs.r()),
+            f(self.g(), rhs.g()),
+            f(self.b(), rhs.b()),
+        ])
+    }
+
+    pub fn clamp(&self, min: f32, max: f32) -> Color {
+        Color([
+            self.r().max(min).min(max),
+            self.g().max(min).min(max),
+            self.b().max(min).min(max),
+        ])
+    }
+    pub fn regularize(&self) -> Color {
+        self.clamp(0.0, 1.0)
+    }
+
+    pub fn mult(self, brightness: Color) -> Color {
+        self.mix_with(brightness, |a, b| a * b)
     }
 }
 
@@ -503,6 +540,13 @@ impl Add<Color> for Color {
     type Output = Color;
     fn add(self, rhs: Self) -> Color {
         Color([self.r() + rhs.r(), self.g() + rhs.g(), self.b() + rhs.b()])
+    }
+}
+
+impl Add<f32> for Color {
+    type Output = Color;
+    fn add(self, rhs: f32) -> Color {
+        Color([self.r() + rhs, self.g() + rhs, self.b() + rhs])
     }
 }
 

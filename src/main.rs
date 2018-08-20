@@ -8,23 +8,23 @@ extern crate rand;
 
 // extern crate flame;
 
-
 #[macro_use]
 extern crate derive_builder;
 
 mod common;
+mod obj_model;
 mod object;
 mod scene;
-mod tracer;
-mod obj_model;
 mod shader;
+mod tracer;
 
 mod example_scene {
     use common::*;
-    use object::{ChessBoard, Material, Sphere, Rectangle, TrigMesh};
-    use object::Transform;
     use obj_model::ObjModel;
+    use object::Transform;
+    use object::{ChessBoard, Material, Rectangle, Shaded, Sphere, TrigMesh};
     use scene::{Scene, SceneBuilder};
+    use shader;
     use std::borrow::Cow;
 
     pub fn five_spheres() -> Scene {
@@ -44,11 +44,6 @@ mod example_scene {
         scene.add_light(V3([-5.0, 10.0, 0.0]), 0.7);
 
         let spheres = vec![
-            Sphere {
-                c: V3([0.0, -0.5, -7.0]),
-                r: 1.5,
-                material: Material::Glass
-            },
             Sphere {
                 c: V3([-2.5, 1.0, -6.0]),
                 r: 1.5,
@@ -81,6 +76,14 @@ mod example_scene {
             scene.add_object(s);
         }
 
+        scene.add_object(Shaded::new(
+            Sphere {
+                c: V3([0.0, -0.5, -7.0]),
+                r: 1.5,
+                material: Material::Glass,
+            },
+            shader::preset::glass(Color::White),
+        ));
         scene.add_object(
             Rectangle::new(
                 V3([2.0, 1.0, -5.0]),

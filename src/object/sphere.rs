@@ -1,4 +1,5 @@
 use super::{Cow, Hit, Material, Object, Ray, V3};
+use shader::Shader;
 
 #[derive(Debug, Clone)]
 pub struct Sphere {

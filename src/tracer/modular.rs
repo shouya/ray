@@ -10,14 +10,14 @@ fn trace_ray(s: &Scene, ray: Ray) -> Color {
   }
 
   let (obj, hit) = hit.unwrap();
-  let shader = obj.shader(hit.pos);
   let inci = Incidence {
     obj: obj.as_ref(),
     hit: &hit,
     ray: &ray
   };
+  let color = obj.render_depth(s, &inci, 0);
 
-  shader.render(s, &inci)
+  color.unwrap_or(s.ambient)
 }
 
 
@@ -28,7 +28,7 @@ pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
     for (x, y, pixel) in film.enumerate_pixels_mut() {
         let ray = s.generate_ray(x, y, w, h);
         if x == 0 {
-            print!("Process: {}/{} ({}%)\r", y, h, y * 100 / h);
+            print!("Process: {}/{} ({}%)\r", y+1, h, (y+1) * 100 / h);
         }
         let color = trace_ray(&s, ray);
         *pixel = Rgb(color.into());

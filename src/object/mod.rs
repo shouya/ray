@@ -1,5 +1,6 @@
 use common::*;
-use shader::Shader;
+use shader::Incidence;
+use scene::Scene;
 use std::borrow::Cow;
 
 #[derive(Debug, Clone, Copy)]
@@ -19,15 +20,13 @@ pub trait Object {
     // returns material at the point
     fn material(&self, pos: V3) -> Cow<Material>;
 
-    // returns a shader
-    fn shader(&self, pos: V3) -> Box<dyn Shader> {
-        use shader;
-        Box::new(shader::preset::blank())
-    }
-
     // implement this method to allow back-face bulling
     fn const_normal(&self) -> Option<V3> {
         None
+    }
+
+    fn render_depth(&self, s: &Scene, i: &Incidence, d: usize) -> Option<Color> {
+        Some(Color::White)
     }
 }
 
@@ -46,6 +45,9 @@ pub use self::chessboard::ChessBoard;
 pub use self::mesh::TrigMesh;
 pub use self::sphere::Sphere;
 pub use self::triangle::{Rectangle, Triangle};
+
+pub mod shaded;
+pub use self::shaded::Shaded;
 
 #[allow(non_upper_case_globals)]
 impl Material {

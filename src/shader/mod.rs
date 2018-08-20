@@ -11,7 +11,7 @@ pub mod plain;
 
 pub use self::diffuse::Diffuse;
 pub use self::glossy::Glossy;
-pub use self::mix::MixShader;
+pub use self::mix::Mix;
 pub use self::plain::Plain;
 
 pub struct Incidence<'r, 'h, 'o> {
@@ -26,8 +26,16 @@ pub enum DynValue<T> {
 }
 
 pub trait Shader {
-  fn render(&self, s: &Scene, _i: &Incidence) -> Color {
-    s.ambient
+  fn render(&self, s: &Scene, i: &Incidence) -> Color {
+    self.render_depth(s, i, 0).unwrap_or(s.ambient)
+  }
+
+  fn render_depth(&self, s: &Scene, i: &Incidence, d: usize) -> Option<Color> {
+    Some(self.render(s, i))
+  }
+
+  fn is_transparent(&self) -> bool {
+    false
   }
 }
 
@@ -40,5 +48,11 @@ where
       DynValue::Const(value) => value.clone(),
       DynValue::Dyn(f) => f(s, i),
     }
+  }
+}
+
+impl<T> From<T> for DynValue<T> {
+  fn from(v: T) -> DynValue<T> {
+    DynValue::Const(v)
   }
 }
