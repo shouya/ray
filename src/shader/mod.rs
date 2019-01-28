@@ -5,13 +5,17 @@ use scene::Scene;
 pub mod preset;
 
 pub mod diffuse;
+pub mod phong;
 pub mod glossy;
 pub mod mix;
+pub mod sum;
 pub mod plain;
 
 pub use self::diffuse::Diffuse;
+pub use self::phong::Phong;
 pub use self::glossy::Glossy;
 pub use self::mix::Mix;
+pub use self::sum::Sum;
 pub use self::plain::Plain;
 
 pub struct Incidence<'r, 'h, 'o> {

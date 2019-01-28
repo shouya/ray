@@ -191,6 +191,12 @@ impl Add<V3> for V3 {
     }
 }
 
+impl Default for V3 {
+    fn default() -> Self {
+        V3([0.,0.,0.])
+    }
+}
+
 impl PartialEq for V3 {
     fn eq(&self, other: &V3) -> bool {
         f32_eq(self.x(), other.x()) && f32_eq(self.y(), other.y()) && f32_eq(self.z(), other.z())

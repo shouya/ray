@@ -49,6 +49,7 @@ impl Glossy {
     let diffuse_color = diffuse.render(s, i);
     diffuse_color
   }
+
 }
 
 impl Shader for Glossy {
