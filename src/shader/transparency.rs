@@ -37,13 +37,15 @@ pub fn fresnel(ior: &DynValue<f32>) -> DynValue<f32> {
 
 pub struct Transparency {
   mix: Mix,
-  // refl: Reflection,
-  // refr: Refraction,
 }
 
 impl Shader for Transparency {
   fn render_depth(&self, s: &Scene, i: &Incidence, d: usize) -> Option<Color> {
     self.mix.render_depth(s, i, d)
+  }
+
+  fn is_transparent(&self) -> bool {
+    true
   }
 }
 
