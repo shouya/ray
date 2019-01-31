@@ -3,24 +3,19 @@ use object::Material;
 use shader;
 use shader::Shader;
 
-pub mod simple;
-pub mod transparency;
+mod simple;
+mod transparent;
 
-pub use self::simple::blank;
-pub use self::transparency::Transparency;
+pub use self::simple::{blank, glass, mirror, solid};
+pub use self::simple::{simple_solid, simple_glass, simple_mirror};
+pub use self::transparent::{transparent, Transparency};
 
-pub fn shiny(surface_color: Color, specular_color: Color, specular_index: f32) -> impl Shader {
-  let diffuse = shader::Diffusion::new(surface_color.into(), 0.0.into());
-  let phong = shader::Phong::new(specular_color.into(), specular_index.into());
+pub fn shiny(surface_color: Color, specular_index: f32) -> impl Shader {
+  let diffuse = shader::Diffusion::new(surface_color.into());
+  let phong = shader::Phong::new(specular_index.into());
   shader::Mix::new(diffuse.into(), phong.into(), 0.5.into())
 }
 
-pub fn glass(surface_color: Color) -> impl Shader {
-  let metalic_color = Color([0.38; 3]);
-  let glossy = shader::Glossy::new(metalic_color.into(), 0.05.into());
-  let diffuse = shader::Diffusion::new(surface_color.into(), 0.0.into());
-  shader::Mix::new(glossy.into(), diffuse.into(), 0.89.into())
-}
 
 pub fn from_material(m: Material) -> impl Shader {
   let a1 = m.diffusion;
@@ -32,8 +27,8 @@ pub fn from_material(m: Material) -> impl Shader {
   let q2 = 1.0 / (a4 / a3 + 1.0);
   let p = a1 / q1;
 
-  let s1 = shader::Diffusion::new(m.surface_color.into(), 0.0.into());
-  let s2 = shader::Phong::new(Color::White.into(), 0.0.into());
+  let s1 = shader::Diffusion::new(m.surface_color.into());
+  let s2 = shader::Phong::new(0.0.into());
   // let s3 = shader::Transparent::new();
 
   s1

@@ -46,18 +46,22 @@ impl Shader for Transparency {
 }
 
 impl Transparency {
-  pub fn new(reflectivity: DynValue<f32>, ior: DynValue<f32>) -> Self {
-    let refl = Reflection { reflectivity };
+  pub fn new(reflectivity: f32, ior: DynValue<f32>) -> Self {
+    let refl: DynValue<Option<Color>> = Reflection.into();
     let refr = {
       let ior2 = ior.clone();
       Refraction { ior: ior2 }
     };
     let frac = fresnel(&ior);
-    let mix = Mix::new(refl.into(), refr.into(), frac);
+    let mix = Mix::new(
+      refl.map(move |c| c.map(|c| c * reflectivity)),
+      refr.into(),
+      frac,
+    );
     Self { mix }
   }
 }
 
 pub fn transparent(reflectivity: f32, ior: f32) -> impl Shader {
-  Transparency::new(reflectivity.into(), ior.into())
+  Transparency::new(reflectivity, ior.into())
 }

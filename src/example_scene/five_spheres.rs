@@ -21,7 +21,8 @@ pub fn scene() -> Scene {
     .build()
     .unwrap();
 
-  scene.add_light(V3([-5.0, 10.0, 0.0]), 0.7);
+  scene.add_white_light(V3([-5.0, 10.0, 0.0]), 0.7);
+  scene.add_white_light(V3([5.0, -10.0, 0.0]), 0.7);
 
   let spheres = vec![
     Sphere {
@@ -53,7 +54,7 @@ pub fn scene() -> Scene {
   ];
 
   for s in spheres.into_iter() {
-    scene.add_object(s);
+    scene.add_object(Shaded::new(s, shader::preset::solid(Color::Green, 3.0)));
   }
 
   scene.add_object(Shaded::new(
@@ -62,9 +63,8 @@ pub fn scene() -> Scene {
       r: 1.5,
       material: Material::Glass,
     },
-    // shader::preset::glass(Color::White),
-    // shader::preset::shiny(Color::Green, Color::White, 10.0),
-    shader::preset::Transparency::new(0.5.into(), 1.2.into()),
+    shader::preset::simple_glass(Color::Red, 0.9),
+    // shader::Refraction { ior: 1.01.into() }
   ));
 
   scene.add_object(Shaded::new(
@@ -83,10 +83,10 @@ pub fn scene() -> Scene {
     shader::preset::Transparency::new(1.0.into(), 1.2.into()),
   ));
 
-  let model = ObjModel::from_file("models/torus.obj");
-  // let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedGlass);
-  let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedMirror);
-  scene.add_object(torus.translate(V3([0.0, 2.0, -5.0])));
+  // let model = ObjModel::from_file("models/torus.obj");
+  // // let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedGlass);
+  // let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedMirror);
+  // scene.add_object(torus.translate(V3([0.0, 2.0, -5.0])));
 
   scene.add_object(ChessBoard {
     plane: Plane::new(V3([0.0, -1.6, 0.0]), V3([0.0, 1.0, 0.0])),

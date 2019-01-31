@@ -1,12 +1,10 @@
 use common::Color;
 use scene::Scene;
-use shader::{DynValue, Incidence, Shader};
+use shader::{Incidence, Shader};
 
 const BIAS: f32 = 1e-5;
 
-pub struct Reflection {
-  pub reflectivity: DynValue<f32>,
-}
+pub struct Reflection;
 
 impl Shader for Reflection {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {

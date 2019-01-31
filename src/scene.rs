@@ -26,8 +26,16 @@ impl Scene {
         self.objs.push(Box::new(obj))
     }
 
-    pub fn add_light(&mut self, pos: V3, brightness: f32) {
-        self.lights.push(PointLight { pos, brightness })
+    pub fn add_white_light(&mut self, pos: V3, brightness: f32) {
+        self.add_light(pos, Color::White, brightness)
+    }
+
+    pub fn add_light(&mut self, pos: V3, color: Color, brightness: f32) {
+        self.lights.push(PointLight {
+            pos,
+            color,
+            brightness,
+        })
     }
 
     pub fn vp_from_pixel(&self, x: u32, y: u32, w: u32, h: u32) -> V3 {
@@ -58,7 +66,7 @@ impl Scene {
         }
 
         match self.nearest_hit(ray) {
-            None => None,
+            None => Some(self.ambient),
             Some((obj, hit)) => {
                 let inci = Incidence {
                     ray: &ray,
@@ -69,6 +77,10 @@ impl Scene {
                 obj.render(self, &inci)
             }
         }
+    }
+
+    pub fn is_blocked(&self, ray: &Ray) -> bool {
+        self.nearest_hit(ray).is_some()
     }
 
     pub fn nearest_hit<'a>(&'a self, ray: &Ray) -> Option<(&'a Box<dyn Object>, Hit)> {

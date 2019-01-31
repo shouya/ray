@@ -1,11 +1,14 @@
 use super::{Cow, Material, Object};
+use scene::Scene;
+use shader::preset::simple_solid;
+use shader::{DynValue, Incidence};
 
 use common::*;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ChessBoard {
     pub plane: Plane,
-    pub material: (Material, Material),
+    pub material: (DynValue<Option<Color>>, DynValue<Option<Color>>),
     pub cell_size: f32,
 }
 
@@ -21,18 +24,13 @@ impl Default for ChessBoard {
             specular_index: 0.1, // std dev of reflected shadow rays, 0: perfect smooth
             roughness: 0.0,
         };
-        let black = Material {
-            surface_color: Color::White * 0.3,
-            ..base
-        };
-        let white = Material {
-            surface_color: Color::White * 0.7,
-            ..base
-        };
 
         ChessBoard {
             plane: Plane::new(V3::zero(), V3([0.0, 0.0, 1.0])),
-            material: (black, white),
+            material: (
+                simple_solid(Color([0.3; 3])).into(),
+                simple_solid(Color([0.7; 3])).into(),
+            ),
             cell_size: 1.0,
         }
     }
@@ -48,16 +46,16 @@ impl Object for ChessBoard {
         })
     }
 
-    fn material(&self, p: V3) -> Cow<Material> {
-        let p = self.map_to_2d(p);
+    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+        let p = self.map_to_2d(i.hit.pos);
         let is_even = |v: f32| (v / self.cell_size) as i32 % 2 == 0;
         let a = is_even(p.x()) ^ (p.x() < 0.0);
         let b = is_even(p.y()) ^ (p.y() < 0.0);
 
         if a ^ b {
-            Cow::Borrowed(&self.material.0)
+            self.material.0.get(s, i)
         } else {
-            Cow::Borrowed(&self.material.1)
+            self.material.1.get(s, i)
         }
     }
 }

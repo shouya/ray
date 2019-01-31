@@ -10,12 +10,15 @@ pub struct Refraction {
 
 impl Shader for Refraction {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    let ior = self.ior.get(s, i);
     let ior = if i.hit.inside {
-      1.0 / (self.ior.get(s, i) + 1e-10)
+      // 1.0 / (ior + 1e-10)
+      ior
     } else {
-      self.ior.get(s, i)
+      ior
     };
-    let ray = i.ray.refract(&i.hit.biased(BIAS), ior);
+    let bias = if i.hit.inside { BIAS } else { -BIAS };
+    let ray = i.ray.refract(&i.hit.biased(bias), ior);
     s.trace_ray(&ray, i.depth + 1)
   }
 }

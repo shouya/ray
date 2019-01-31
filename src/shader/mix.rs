@@ -18,9 +18,9 @@ impl Shader for Mix {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
     let f = self.frac.get(s, i);
     if f <= 0.0 {
-      self.a.get(s, i)
-    } else if f >= 1.0 {
       self.b.get(s, i)
+    } else if f >= 1.0 {
+      self.a.get(s, i)
     } else {
       let left = self.a.get(s, i)?;
       let right = self.b.get(s, i)?;
@@ -47,7 +47,7 @@ impl ChannelMix {
 
 impl Shader for ChannelMix {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
-    let frac = self.frac.get(s, i);
+    let frac = self.frac.get(s, i).regularize();
     if frac == Color::Zero {
       self.b.get(s, i)
     } else if frac == Color::One {

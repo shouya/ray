@@ -70,7 +70,8 @@ pub struct Hit {
 #[derive(Debug, Clone)]
 pub struct PointLight {
     pub pos: V3,
-    pub brightness: f32, // 0.0 turned off
+    pub color: Color,
+    pub brightness: f32, // 0: turned off
 }
 
 #[derive(Debug, Clone)]
@@ -505,9 +506,9 @@ impl Color {
     pub fn channel_blend(&self, rhs: Color, frac: Color) -> Color {
         let c = frac;
         Color([
-            self.r() * c.r() + rhs.r() + (1.0 - c.r()),
-            self.g() * c.g() + rhs.g() + (1.0 - c.g()),
-            self.b() * c.b() + rhs.b() + (1.0 - c.b()),
+            self.r() * c.r() + rhs.r() * (1.0 - c.r()),
+            self.g() * c.g() + rhs.g() * (1.0 - c.g()),
+            self.b() * c.b() + rhs.b() * (1.0 - c.b()),
         ])
     }
 
@@ -570,10 +571,24 @@ impl Add<Color> for Color {
     }
 }
 
+impl Sub<Color> for Color {
+    type Output = Color;
+    fn sub(self, rhs: Self) -> Color {
+        Color([self.r() - rhs.r(), self.g() - rhs.g(), self.b() - rhs.b()])
+    }
+}
+
 impl Add<f32> for Color {
     type Output = Color;
     fn add(self, rhs: f32) -> Color {
         Color([self.r() + rhs, self.g() + rhs, self.b() + rhs])
+    }
+}
+
+impl Mul<Color> for Color {
+    type Output = Color;
+    fn mul(self, rhs: Color) -> Color {
+        Color([self.r() * rhs.r(), self.g() * rhs.g(), self.b() * rhs.b()])
     }
 }
 

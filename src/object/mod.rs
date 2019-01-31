@@ -19,7 +19,9 @@ pub trait Object {
     // returns hit and norm
     fn intersect(&self, ray: &Ray) -> Option<Hit>;
     // returns material at the point
-    fn material(&self, pos: V3) -> Cow<Material>;
+    fn material(&self, pos: V3) -> Cow<Material> {
+        Cow::Owned(Material::Glass)
+    }
 
     // implement this method to allow back-face bulling
     fn const_normal(&self) -> Option<V3> {
@@ -27,7 +29,7 @@ pub trait Object {
     }
 
     fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
-        Some(Color::White)
+        Some(Color::Blue)
     }
 }
 
