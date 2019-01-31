@@ -22,12 +22,9 @@ impl Shader for Mix {
     } else if f >= 1.0 {
       self.a.render_depth(s, i, depth)
     } else {
-      self.a.render_depth(s, i, depth).and_then(|color_a| {
-        self.b.render_depth(s, i, depth).and_then(|color_b| {
-          let c = Some(color_a.blend(color_b, f));
-          c
-        })
-      })
+      let left = self.a.render_depth(s, i, depth).unwrap_or(Color::Black);
+      let right = self.b.render_depth(s, i, depth).unwrap_or(Color::Black);
+      Some(left.blend(right, f))
     }
   }
 

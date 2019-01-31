@@ -10,7 +10,7 @@ pub fn blank() -> impl Shader {
 pub fn shiny(surface_color: Color, specular_color: Color, specular_index: f32) -> impl Shader {
   let diffuse = shader::Diffusion::new(surface_color.into(), 0.0.into());
   let phong = shader::Phong::new(specular_color.into(), specular_index.into());
-  shader::Sum::new(Box::new(diffuse), Box::new(phong))
+  shader::Mix::new(Box::new(diffuse), Box::new(phong), 0.5.into())
 }
 
 pub fn glass(surface_color: Color) -> impl Shader {

@@ -1,4 +1,4 @@
-use common::{Color};
+use common::Color;
 use scene::Scene;
 use shader::{DynValue, Incidence, Shader};
 
@@ -16,17 +16,6 @@ impl Shader for Refraction {
       self.ior.get(s, i)
     };
     let ray = i.ray.refract(&i.hit.biased(BIAS), ior);
-
-    match s.nearest_hit(&ray) {
-      None => Some(s.ambient),
-      Some((obj, hit)) => {
-        let inci = Incidence {
-          ray: &ray,
-          obj: obj.as_ref(),
-          hit: &hit,
-        };
-        obj.render_depth(s, &inci, d + 1)
-      }
-    }
+    s.trace_ray(&ray, d + 1)
   }
 }

@@ -11,16 +11,6 @@ pub struct Reflection {
 impl Shader for Reflection {
   fn render_depth(&self, s: &Scene, i: &Incidence, d: usize) -> Option<Color> {
     let ray = i.ray.reflect(&i.hit.biased(BIAS));
-    match s.nearest_hit(&ray) {
-      None => None,
-      Some((obj, hit)) => {
-        let inci = Incidence {
-          ray: &ray,
-          obj: obj.as_ref(),
-          hit: &hit,
-        };
-        obj.render_depth(s, &inci, d + 1)
-      }
-    }
+    s.trace_ray(&ray, d + 1)
   }
 }

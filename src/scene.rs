@@ -14,6 +14,8 @@ pub struct Scene {
     pub ambient: Color,
     #[builder(setter(skip))]
     pub lights: Vec<PointLight>,
+    #[builder(default = "5")]
+    pub max_depth: usize,
 }
 
 impl Scene {
@@ -47,6 +49,25 @@ impl Scene {
             Projection::Orthogonal => self.vp_plane.n(),
         };
         Ray::new(orig, dir)
+    }
+
+    pub fn trace_ray(&self, ray: &Ray, d: usize) -> Option<Color> {
+        use shader::Incidence;
+        if d >= self.max_depth {
+            return None;
+        }
+
+        match self.nearest_hit(ray) {
+            None => None,
+            Some((obj, hit)) => {
+                let inci = Incidence {
+                    ray: &ray,
+                    obj: obj.as_ref(),
+                    hit: &hit,
+                };
+                obj.render_depth(self, &inci, d + 1)
+            }
+        }
     }
 
     pub fn nearest_hit<'a>(&'a self, ray: &Ray) -> Option<(&'a Box<dyn Object>, Hit)> {

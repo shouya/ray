@@ -50,7 +50,7 @@ impl Shader for Transparency {
 }
 
 impl Transparency {
-  fn new(reflectivity: DynValue<f32>, ior: DynValue<f32>) -> Self {
+  pub fn new(reflectivity: DynValue<f32>, ior: DynValue<f32>) -> Self {
     let refl = Reflection { reflectivity };
     let refr = {
       let ior2 = ior.clone();

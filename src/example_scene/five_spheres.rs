@@ -1,4 +1,3 @@
-
 use common::*;
 use obj_model::ObjModel;
 use object::Transform;
@@ -18,6 +17,7 @@ pub fn scene() -> Scene {
     .camera(V3::zero())
     .projection(Projection::Perspective)
     .ambient(Color::White * 0.8)
+    .max_depth(5)
     .build()
     .unwrap();
 
@@ -63,10 +63,11 @@ pub fn scene() -> Scene {
       material: Material::Glass,
     },
     // shader::preset::glass(Color::White),
-    shader::preset::shiny(Color::Green, Color::White, 10.0)
+    // shader::preset::shiny(Color::Green, Color::White, 10.0),
+    shader::Transparency::new(0.5.into(), 1.2.into()),
   ));
 
-  scene.add_object(
+  scene.add_object(Shaded::new(
     Rectangle::new(
       V3([2.0, 1.0, -5.0]),
       V3([2.0, -1.6, -5.0]),
@@ -77,8 +78,10 @@ pub fn scene() -> Scene {
         roughness: 0.005,
         ..Material::PlaneGlass
       }),
-    ).double_sided(true),
-  );
+    )
+    .double_sided(true),
+    shader::Transparency::new(1.0.into(), 1.2.into()),
+  ));
 
   let model = ObjModel::from_file("models/torus.obj");
   // let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedGlass);

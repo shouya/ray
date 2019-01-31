@@ -9,7 +9,7 @@ flamer = "^0.2.2"
 
 
 [dependencies]
-derive_builder = "0.5"
+derive_builder = "0.7"
 image = "0.19"
 rand = "0.5"
 indicatif = "0.11"
