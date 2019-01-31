@@ -13,7 +13,7 @@ impl Plain {
 }
 
 impl Shader for Plain {
-  fn render(&self, _s: &Scene, _i: &Incidence) -> Color {
-    self.color
+  fn render(&self, _s: &Scene, _i: &Incidence) -> Option<Color> {
+    Some(self.color)
   }
 }

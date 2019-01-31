@@ -9,8 +9,8 @@ pub struct Reflection {
 }
 
 impl Shader for Reflection {
-  fn render_depth(&self, s: &Scene, i: &Incidence, d: usize) -> Option<Color> {
+  fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
     let ray = i.ray.reflect(&i.hit.biased(BIAS));
-    s.trace_ray(&ray, d + 1)
+    s.trace_ray(&ray, i.depth + 1)
   }
 }

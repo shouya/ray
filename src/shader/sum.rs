@@ -3,26 +3,20 @@ use common::Color;
 use scene::Scene;
 
 pub struct Sum {
-  a: Box<dyn Shader>,
-  b: Box<dyn Shader>,
+  a: DynValue<Option<Color>>,
+  b: DynValue<Option<Color>>,
 }
 
 impl Sum {
-  pub fn new(a: Box<dyn Shader>, b: Box<dyn Shader>) -> Sum {
+  pub fn new(a: DynValue<Option<Color>>, b: DynValue<Option<Color>>) -> Sum {
     Sum { a, b }
   }
 }
 
 impl Shader for Sum {
-  fn render_depth(&self, s: &Scene, i: &Incidence, depth: usize) -> Option<Color> {
-    self.a.render_depth(s, i, depth).and_then(|color_a| {
-      self.b.render_depth(s, i, depth).and_then(|color_b| {
-        Some(color_a + color_b)
-      })
-    })
-  }
-
-  fn is_transparent(&self) -> bool {
-    self.a.is_transparent() || self.b.is_transparent()
+  fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    let a = self.a.get(s, i)?;
+    let b = self.b.get(s, i)?;
+    Some(a + b)
   }
 }

@@ -13,8 +13,9 @@ fn trace_ray(s: &Scene, ray: Ray) -> Color {
     obj: obj.as_ref(),
     hit: &hit,
     ray: &ray,
+    depth: 0
   };
-  let color = obj.render_depth(s, &inci, 0);
+  let color = obj.render(s, &inci);
 
   color.unwrap_or(s.ambient)
 }

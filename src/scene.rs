@@ -64,8 +64,9 @@ impl Scene {
                     ray: &ray,
                     obj: obj.as_ref(),
                     hit: &hit,
+                    depth: d,
                 };
-                obj.render_depth(self, &inci, d + 1)
+                obj.render(self, &inci)
             }
         }
     }

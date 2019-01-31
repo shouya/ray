@@ -19,10 +19,10 @@ const BIAS: f32 = 1e-4;
 const BACKGROUND_INTENSITY: Color = Color([0.03; 3]);
 
 impl Shader for Diffusion {
-  fn render(&self, s: &Scene, i: &Incidence) -> Color {
+  fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
     let color = self.color.get(s, i);
     let mut intensity = BACKGROUND_INTENSITY;
-    let Incidence { hit, ray, obj } = i;
+    let Incidence { hit, ray, obj, .. } = i;
 
     for light in s.lights.iter() {
       let shadowray_dir = light.pos - hit.pos;
@@ -37,6 +37,6 @@ impl Shader for Diffusion {
       }
     }
 
-    color.mult(intensity)
+    Some(color.mult(intensity))
   }
 }

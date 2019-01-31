@@ -18,10 +18,10 @@ const BIAS: f32 = 1e-4;
 const BACKGROUND_INTENSITY: Color = Color([0.0; 3]);
 
 impl Shader for Phong {
-  fn render(&self, s: &Scene, i: &Incidence) -> Color {
+  fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
     let color = self.specular_color.get(s, i);
     let p = self.specular_index.get(s, i);
-    let Incidence { hit, ray, obj } = i;
+    let Incidence { hit, ray, obj, .. } = i;
     let v = -ray.dir;
     let mut i = BACKGROUND_INTENSITY;
 
@@ -38,6 +38,6 @@ impl Shader for Phong {
       }
     }
 
-    color.mult(i)
+    Some(color.mult(i))
   }
 }

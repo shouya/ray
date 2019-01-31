@@ -26,7 +26,7 @@ pub trait Object {
         None
     }
 
-    fn render_depth(&self, s: &Scene, i: &Incidence, d: usize) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
         Some(Color::White)
     }
 }

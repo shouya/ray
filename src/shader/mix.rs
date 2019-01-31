@@ -4,31 +4,27 @@ use scene::Scene;
 
 pub struct Mix {
   frac: DynValue<f32>,
-  a: Box<dyn Shader>,
-  b: Box<dyn Shader>,
+  a: DynValue<Option<Color>>,
+  b: DynValue<Option<Color>>
 }
 
 impl Mix {
-  pub fn new(a: Box<dyn Shader>, b: Box<dyn Shader>, frac: DynValue<f32>) -> Mix {
+  pub fn new(a: DynValue<Option<Color>>, b: DynValue<Option<Color>>, frac: DynValue<f32>) -> Mix {
     Mix { a, b, frac }
   }
 }
 
 impl Shader for Mix {
-  fn render_depth(&self, s: &Scene, i: &Incidence, depth: usize) -> Option<Color> {
+  fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
     let f = self.frac.get(s, i);
     if f <= 0.0 {
-      self.b.render_depth(s, i, depth)
+      self.a.get(s, i)
     } else if f >= 1.0 {
-      self.a.render_depth(s, i, depth)
+      self.b.get(s, i)
     } else {
-      let left = self.a.render_depth(s, i, depth).unwrap_or(Color::Black);
-      let right = self.b.render_depth(s, i, depth).unwrap_or(Color::Black);
+      let left = self.a.get(s, i)?;
+      let right = self.b.get(s, i)?;
       Some(left.blend(right, f))
     }
-  }
-
-  fn is_transparent(&self) -> bool {
-    self.a.is_transparent() || self.b.is_transparent()
   }
 }

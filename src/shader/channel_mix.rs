@@ -15,15 +15,15 @@ impl ChannelMix {
 }
 
 impl Shader for ChannelMix {
-  fn render_depth(&self, s: &Scene, i: &Incidence, depth: usize) -> Option<Color> {
+  fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
     let c = self.frac.get(s, i);
     if c == Color::Zero {
-      self.b.render_depth(s, i, depth)
+      self.b.render(s, i)
     } else if f == Color::One {
-      self.a.render_depth(s, i, depth)
+      self.a.render(s, i)
     } else {
-      let left = self.a.render_depth(s, i, depth).unwrap_or(Color::Black);
-      let right = self.b.render_depth(s, i, depth).unwrap_or(Color::Black);
+      let left = self.a.render(s, i)?;
+      let right = self.b.render(s, i)?;
       Some(left.blend(right, f))
     }
   }

@@ -26,7 +26,7 @@ impl Object for Shaded {
     fn intersect(&self, ray: &Ray) -> Option<Hit> { self.object.intersect(ray) }
     fn material(&self, pos: V3) -> Cow<Material> { self.object.material(pos) }
     fn const_normal(&self) -> Option<V3> { self.object.const_normal() }
-    fn render_depth(&self, s: &Scene, i: &Incidence, d: usize) -> Option<Color> {
-      self.shader.render_depth(s, i, d)
+    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+      self.shader.render(s, i)
     }
 }

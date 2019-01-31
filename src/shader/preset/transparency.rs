@@ -40,12 +40,8 @@ pub struct Transparency {
 }
 
 impl Shader for Transparency {
-  fn render_depth(&self, s: &Scene, i: &Incidence, d: usize) -> Option<Color> {
-    self.mix.render_depth(s, i, d)
-  }
-
-  fn is_transparent(&self) -> bool {
-    true
+  fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    self.mix.render(s, i)
   }
 }
 
@@ -57,7 +53,7 @@ impl Transparency {
       Refraction { ior: ior2 }
     };
     let frac = fresnel(&ior);
-    let mix = Mix::new(Box::new(refl), Box::new(refr), frac);
+    let mix = Mix::new(refl.into(), refr.into(), frac);
     Self { mix }
   }
 }

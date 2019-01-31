@@ -28,6 +28,7 @@ pub struct Incidence<'r, 'h, 'o> {
   pub ray: &'r Ray,
   pub hit: &'h Hit,
   pub obj: &'o dyn Object,
+  pub depth: usize,
 }
 
 #[derive(Clone)]
@@ -37,24 +38,7 @@ pub enum DynValue<T> {
 }
 
 pub trait Shader {
-  fn render(&self, s: &Scene, i: &Incidence) -> Color {
-    self.render_depth(s, i, 0).unwrap_or(s.ambient)
-  }
-
-  fn render_depth(&self, s: &Scene, i: &Incidence, d: usize) -> Option<Color> {
-    Some(self.render(s, i))
-  }
-
-  fn is_transparent(&self) -> bool {
-    false
-  }
-
-  fn into_dyn_color(self, d: usize) -> DynValue<Option<Color>>
-  where
-    Self: Sized + 'static,
-  {
-    DynValue::from_fn(move |s: &Scene, i: &Incidence| self.render_depth(s, i, d))
-  }
+  fn render(&self, s: &Scene, i: &Incidence) -> Option<Color>;
 }
 
 impl<T> DynValue<T>
@@ -71,7 +55,8 @@ where
   pub fn map<F, U>(self, f: F) -> DynValue<U>
   where
     F: Fn(T) -> U,
-    F: 'static, T: 'static
+    F: 'static,
+    T: 'static,
   {
     DynValue::from_fn(move |s: &Scene, i: &Incidence| f(self.get(s, i)))
   }
@@ -90,5 +75,14 @@ impl<T> DynValue<T> {
 impl<T> From<T> for DynValue<T> {
   fn from(v: T) -> DynValue<T> {
     DynValue::Const(v)
+  }
+}
+
+impl<T: 'static> From<T> for DynValue<Option<Color>>
+where
+  T: Shader,
+{
+  fn from(v: T) -> DynValue<Option<Color>> {
+    DynValue::from_fn(move |s: &Scene, i: &Incidence| v.render(s, i))
   }
 }
