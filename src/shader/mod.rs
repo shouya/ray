@@ -8,20 +8,22 @@ pub mod preset;
 
 pub mod diffusion;
 pub mod glossy;
-pub mod mix;
 pub mod phong;
 pub mod plain;
 pub mod reflection;
 pub mod refraction;
-pub mod sum;
 
 pub use self::diffusion::Diffusion;
 pub use self::glossy::Glossy;
-pub use self::mix::Mix;
 pub use self::phong::Phong;
 pub use self::plain::Plain;
 pub use self::reflection::Reflection;
 pub use self::refraction::Refraction;
+
+pub mod sum;
+pub mod mix;
+
+pub use self::mix::{Mix, ChannelMix};
 pub use self::sum::Sum;
 
 pub struct Incidence<'r, 'h, 'o> {
