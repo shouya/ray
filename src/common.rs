@@ -467,6 +467,8 @@ impl Color {
     pub const White: Color = Color([1.0, 1.0, 1.0]);
     #[allow(dead_code)]
     pub const Black: Color = Color([0.0, 0.0, 0.0]);
+    pub const Zero: Color = Self::Black;
+    pub const One: Color = Self::White;
 
     pub fn from_intensity(i: f32) -> Color {
         Color([i, i, i])
@@ -500,6 +502,15 @@ impl Color {
         Color([r / n, g / n, b / n])
     }
 
+    pub fn channel_blend(&self, rhs: Color, frac: Color) -> Color {
+        let c = frac;
+        Color([
+            self.r() * c.r() + rhs.r() + (1.0 - c.r()),
+            self.g() * c.g() + rhs.g() + (1.0 - c.g()),
+            self.b() * c.b() + rhs.b() + (1.0 - c.b()),
+        ])
+    }
+
     pub fn mix_with<F>(&self, rhs: Color, f: F) -> Color
     where
         F: Fn(f32, f32) -> f32,
@@ -524,6 +535,12 @@ impl Color {
 
     pub fn mult(self, brightness: Color) -> Color {
         self.mix_with(brightness, |a, b| a * b)
+    }
+}
+
+impl PartialEq for Color {
+    fn eq(&self, other: &Color) -> bool {
+        f32_eq(self.r(), other.r()) && f32_eq(self.g(), other.g()) && f32_eq(self.b(), other.b())
     }
 }
 

@@ -61,3 +61,7 @@ impl Transparency {
     Self { mix }
   }
 }
+
+pub fn transparent(reflectivity: f32, ior: f32) -> impl Shader {
+  Transparency::new(reflectivity.into(), ior.into())
+}

@@ -14,7 +14,6 @@ pub mod plain;
 pub mod reflection;
 pub mod refraction;
 pub mod sum;
-pub mod transparency;
 
 pub use self::diffusion::Diffusion;
 pub use self::glossy::Glossy;
@@ -24,7 +23,6 @@ pub use self::plain::Plain;
 pub use self::reflection::Reflection;
 pub use self::refraction::Refraction;
 pub use self::sum::Sum;
-pub use self::transparency::{fresnel, Transparency};
 
 pub struct Incidence<'r, 'h, 'o> {
   pub ray: &'r Ray,
@@ -50,6 +48,13 @@ pub trait Shader {
   fn is_transparent(&self) -> bool {
     false
   }
+
+  fn into_dyn_color(self, d: usize) -> DynValue<Option<Color>>
+  where
+    Self: Sized + 'static,
+  {
+    DynValue::from_fn(move |s: &Scene, i: &Incidence| self.render_depth(s, i, d))
+  }
 }
 
 impl<T> DynValue<T>
@@ -61,6 +66,14 @@ where
       DynValue::Const(value) => value.clone(),
       DynValue::Dyn(f) => f(s, i),
     }
+  }
+
+  pub fn map<F, U>(self, f: F) -> DynValue<U>
+  where
+    F: Fn(T) -> U,
+    F: 'static, T: 'static
+  {
+    DynValue::from_fn(move |s: &Scene, i: &Incidence| f(self.get(s, i)))
   }
 }
 

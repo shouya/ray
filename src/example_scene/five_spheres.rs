@@ -64,7 +64,7 @@ pub fn scene() -> Scene {
     },
     // shader::preset::glass(Color::White),
     // shader::preset::shiny(Color::Green, Color::White, 10.0),
-    shader::Transparency::new(0.5.into(), 1.2.into()),
+    shader::preset::Transparency::new(0.5.into(), 1.2.into()),
   ));
 
   scene.add_object(Shaded::new(
@@ -80,7 +80,7 @@ pub fn scene() -> Scene {
       }),
     )
     .double_sided(true),
-    shader::Transparency::new(1.0.into(), 1.2.into()),
+    shader::preset::Transparency::new(1.0.into(), 1.2.into()),
   ));
 
   let model = ObjModel::from_file("models/torus.obj");

@@ -3,9 +3,11 @@ use object::Material;
 use shader;
 use shader::Shader;
 
-pub fn blank() -> impl Shader {
-  shader::Plain::new(Color::White)
-}
+pub mod simple;
+pub mod transparency;
+
+pub use self::simple::blank;
+pub use self::transparency::Transparency;
 
 pub fn shiny(surface_color: Color, specular_color: Color, specular_index: f32) -> impl Shader {
   let diffuse = shader::Diffusion::new(surface_color.into(), 0.0.into());
