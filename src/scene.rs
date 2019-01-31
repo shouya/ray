@@ -49,7 +49,7 @@ impl Scene {
         Ray::new(orig, dir)
     }
 
-    pub fn nearest_hit<'a>(&'a self, ray: &Ray) -> Option<(&'a Box<Object>, Hit)> {
+    pub fn nearest_hit<'a>(&'a self, ray: &Ray) -> Option<(&'a Box<dyn Object>, Hit)> {
         use std::f32;
         let mut min_dist = f32::INFINITY;
         let mut result = None;

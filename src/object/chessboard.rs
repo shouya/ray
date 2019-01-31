@@ -11,22 +11,23 @@ pub struct ChessBoard {
 
 impl Default for ChessBoard {
     fn default() -> ChessBoard {
-        let material = Material {
+        let base = Material {
             surface_color: Color::Black,
             emission_color: Color::Black,
             ior: 0.0,
+            diffusion: 0.9,
             transparency: 0.0,   // 0: opaque, 1: transparent
             reflexivity: 0.0,    // 0: black body, 1: perfect mirror
-            specular_index: 0.0, // std dev of reflected shadow rays, 0: perfect smooth
+            specular_index: 0.1, // std dev of reflected shadow rays, 0: perfect smooth
             roughness: 0.0,
         };
         let black = Material {
             surface_color: Color::White * 0.3,
-            ..material
+            ..base
         };
         let white = Material {
             surface_color: Color::White * 0.7,
-            ..material
+            ..base
         };
 
         ChessBoard {

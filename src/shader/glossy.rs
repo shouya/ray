@@ -1,6 +1,6 @@
 use common::{Color, Hit, Ray};
 use scene::Scene;
-use shader::diffuse::Diffuse;
+use shader::diffusion::Diffusion;
 use shader::{DynValue, Incidence, Shader};
 
 pub struct Glossy {
@@ -45,7 +45,7 @@ impl Glossy {
 
   pub fn pure_diffusive(&self, s: &Scene, i: &Incidence) -> Color {
     let color = self.color.get(s, i);
-    let diffuse = Diffuse::new(color.into(), 0.0.into());
+    let diffuse = Diffusion::new(color.into(), 0.0.into());
     let diffuse_color = diffuse.render(s, i);
     diffuse_color
   }

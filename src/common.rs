@@ -193,7 +193,7 @@ impl Add<V3> for V3 {
 
 impl Default for V3 {
     fn default() -> Self {
-        V3([0.,0.,0.])
+        V3([0., 0., 0.])
     }
 }
 
@@ -468,6 +468,10 @@ impl Color {
     #[allow(dead_code)]
     pub const Black: Color = Color([0.0, 0.0, 0.0]);
 
+    pub fn from_intensity(i: f32) -> Color {
+        Color([i, i, i])
+    }
+
     pub fn r(&self) -> f32 {
         self.0[0]
     }
@@ -566,7 +570,7 @@ impl Mul<f32> for Color {
 impl Hit {
     pub fn biased(self, amount: f32) -> Hit {
         Hit {
-            pos: self.pos + self.pos * amount,
+            pos: self.pos + self.norm * amount,
             ..self
         }
     }

@@ -4,14 +4,18 @@ use scene::Scene;
 
 pub mod preset;
 
-pub mod diffuse;
+pub mod diffusion;
+pub mod reflection;
+pub mod refraction;
 pub mod phong;
 pub mod glossy;
 pub mod mix;
 pub mod sum;
 pub mod plain;
 
-pub use self::diffuse::Diffuse;
+pub use self::diffusion::Diffusion;
+pub use self::reflection::Reflection;
+pub use self::refraction::Refraction;
 pub use self::phong::Phong;
 pub use self::glossy::Glossy;
 pub use self::mix::Mix;

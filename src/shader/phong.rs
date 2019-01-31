@@ -1,6 +1,6 @@
 use common::{Color, Hit, Ray};
 use scene::Scene;
-use shader::diffuse::Diffuse;
+use shader::diffusion::Diffusion;
 use shader::{DynValue, Incidence, Shader};
 
 pub struct Phong {

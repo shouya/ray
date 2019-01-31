@@ -2,14 +2,14 @@ use super::{DynValue, Incidence, Shader};
 use common::{Color, Hit, Ray};
 use scene::Scene;
 
-pub struct Diffuse {
+pub struct Diffusion {
   pub color: DynValue<Color>,
   pub roughness: DynValue<f32>,
 }
 
-impl Diffuse {
-  pub fn new(color: DynValue<Color>, roughness: DynValue<f32>) -> Diffuse {
-    Diffuse { color, roughness }
+impl Diffusion {
+  pub fn new(color: DynValue<Color>, roughness: DynValue<f32>) -> Self {
+    Self { color, roughness }
   }
 }
 
@@ -18,7 +18,7 @@ const BIAS: f32 = 1e-4;
 // so a scene with no light can still has some color in it.
 const BACKGROUND_INTENSITY: Color = Color([0.03; 3]);
 
-impl Shader for Diffuse {
+impl Shader for Diffusion {
   fn render(&self, s: &Scene, i: &Incidence) -> Color {
     let color = self.color.get(s, i);
     let mut intensity = BACKGROUND_INTENSITY;
