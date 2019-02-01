@@ -1,10 +1,9 @@
 use common::*;
 use obj_model::ObjModel;
 use object::Transform;
-use object::{ChessBoard, Material, Rectangle, Shaded, Sphere, TrigMesh};
+use object::{ChessBoard, Rectangle, Shaded, Sphere, TrigMesh};
 use scene::{Scene, SceneBuilder};
 use shader;
-use std::borrow::Cow;
 
 pub fn scene() -> Scene {
   let mut scene = SceneBuilder::default()
@@ -28,28 +27,18 @@ pub fn scene() -> Scene {
     Sphere {
       c: V3([-2.5, 1.0, -6.0]),
       r: 1.5,
-      material: Material {
-        surface_color: Color::Black,
-        ..Material::Mirror
-      },
     },
     Sphere {
       c: V3([3.5, 1.5, -7.0]),
       r: 1.5,
-      material: Material::FrostedGlass,
     },
     Sphere {
       c: V3([-1.5, 3.5, -12.0]),
       r: 1.5,
-      material: Material::FrostedMirror,
     },
     Sphere {
       c: V3([3.0, 2.5, -12.0]),
       r: 1.5,
-      material: Material {
-        surface_color: Color::Green,
-        ..Material::Solid
-      },
     },
   ];
 
@@ -62,7 +51,6 @@ pub fn scene() -> Scene {
     Sphere {
       c: V3([0.04, -0.52, -4.0]),
       r: 1.5,
-      material: Material::Glass,
     },
     shader::preset::simple_glass(Color::Red, 0.95),
   ));
@@ -72,12 +60,6 @@ pub fn scene() -> Scene {
       V3([2.0, 1.0, -5.0]),
       V3([2.0, -1.6, -5.0]),
       V3([2.1, -1.6, -3.0]),
-      Cow::Owned(Material {
-        surface_color: Color::Red,
-        transparency: 0.4,
-        roughness: 0.005,
-        ..Material::PlaneGlass
-      }),
     )
     .double_sided(true),
     shader::preset::simple_mirror(Color([0.2; 3]))
@@ -86,7 +68,7 @@ pub fn scene() -> Scene {
 
   let model = ObjModel::from_file("models/torus.obj");
   // let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedGlass);
-  let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedMirror);
+  let torus = TrigMesh::from_model(&model.unwrap());
   scene.add_object(torus.translate(V3([0.0, 2.0, -5.0])));
 
   scene.add_object(ChessBoard {

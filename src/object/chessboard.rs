@@ -1,4 +1,4 @@
-use super::{Cow, Material, Object};
+use super::Object;
 use scene::Scene;
 use shader::preset::simple_solid;
 use shader::{DynValue, Incidence};
@@ -14,17 +14,6 @@ pub struct ChessBoard {
 
 impl Default for ChessBoard {
     fn default() -> ChessBoard {
-        let base = Material {
-            surface_color: Color::Black,
-            emission_color: Color::Black,
-            ior: 0.0,
-            diffusion: 0.9,
-            transparency: 0.0,   // 0: opaque, 1: transparent
-            reflexivity: 0.0,    // 0: black body, 1: perfect mirror
-            specular_index: 0.1, // std dev of reflected shadow rays, 0: perfect smooth
-            roughness: 0.0,
-        };
-
         ChessBoard {
             plane: Plane::new(V3::zero(), V3([0.0, 0.0, 1.0])),
             material: (

@@ -11,7 +11,6 @@ pub struct TrigMesh {
   vs: Vec<V3>,
   vns: Option<Vec<V3>>,
   ts: Vec<([I; 3], [I; 3])>,
-  material: Material,
   // we cache the vertices of trigs and the bounding box of the whole object
   cache: RefCell<Option<TrigMeshCache>>,
 }
@@ -33,18 +32,17 @@ struct Cluster {
 }
 
 impl TrigMesh {
-  pub fn new(vs: Vec<V3>, ts: Vec<([I; 3], [I; 3])>, m: Material) -> Self {
+  pub fn new(vs: Vec<V3>, ts: Vec<([I; 3], [I; 3])>) -> Self {
     TrigMesh {
       vs,
       ts,
       vns: None,
       cache: RefCell::new(None),
-      material: m,
     }
   }
 
-  pub fn from_model(model: &ObjModel, m: Material) -> Self {
-    let mut mesh = TrigMesh::new(vec![], vec![], m);
+  pub fn from_model(model: &ObjModel) -> Self {
+    let mut mesh = TrigMesh::new(vec![], vec![]);
     let mut vns = Vec::new();
 
     for v in model.v.iter() {
@@ -107,10 +105,6 @@ impl Object for TrigMesh {
   fn intersect(&self, ray: &Ray) -> Option<Hit> {
     let cache = self.get_cache();
     cache.cluster.intersect(ray)
-  }
-
-  fn material(&self, _pos: V3) -> Cow<Material> {
-    Cow::Borrowed(&self.material)
   }
 }
 

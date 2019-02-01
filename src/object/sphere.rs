@@ -1,11 +1,9 @@
-use super::{Cow, Hit, Material, Object, Ray, V3};
-use shader::Shader;
+use super::{Hit, Object, Ray, V3};
 
 #[derive(Debug, Clone)]
 pub struct Sphere {
     pub c: V3,
     pub r: f32,
-    pub material: Material,
 }
 
 impl Object for Sphere {
@@ -47,9 +45,5 @@ impl Object for Sphere {
         } else {
             None
         }
-    }
-
-    fn material(&self, _pos: V3) -> Cow<Material> {
-        Cow::Borrowed(&self.material)
     }
 }

@@ -2,17 +2,15 @@ use super::*;
 use common::*;
 
 #[derive(Debug, Clone)]
-pub struct Triangle<'a> {
+pub struct Triangle {
     pub trig: Trig,
-    pub material: Cow<'a, Material>,
     pub double_sided: bool,
 }
 
-impl<'a> Triangle<'a> {
-    pub fn new(a: V3, b: V3, c: V3, m: Cow<'a, Material>) -> Self {
+impl Triangle {
+    pub fn new(a: V3, b: V3, c: V3) -> Self {
         Triangle {
             trig: Trig(a, b, c),
-            material: m,
             double_sided: false,
         }
     }
@@ -23,7 +21,7 @@ impl<'a> Triangle<'a> {
     }
 }
 
-impl<'a> Object for Triangle<'a> {
+impl Object for Triangle {
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
         let pos = self.trig.intersect(ray)?;
 
@@ -40,10 +38,6 @@ impl<'a> Object for Triangle<'a> {
         })
     }
 
-    fn material(&self, _pos: V3) -> Cow<Material> {
-        Cow::Borrowed(&self.material)
-    }
-
     fn const_normal(&self) -> Option<V3> {
         if self.double_sided {
             None
@@ -54,24 +48,24 @@ impl<'a> Object for Triangle<'a> {
 }
 
 #[derive(Debug, Clone)]
-pub struct Rectangle<'a> {
-    pub t1: Triangle<'a>,
-    pub t2: Triangle<'a>,
+pub struct Rectangle {
+    pub t1: Triangle,
+    pub t2: Triangle,
 }
 
-impl<'a> Rectangle<'a> {
+impl Rectangle {
     // follows CCW order, b is the right angle
     // c -> +--+ <- b
     //       \ |
     //      .  + <- a
-    pub fn new(a: V3, b: V3, c: V3, m: Cow<'a, Material>) -> Self {
+    pub fn new(a: V3, b: V3, c: V3) -> Self {
         let ba = a - b;
         let bc = c - b;
         assert!(f32_eq(ba.dot(bc), 0.0));
 
         let d = c + ba;
-        let t1 = Triangle::new(a, b, c, m.clone());
-        let t2 = Triangle::new(c, d, a, m);
+        let t1 = Triangle::new(a, b, c);
+        let t2 = Triangle::new(c, d, a);
 
         Rectangle {
             t1,
@@ -86,13 +80,9 @@ impl<'a> Rectangle<'a> {
     }
 }
 
-impl<'a> Object for Rectangle<'a> {
+impl<'a> Object for Rectangle {
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
         self.t1.intersect(ray).or_else(|| self.t2.intersect(ray))
-    }
-
-    fn material(&self, _pos: V3) -> Cow<Material> {
-        self.t1.material(_pos)
     }
 
     fn const_normal(&self) -> Option<V3> {
