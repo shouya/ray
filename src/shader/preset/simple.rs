@@ -43,11 +43,11 @@ pub fn simple_solid(color: Color) -> impl Shader {
 }
 
 pub fn simple_glass(color: Color, transparency: f32) -> impl Shader {
-  glass(color, 125.0, transparency, 0.8, 1.5)
+  glass(color, 25.0, transparency, 0.8, 1.5)
 }
 
 pub fn simple_mirror(color: Color) -> impl Shader {
-  mirror(color, 1425.0, 0.5)
+  mirror(color, 45.0, 0.9)
 }
 
 //pub fn diffusive(color: Color) -> impl Shader {

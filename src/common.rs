@@ -462,10 +462,13 @@ impl Neg for Ray {
     fn neg(self) -> Ray {
         Ray {
             orig: self.orig,
-            dir: -self.dir
+            dir: -self.dir,
         }
     }
 }
+
+extern crate random_color;
+use self::random_color::RandomColor;
 
 #[allow(non_upper_case_globals)]
 impl Color {
@@ -547,6 +550,15 @@ impl Color {
 
     pub fn mult(self, brightness: Color) -> Color {
         self.mix_with(brightness, |a, b| a * b)
+    }
+
+    pub fn from_rgb(hex: [u32; 3]) -> Self {
+        let [r, g, b] = hex;
+        Self([r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0])
+    }
+
+    pub fn random() -> Self {
+        Color::from_rgb(RandomColor::new().to_rgb_array())
     }
 }
 

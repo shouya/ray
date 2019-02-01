@@ -54,7 +54,8 @@ pub fn scene() -> Scene {
   ];
 
   for s in spheres.into_iter() {
-    scene.add_object(Shaded::new(s, shader::preset::solid(Color::Green, 3.0)));
+    let color = Color::random();
+    scene.add_object(Shaded::new(s, shader::preset::simple_solid(color)));
   }
 
   scene.add_object(Shaded::new(
@@ -63,7 +64,7 @@ pub fn scene() -> Scene {
       r: 1.5,
       material: Material::Glass,
     },
-    shader::preset::simple_glass(Color::Red, 0.90),
+    shader::preset::simple_glass(Color::Red, 0.95),
   ));
 
   scene.add_object(Shaded::new(
@@ -83,10 +84,10 @@ pub fn scene() -> Scene {
     // shader::preset::Transparency::new(1.0.into(), 1.2.into()),
   ));
 
-  // let model = ObjModel::from_file("models/torus.obj");
-  // // let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedGlass);
-  // let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedMirror);
-  // scene.add_object(torus.translate(V3([0.0, 2.0, -5.0])));
+  let model = ObjModel::from_file("models/torus.obj");
+  // let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedGlass);
+  let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedMirror);
+  scene.add_object(torus.translate(V3([0.0, 2.0, -5.0])));
 
   scene.add_object(ChessBoard {
     plane: Plane::new(V3([0.0, -1.6, 0.0]), V3([0.0, 1.0, 0.0])),

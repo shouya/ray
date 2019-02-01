@@ -1,6 +1,6 @@
 use super::{dist, Color, ImageBuffer, Ray, Rgb, RgbImage, Scene};
 use shader::Incidence;
-extern crate indicatif;
+extern crate pbr;
 
 fn trace_ray(s: &Scene, ray: Ray) -> Color {
   let hit = s.nearest_hit(&ray);
@@ -13,7 +13,7 @@ fn trace_ray(s: &Scene, ray: Ray) -> Color {
     obj: obj.as_ref(),
     hit: &hit,
     ray: &ray,
-    depth: 0
+    depth: 0,
   };
   let color = obj.render(s, &inci);
 
@@ -23,21 +23,16 @@ fn trace_ray(s: &Scene, ray: Ray) -> Color {
 #[allow(dead_code)]
 pub fn trace(s: Scene, w: u32, h: u32) -> RgbImage {
   let mut film = ImageBuffer::new(w, h);
-  let pb = indicatif::ProgressBar::new((w * h).into());
-  pb.set_draw_delta(w.into());
-  pb.set_style(
-    indicatif::ProgressStyle::default_bar()
-      .template("[{elapsed_precise}] {wide_bar:.cyan} {percent}%")
-      .progress_chars("=>-"),
-  );
+  let mut pb = pbr::ProgressBar::new((w * h).into());
+  pb.set_max_refresh_rate(Some(std::time::Duration::from_millis(100)));
 
   for (x, y, pixel) in film.enumerate_pixels_mut() {
     let ray = s.generate_ray(x, y, w, h);
-    pb.tick();
-    let color = trace_ray(&s, ray).regularize();
+    let color = s.trace_ray(&ray, 0).unwrap_or(Color::Green).regularize();
     *pixel = Rgb(color.into());
+    pb.inc();
   }
-  pb.finish_with_message("done");
+  pb.finish();
 
   film
 }
