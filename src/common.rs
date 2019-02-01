@@ -84,6 +84,7 @@ pub fn dist2(a: V3, b: V3) -> f32 {
     let d = b - a;
     d.dot(d)
 }
+#[allow(unused)]
 pub fn dist(a: V3, b: V3) -> f32 {
     dist2(a, b).sqrt()
 }
@@ -92,6 +93,7 @@ pub fn f32_eq(a: f32, b: f32) -> bool {
     (a - b).abs() < F32_EPSILON
 }
 
+#[allow(unused)]
 pub fn f32_ge(a: f32, b: f32) -> bool {
     a > b || f32_eq(a, b)
 }
@@ -350,6 +352,7 @@ impl Trig {
         }
     }
 
+    #[allow(unused)]
     pub fn flip(&self) -> Trig {
         Trig(self.a(), self.c(), self.b())
     }

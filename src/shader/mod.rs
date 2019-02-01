@@ -88,6 +88,8 @@ impl<T> From<T> for DynValue<T> {
     DynValue::Const(v)
   }
 }
+
+#[allow(unused)]
 struct DynValueShader(DynValue<Option<Color>>);
 
 impl Shader for DynValueShader {
@@ -97,12 +99,14 @@ impl Shader for DynValueShader {
 }
 
 impl DynValue<Color> {
+  #[allow(unused)]
   fn into_shader(self) -> DynValueShader {
     DynValueShader(self.map(|x| Some(x)))
   }
 }
 
 impl DynValue<Option<Color>> {
+  #[allow(unused)]
   fn into_shader(self) -> DynValueShader {
     DynValueShader(self)
   }

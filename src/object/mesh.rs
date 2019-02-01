@@ -2,7 +2,6 @@ use super::*;
 use obj_model::ObjModel;
 use std::cell::Ref;
 use std::cell::RefCell;
-use std::ops::Deref;
 
 // index type, if more than 65535 points are needed, use u32 here
 type I = u16;

@@ -1,8 +1,9 @@
 use common::Color;
 use shader::{
-  ChannelMix, Diffusion, DynValue, Incidence, Mix, Phong, Plain, Reflection, Refraction, Shader,
+  ChannelMix, Diffusion, DynValue, Mix, Phong, Plain, Reflection, Shader,
 };
 
+#[allow(unused)]
 pub fn blank() -> impl Shader {
   Plain::new(Color::White)
 }

@@ -1,7 +1,3 @@
-use common::Color;
-use shader;
-use shader::Shader;
-
 mod simple;
 mod transparent;
 

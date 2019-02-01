@@ -1,5 +1,4 @@
 use super::*;
-use common::*;
 
 #[derive(Debug, Clone)]
 pub struct Triangle {

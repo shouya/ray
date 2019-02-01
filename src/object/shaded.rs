@@ -1,5 +1,4 @@
 use common::*;
-use std::borrow::Cow;
 use object::Object;
 use shader::{Shader, Incidence};
 use scene::Scene;
@@ -15,10 +14,6 @@ impl Shaded {
       object: Box::new(object),
       shader: Box::new(shader),
     }
-  }
-
-  pub fn new_boxed(object: Box<dyn Object>, shader: Box<dyn Shader>) -> Shaded {
-    Shaded { object, shader }
   }
 }
 

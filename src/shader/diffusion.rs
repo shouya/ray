@@ -1,5 +1,5 @@
 use super::{DynValue, Incidence, Shader};
-use common::{Color, Hit, Ray};
+use common::{Color, Ray};
 use scene::Scene;
 
 pub struct Diffusion {

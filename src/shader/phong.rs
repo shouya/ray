@@ -1,6 +1,5 @@
-use common::{Color, Hit, Ray};
+use common::{Color, Ray};
 use scene::Scene;
-use shader::diffusion::Diffusion;
 use shader::{DynValue, Incidence, Shader};
 
 pub struct Phong {
@@ -18,7 +17,7 @@ const BIAS: f32 = 1e-4;
 impl Shader for Phong {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
     let p = self.specular_index.get(s, i);
-    let Incidence { hit, ray, obj, .. } = i;
+    let Incidence { hit, ray, .. } = i;
     let mut intensity = Color::Black;
 
     for light in s.lights.iter() {

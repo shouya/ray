@@ -1,12 +1,14 @@
-use shader::{Shader, Incidence};
 use common::Color;
 use scene::Scene;
+use shader::{Incidence, Shader};
 
+#[allow(unused)]
 pub struct Plain {
-  color: Color
+  color: Color,
 }
 
 impl Plain {
+  #[allow(unused)]
   pub fn new(color: Color) -> Plain {
     Plain { color }
   }
