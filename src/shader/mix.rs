@@ -1,15 +1,15 @@
-use super::{DynValue, Incidence, Shader};
+use super::{DynValue, ShaderType, Incidence, Shader};
 use common::Color;
 use scene::Scene;
 
 pub struct Mix {
   frac: DynValue<f32>,
-  a: DynValue<Option<Color>>,
-  b: DynValue<Option<Color>>,
+  a: ShaderType,
+  b: ShaderType,
 }
 
 impl Mix {
-  pub fn new(a: DynValue<Option<Color>>, b: DynValue<Option<Color>>, frac: DynValue<f32>) -> Self {
+  pub fn new(a: ShaderType, b: ShaderType, frac: DynValue<f32>) -> Self {
     Self { a, b, frac }
   }
 }
@@ -31,14 +31,14 @@ impl Shader for Mix {
 
 pub struct ChannelMix {
   frac: DynValue<Color>,
-  a: DynValue<Option<Color>>,
-  b: DynValue<Option<Color>>,
+  a: ShaderType,
+  b: ShaderType,
 }
 
 impl ChannelMix {
   pub fn new(
-    a: DynValue<Option<Color>>,
-    b: DynValue<Option<Color>>,
+    a: ShaderType,
+    b: ShaderType,
     frac: DynValue<Color>,
   ) -> Self {
     Self { a, b, frac }
@@ -62,13 +62,13 @@ impl Shader for ChannelMix {
 
 #[allow(unused)]
 pub struct Sum {
-  a: DynValue<Option<Color>>,
-  b: DynValue<Option<Color>>,
+  a: ShaderType,
+  b: ShaderType,
 }
 
 impl Sum {
   #[allow(unused)]
-  pub fn new(a: DynValue<Option<Color>>, b: DynValue<Option<Color>>) -> Sum {
+  pub fn new(a: ShaderType, b: ShaderType) -> Sum {
     Sum { a, b }
   }
 }

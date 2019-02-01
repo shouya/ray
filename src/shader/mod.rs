@@ -4,8 +4,8 @@ use scene::Scene;
 
 use std::rc::Rc;
 
-pub mod compound;
 pub mod base;
+pub mod compound;
 pub mod mix;
 
 pub use self::base::diffusion::Diffusion;
@@ -28,6 +28,8 @@ pub struct Incidence<'r, 'h, 'o> {
 pub trait Shader {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color>;
 }
+
+pub type ShaderType = DynValue<Option<Color>>;
 
 #[derive(Clone)]
 pub enum DynValue<T> {
@@ -66,11 +68,11 @@ impl<T> DynValue<T> {
   }
 }
 
-impl<T> From<T> for DynValue<Option<Color>>
+impl<T> From<T> for ShaderType
 where
   T: Shader + 'static,
 {
-  fn from(v: T) -> DynValue<Option<Color>> {
+  fn from(v: T) -> ShaderType {
     DynValue::from_fn(move |s: &Scene, i: &Incidence| v.render(s, i))
   }
 }
@@ -82,7 +84,7 @@ impl<T> From<T> for DynValue<T> {
 }
 
 #[allow(unused)]
-struct DynValueShader(DynValue<Option<Color>>);
+struct DynValueShader(ShaderType);
 
 impl Shader for DynValueShader {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
@@ -97,7 +99,7 @@ impl DynValue<Color> {
   }
 }
 
-impl DynValue<Option<Color>> {
+impl ShaderType {
   #[allow(unused)]
   fn into_shader(self) -> DynValueShader {
     DynValueShader(self)

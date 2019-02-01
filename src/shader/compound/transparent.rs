@@ -1,6 +1,6 @@
 use common::{Color, Hit, Ray};
 use scene::Scene;
-use shader::{DynValue, Incidence, Mix, Reflection, Refraction, Shader};
+use shader::{DynValue, ShaderType, Incidence, Mix, Reflection, Refraction, Shader};
 
 // return reflection ratio
 fn fresnel_internal(ray: &Ray, hit: &Hit, ior: f32) -> f32 {
@@ -36,8 +36,8 @@ pub fn fresnel(ior: &DynValue<f32>) -> DynValue<f32> {
 }
 
 pub struct Transparency {
-  refr: DynValue<Option<Color>>,
-  mix: DynValue<Option<Color>>,
+  refr: ShaderType,
+  mix: ShaderType,
 }
 
 impl Shader for Transparency {
@@ -52,8 +52,8 @@ impl Shader for Transparency {
 
 impl Transparency {
   pub fn new(reflectivity: f32, ior: DynValue<f32>) -> Self {
-    let refl: DynValue<Option<Color>> = Reflection.into();
-    let refr: DynValue<Option<Color>> = Refraction { ior: ior.clone() }.into();
+    let refl: ShaderType = Reflection.into();
+    let refr: ShaderType = Refraction { ior: ior.clone() }.into();
     let frac = fresnel(&ior);
 
     let mix = Mix::new(refl, refr.clone(), frac.map(move |f| f * reflectivity)).into();
@@ -62,6 +62,6 @@ impl Transparency {
   }
 }
 
-pub fn transparent(reflectivity: f32, ior: f32) -> impl Shader {
-  Transparency::new(reflectivity, ior.into())
+pub fn transparent(reflectivity: f32, ior: f32) -> ShaderType {
+  Transparency::new(reflectivity, ior.into()).into()
 }

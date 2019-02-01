@@ -1,6 +1,6 @@
 use common::*;
 use scene::Scene;
-use shader::Incidence;
+use shader::{Incidence, ShaderType};
 
 pub trait Object {
     // returns hit and norm
@@ -13,6 +13,13 @@ pub trait Object {
 
     fn render(&self, _s: &Scene, _i: &Incidence) -> Option<Color> {
         Some(Color::Blue)
+    }
+
+    fn shaded(self, shader: ShaderType) -> Shaded
+    where
+        Self: Sized + 'static,
+    {
+        Shaded::new(self, shader)
     }
 }
 

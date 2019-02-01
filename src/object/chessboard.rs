@@ -1,14 +1,14 @@
 use super::Object;
 use scene::Scene;
 use shader::simple_solid;
-use shader::{DynValue, Incidence};
+use shader::{ShaderType, Incidence};
 
 use common::*;
 
 #[derive(Clone)]
 pub struct ChessBoard {
     pub plane: Plane,
-    pub material: (DynValue<Option<Color>>, DynValue<Option<Color>>),
+    pub material: (ShaderType, ShaderType),
     pub cell_size: f32,
 }
 
