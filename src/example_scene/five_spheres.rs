@@ -17,12 +17,12 @@ pub fn scene() -> Scene {
     .camera(V3::zero())
     .projection(Projection::Perspective)
     .ambient(Color::White * 0.8)
-    .max_depth(5)
+    .max_depth(15)
     .build()
     .unwrap();
 
-  scene.add_white_light(V3([-5.0, 10.0, 0.0]), 0.7);
-  scene.add_white_light(V3([5.0, -10.0, 0.0]), 0.7);
+  scene.add_white_light(V3([-5.0, 10.0, 0.0]), 0.4);
+  scene.add_white_light(V3([2.0, 10.0, -10.0]), 0.4);
 
   let spheres = vec![
     Sphere {
@@ -59,12 +59,11 @@ pub fn scene() -> Scene {
 
   scene.add_object(Shaded::new(
     Sphere {
-      c: V3([0.0, -0.5, -7.0]),
+      c: V3([0.04, -0.52, -4.0]),
       r: 1.5,
       material: Material::Glass,
     },
-    shader::preset::simple_glass(Color::Red, 0.9),
-    // shader::Refraction { ior: 1.01.into() }
+    shader::preset::simple_glass(Color::Red, 0.90),
   ));
 
   scene.add_object(Shaded::new(
@@ -80,7 +79,8 @@ pub fn scene() -> Scene {
       }),
     )
     .double_sided(true),
-    shader::preset::Transparency::new(1.0.into(), 1.2.into()),
+    shader::preset::simple_mirror(Color([0.2; 3]))
+    // shader::preset::Transparency::new(1.0.into(), 1.2.into()),
   ));
 
   // let model = ObjModel::from_file("models/torus.obj");

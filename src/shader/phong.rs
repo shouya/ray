@@ -19,7 +19,6 @@ impl Shader for Phong {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
     let p = self.specular_index.get(s, i);
     let Incidence { hit, ray, obj, .. } = i;
-    let sight = -ray.dir;
     let mut intensity = Color::Black;
 
     for light in s.lights.iter() {
@@ -27,9 +26,9 @@ impl Shader for Phong {
       let shadowray = Ray::new(hit.pos, shadowray_dir).biased(BIAS);
 
       if !s.is_blocked(&shadowray) {
-        let angle = shadowray_dir.norm().dot(hit.norm).max(0.0);
-        let h = (sight + shadowray_dir).norm();
-        intensity = intensity + h.dot(hit.norm).max(0.0).powf(p);
+        let refl_ray = shadowray.reflect(hit);
+        let angle = refl_ray.dir.dot(ray.dir);
+        intensity = intensity + angle.max(0.0).powf(p);
       }
     }
 

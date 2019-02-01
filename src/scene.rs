@@ -14,6 +14,8 @@ pub struct Scene {
     pub ambient: Color,
     #[builder(setter(skip))]
     pub lights: Vec<PointLight>,
+    #[builder(default = "Color([0.2;3])")]
+    pub background_light: Color,
     #[builder(default = "5")]
     pub max_depth: usize,
 }

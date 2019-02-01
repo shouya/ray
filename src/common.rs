@@ -389,9 +389,10 @@ impl Ray {
     pub fn refract(&self, hit: &Hit, ior: f32) -> Ray {
         use std::mem;
 
-        let mut cosi = hit.norm.dot(self.dir);
-        let (mut etai, mut etat) = (1.0, ior);
+        let i = self.dir;
         let mut n = hit.norm;
+        let mut cosi = n.dot(i).max(-1.0).min(1.0);
+        let (mut etai, mut etat) = (1.0, ior);
         if cosi < 0.0 {
             cosi = -cosi;
         } else {
@@ -400,14 +401,14 @@ impl Ray {
         }
 
         let eta = etai / etat;
-        let sint2 = eta * eta * (1.0 - cosi * cosi);
-        let trans = 1.0 - sint2;
-        let dir = if trans < 0.0 {
+        let k = 1.0 - eta * eta * (1.0 - cosi * cosi);
+        let dir = if k < 0.0 {
             // full internal refl
-            V3::zero()
+            V3([1.0, 0.0, 0.0])
         } else {
-            self.dir * eta + n * (eta * cosi - trans.sqrt())
+            i * eta + n * (eta * cosi - k.sqrt())
         };
+
         Ray::new(hit.pos, dir)
     }
 
@@ -456,6 +457,16 @@ impl Add<V3> for Ray {
     }
 }
 
+impl Neg for Ray {
+    type Output = Ray;
+    fn neg(self) -> Ray {
+        Ray {
+            orig: self.orig,
+            dir: -self.dir
+        }
+    }
+}
+
 #[allow(non_upper_case_globals)]
 impl Color {
     #[allow(dead_code)]
@@ -485,10 +496,10 @@ impl Color {
         self.0[2]
     }
 
-    // transparency: 0: all self, 1: all rhs
-    pub fn blend(&self, rhs: Color, transparency: f32) -> Color {
-        let (t0, t1) = (transparency, 1.0 - transparency);
-        self.mix_with(rhs, |l, r| r * t0 + l * t1)
+    // ratio: 1: all self, 0: all rhs
+    pub fn blend(&self, rhs: Color, ratio: f32) -> Color {
+        let (t0, t1) = (ratio, 1.0 - ratio);
+        self.mix_with(rhs, |l, r| l * t0 + r * t1)
     }
 
     pub fn blend_all(colors: &[Color]) -> Color {

@@ -17,7 +17,7 @@ const BIAS: f32 = 1e-4;
 impl Shader for Diffusion {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
     let color = self.color.get(s, i);
-    let mut intensity = Color::Black;
+    let mut intensity = s.background_light;
     let Incidence { hit, .. } = i;
 
     for light in s.lights.iter() {

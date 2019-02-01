@@ -36,29 +36,29 @@ pub fn fresnel(ior: &DynValue<f32>) -> DynValue<f32> {
 }
 
 pub struct Transparency {
-  mix: Mix,
+  refr: DynValue<Option<Color>>,
+  mix: DynValue<Option<Color>>,
 }
 
 impl Shader for Transparency {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
-    self.mix.render(s, i)
+    if i.hit.inside {
+      return self.refr.get(s, i);
+    } else {
+      return self.mix.get(s, i);
+    }
   }
 }
 
 impl Transparency {
   pub fn new(reflectivity: f32, ior: DynValue<f32>) -> Self {
     let refl: DynValue<Option<Color>> = Reflection.into();
-    let refr = {
-      let ior2 = ior.clone();
-      Refraction { ior: ior2 }
-    };
+    let refr: DynValue<Option<Color>> = Refraction { ior: ior.clone() }.into();
     let frac = fresnel(&ior);
-    let mix = Mix::new(
-      refl.map(move |c| c.map(|c| c * reflectivity)),
-      refr.into(),
-      frac,
-    );
-    Self { mix }
+
+    let mix = Mix::new(refl, refr.clone(), frac.map(move |f| f * reflectivity)).into();
+
+    Self { refr, mix }
   }
 }
 

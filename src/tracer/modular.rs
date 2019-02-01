@@ -17,7 +17,7 @@ fn trace_ray(s: &Scene, ray: Ray) -> Color {
   };
   let color = obj.render(s, &inci);
 
-  color.unwrap_or(s.ambient)
+  color.unwrap_or(Color::Green)
 }
 
 #[allow(dead_code)]
