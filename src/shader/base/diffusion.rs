@@ -1,6 +1,6 @@
-use super::{DynValue, Incidence, Shader};
 use common::{Color, Ray};
 use scene::Scene;
+use shader::{DynValue, Incidence, Shader};
 
 pub struct Diffusion {
   pub color: DynValue<Color>,

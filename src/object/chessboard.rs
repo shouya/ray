@@ -1,6 +1,6 @@
 use super::Object;
 use scene::Scene;
-use shader::preset::simple_solid;
+use shader::simple_solid;
 use shader::{DynValue, Incidence};
 
 use common::*;

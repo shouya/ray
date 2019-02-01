@@ -19,7 +19,7 @@ pub fn solid(color: Color, specular_index: f32) -> impl Shader {
   )
 }
 
-use shader::preset::transparent;
+use super::transparent;
 
 pub fn glass(
   color: Color,
@@ -38,18 +38,3 @@ pub fn mirror(color: Color, specular_index: f32, reflectivity: f32) -> impl Shad
   let refl = Reflection;
   Mix::new(refl.into(), solid_.into(), reflectivity.into())
 }
-
-pub fn simple_solid(color: Color) -> impl Shader {
-  solid(color, 10.0)
-}
-
-pub fn simple_glass(color: Color, transparency: f32) -> impl Shader {
-  glass(color, 25.0, transparency, 0.8, 1.5)
-}
-
-pub fn simple_mirror(color: Color) -> impl Shader {
-  mirror(color, 45.0, 0.9)
-}
-
-//pub fn diffusive(color: Color) -> impl Shader {
-//}

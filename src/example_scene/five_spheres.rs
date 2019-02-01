@@ -44,7 +44,7 @@ pub fn scene() -> Scene {
 
   for s in spheres.into_iter() {
     let color = Color::random();
-    scene.add_object(Shaded::new(s, shader::preset::simple_solid(color)));
+    scene.add_object(Shaded::new(s, shader::simple_solid(color)));
   }
 
   scene.add_object(Shaded::new(
@@ -52,7 +52,7 @@ pub fn scene() -> Scene {
       c: V3([0.04, -0.52, -4.0]),
       r: 1.5,
     },
-    shader::preset::simple_glass(Color::Red, 0.95),
+    shader::simple_glass(Color::Red, 0.95),
   ));
 
   scene.add_object(Shaded::new(
@@ -62,7 +62,7 @@ pub fn scene() -> Scene {
       V3([2.1, -1.6, -3.0]),
     )
     .double_sided(true),
-    shader::preset::simple_mirror(Color([0.2; 3]))
+    shader::simple_mirror(Color([0.2; 3]))
     // shader::preset::Transparency::new(1.0.into(), 1.2.into()),
   ));
 
