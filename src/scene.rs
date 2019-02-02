@@ -97,6 +97,12 @@ impl Scene {
                     continue;
                 }
             }
+
+            if let Some(bound) = obj.bound() {
+                if !bound.intersect(&ray) {
+                    continue;
+                }
+            }
             if let Some(hit) = obj.intersect(&ray) {
                 if dist2(hit.pos, ray.orig) > min_dist {
                     continue;

@@ -21,6 +21,11 @@ pub trait Object {
     {
         Shaded::new(self, shader)
     }
+
+    // accelerate computation when intersection is slow to compute
+    fn bound(&self) -> Option<Bound> {
+        None
+    }
 }
 
 pub trait Transform {

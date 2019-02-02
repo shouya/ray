@@ -80,6 +80,17 @@ pub struct BoundingBox {
     pub max: V3,
 }
 
+#[derive(Debug, Clone)]
+pub struct BoundingSphere {
+    pub c: V3,
+    pub r: f32,
+}
+
+pub enum Bound {
+    BoundingBox(BoundingBox),
+    BoundingSphere(BoundingSphere),
+}
+
 pub fn dist2(a: V3, b: V3) -> f32 {
     let d = b - a;
     d.dot(d)
@@ -694,6 +705,46 @@ impl BoundingBox {
             return false;
         }
         true
+    }
+}
+
+impl BoundingSphere {
+    pub fn intersect(&self, ray: &Ray) -> bool {
+        let l = self.c - ray.orig;
+        let tc = l.dot(ray.dir);
+
+        if tc < 0.0 {
+            return false;
+        }
+
+        let d2 = l.dot(l) - tc * tc;
+        let r2 = self.r * self.r;
+
+        if d2 > r2 {
+            return false;
+        }
+
+        let t1c = (r2 - d2).sqrt();
+        let t1 = tc - t1c;
+        let t2 = tc + t1c;
+
+        if (t1 < 0.0) && (t2 > 0.0) || (t1 > 0.0 && t2 < 0.0) {
+            true
+        } else if t1 > 0.0 && t2 > 0.0 {
+            true
+        } else {
+            false
+        }
+    }
+}
+
+impl Bound {
+    pub fn intersect(&self, ray: &Ray) -> bool {
+        use self::Bound::*;
+        match self {
+            BoundingBox(x) => x.intersect(ray),
+            BoundingSphere(x) => x.intersect(ray),
+        }
     }
 }
 
