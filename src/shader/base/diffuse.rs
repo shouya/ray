@@ -2,11 +2,11 @@ use common::{Color, Ray};
 use scene::Scene;
 use shader::{DynValue, Incidence, Shader};
 
-pub struct Diffusion {
+pub struct Diffuse {
   pub color: DynValue<Color>,
 }
 
-impl Diffusion {
+impl Diffuse {
   pub fn new(color: DynValue<Color>) -> Self {
     Self { color }
   }
@@ -14,7 +14,7 @@ impl Diffusion {
 
 const BIAS: f32 = 1e-4;
 
-impl Shader for Diffusion {
+impl Shader for Diffuse {
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
     let color = self.color.get(s, i);
     let mut intensity = s.background_light;

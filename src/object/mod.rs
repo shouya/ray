@@ -45,4 +45,7 @@ pub use self::sphere::Sphere;
 pub use self::triangle::{Rectangle, Triangle};
 
 pub mod shaded;
+pub mod transformed;
+
 pub use self::shaded::Shaded;
+pub use self::transformed::{Rotated, Scaled, Translated};

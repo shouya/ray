@@ -1,7 +1,7 @@
 use common::*;
 use obj_model::ObjModel;
-use object::Transform;
 use object::{ChessBoard, Rectangle, Shaded, Sphere, TrigMesh};
+use object::{Object, Transform};
 use scene::{Scene, SceneBuilder};
 use shader;
 
@@ -44,32 +44,35 @@ pub fn scene() -> Scene {
 
   for s in spheres.into_iter() {
     let color = Color::random();
-    scene.add_object(Shaded::new(s, shader::simple_solid(color)));
+    scene.add_object(s.shaded(shader::simple_solid(color)));
   }
 
-  scene.add_object(Shaded::new(
+  scene.add_object(
     Sphere {
       c: V3([0.04, -0.52, -4.0]),
       r: 1.5,
-    },
-    shader::simple_glass(Color::Red, 0.95),
-  ));
+    }
+    .shaded(shader::simple_glass(Color::Red, 0.95)),
+  );
 
-  scene.add_object(Shaded::new(
+  scene.add_object(
     Rectangle::new(
       V3([2.0, 1.0, -5.0]),
       V3([2.0, -1.6, -5.0]),
       V3([2.1, -1.6, -3.0]),
     )
-    .double_sided(true),
-    shader::simple_mirror(Color([0.2; 3]))
-    // shader::preset::Transparency::new(1.0.into(), 1.2.into()),
-  ));
+    .double_sided(true)
+    .shaded(shader::simple_mirror(Color([0.2; 3]))),
+  );
 
   let model = ObjModel::from_file("models/torus.obj");
   // let torus = TrigMesh::from_model(&model.unwrap(), Material::FrostedGlass);
   let torus = TrigMesh::from_model(&model.unwrap());
-  scene.add_object(torus.translate(V3([0.0, 2.0, -5.0])));
+  scene.add_object(
+    torus
+      .translate(V3([0.0, 2.0, -5.0]))
+      .shaded(shader::simple_glass(Color::Blue, 0.95)),
+  );
 
   scene.add_object(ChessBoard {
     plane: Plane::new(V3([0.0, -1.6, 0.0]), V3([0.0, 1.0, 0.0])),

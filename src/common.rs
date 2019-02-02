@@ -12,6 +12,10 @@ pub struct V3(pub [f32; 3]);
 #[derive(Debug, Clone, Copy)]
 pub struct V2(pub [f32; 2]);
 
+// Transformation matrix
+#[derive(Debug, Clone, Copy)]
+pub struct M4(pub [[f32; 4]; 4]);
+
 // V3 with normal
 #[derive(Debug, Clone, Copy)]
 pub struct V3N {
@@ -121,6 +125,10 @@ impl V2 {
     }
 }
 
+// ray uses right hand side coordinate system:
+// positive directions:
+//  X - right, Y - up, Z - out of screen
+// CCW rotations are positive
 impl V3 {
     pub fn x(&self) -> f32 {
         self.0[0]
@@ -214,6 +222,157 @@ impl Default for V3 {
 impl PartialEq for V3 {
     fn eq(&self, other: &V3) -> bool {
         f32_eq(self.x(), other.x()) && f32_eq(self.y(), other.y()) && f32_eq(self.z(), other.z())
+    }
+}
+
+impl M4 {
+    pub fn new_id() -> M4 {
+        M4([
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ])
+    }
+
+    pub fn new_translation(v: V3) -> M4 {
+        M4([
+            [1.0, 0.0, 0.0, v.x()],
+            [0.0, 1.0, 0.0, v.y()],
+            [0.0, 0.0, 1.0, v.z()],
+            [0.0, 0.0, 0.0, 1.0],
+        ])
+    }
+
+    pub fn new_rotation_x(t: f32) -> M4 {
+        M4([
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, t.cos(), -t.sin(), 0.0],
+            [0.0, t.sin(), t.cos(), 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ])
+    }
+
+    pub fn new_rotation_y(t: f32) -> M4 {
+        M4([
+            [t.cos(), 0.0, t.sin(), 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [-t.sin(), 0.0, t.cos(), 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ])
+    }
+
+    pub fn new_rotation_z(t: f32) -> M4 {
+        M4([
+            [t.cos(), -t.sin(), 0.0, 0.0],
+            [t.sin(), t.cos(), 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ])
+    }
+
+    pub fn new_rotation(r: V3) -> M4 {
+        Self::new_id()
+            * Self::new_rotation_x(r.x())
+            * Self::new_rotation_y(r.y())
+            * Self::new_rotation_z(r.z())
+    }
+
+    pub fn new_scaling(s: V3) -> M4 {
+        M4([
+            [s.x(), 0.0, 0.0, 0.0],
+            [0.0, s.y(), 0.0, 0.0],
+            [0.0, 0.0, s.z(), 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ])
+    }
+
+    // shearing implementation is skipped
+
+    // panic if not invertible, be careful
+    pub fn inv(self) -> M4 {
+        // copied from https://stackoverflow.com/a/7596981
+        let mut res = [[0.0; 4]; 4];
+        let i = self.0;
+
+        let s0 = i[0][0] * i[1][1] - i[1][0] * i[0][1];
+        let s1 = i[0][0] * i[1][2] - i[1][0] * i[0][2];
+        let s2 = i[0][0] * i[1][3] - i[1][0] * i[0][3];
+        let s3 = i[0][1] * i[1][2] - i[1][1] * i[0][2];
+        let s4 = i[0][1] * i[1][3] - i[1][1] * i[0][3];
+        let s5 = i[0][2] * i[1][3] - i[1][2] * i[0][3];
+
+        let c5 = i[2][2] * i[3][3] - i[3][2] * i[2][3];
+        let c4 = i[2][1] * i[3][3] - i[3][1] * i[2][3];
+        let c3 = i[2][1] * i[3][2] - i[3][1] * i[2][2];
+        let c2 = i[2][0] * i[3][3] - i[3][0] * i[2][3];
+        let c1 = i[2][0] * i[3][2] - i[3][0] * i[2][2];
+        let c0 = i[2][0] * i[3][1] - i[3][0] * i[2][1];
+
+        // Should check for 0 determinant
+        let det = s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0;
+        if f32_eq(det, 0.0) {
+            panic!("inverting a non-invertible matrix")
+        }
+        let det = 1.0 / det;
+
+        res[0][0] = (i[1][1] * c5 - i[1][2] * c4 + i[1][3] * c3) * det;
+        res[0][1] = (-i[0][1] * c5 + i[0][2] * c4 - i[0][3] * c3) * det;
+        res[0][2] = (i[3][1] * s5 - i[3][2] * s4 + i[3][3] * s3) * det;
+        res[0][3] = (-i[2][1] * s5 + i[2][2] * s4 - i[2][3] * s3) * det;
+
+        res[1][0] = (-i[1][0] * c5 + i[1][2] * c2 - i[1][3] * c1) * det;
+        res[1][1] = (i[0][0] * c5 - i[0][2] * c2 + i[0][3] * c1) * det;
+        res[1][2] = (-i[3][0] * s5 + i[3][2] * s2 - i[3][3] * s1) * det;
+        res[1][3] = (i[2][0] * s5 - i[2][2] * s2 + i[2][3] * s1) * det;
+
+        res[2][0] = (i[1][0] * c4 - i[1][1] * c2 + i[1][3] * c0) * det;
+        res[2][1] = (-i[0][0] * c4 + i[0][1] * c2 - i[0][3] * c0) * det;
+        res[2][2] = (i[3][0] * s4 - i[3][1] * s2 + i[3][3] * s0) * det;
+        res[2][3] = (-i[2][0] * s4 + i[2][1] * s2 - i[2][3] * s0) * det;
+
+        res[3][0] = (-i[1][0] * c3 + i[1][1] * c1 - i[1][2] * c0) * det;
+        res[3][1] = (i[0][0] * c3 - i[0][1] * c1 + i[0][2] * c0) * det;
+        res[3][2] = (-i[3][0] * s3 + i[3][1] * s1 - i[3][2] * s0) * det;
+        res[3][3] = (i[2][0] * s3 - i[2][1] * s1 + i[2][2] * s0) * det;
+
+        M4(res)
+    }
+}
+
+impl Mul<M4> for M4 {
+    type Output = M4;
+    fn mul(self, rhs: M4) -> Self::Output {
+        let (a, b) = (self.0, rhs.0);
+        let mut res = [[0.0; 4]; 4];
+
+        for i in 0..4 {
+            for j in 0..4 {
+                for k in 0..4 {
+                    res[i][j] += a[i][k] * b[k][j];
+                }
+            }
+        }
+
+        M4(res)
+    }
+}
+
+impl Mul<V3> for M4 {
+    type Output = V3;
+
+    fn mul(self, rhs: V3) -> Self::Output {
+        let a = self.0;
+        let b = [rhs.0[0], rhs.0[1], rhs.0[2], 1.0];
+        let mut res = [0.0; 3];
+
+        for i in 0..3 {
+            for k in 0..4 {
+                res[i] += a[i][k] * b[k]
+            }
+        }
+
+        V3(res)
     }
 }
 
@@ -638,8 +797,16 @@ impl Mul<f32> for Color {
 
 impl Hit {
     pub fn biased(self, amount: f32) -> Hit {
+        self + self.norm * amount
+    }
+}
+
+impl Add<V3> for Hit {
+    type Output = Hit;
+
+    fn add(self, rhs: V3) -> Hit {
         Hit {
-            pos: self.pos + self.norm * amount,
+            pos: self.pos + rhs,
             ..self
         }
     }

@@ -80,3 +80,5 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 - [Bézier Curves and Surfaces: the Utah Teapot](https://www.scratchapixel.com/lessons/advanced-rendering/bezier-curve-rendering-utah-teapot/bezier-surface)
 - [Learn Computer Graphics From Scratch!](https://www.scratchapixel.com/index.php?redirect)
 - [Countless articles on scratchapixel](https://www.scratchapixel.com)
+- [Transformation Hierarchy](http://groups.csail.mit.edu/graphics/classes/6.837/F03/lectures/05_transformation_hierarchy.ppt)
+- [A brief computer graphics / rendering course](https://github.com/ssloy/tinyraytracer)

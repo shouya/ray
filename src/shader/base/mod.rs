@@ -1,6 +1,6 @@
 pub mod plain;
 
-pub mod diffusion;
+pub mod diffuse;
 pub mod phong;
 
 pub mod reflection;

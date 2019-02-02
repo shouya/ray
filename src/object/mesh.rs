@@ -7,8 +7,11 @@ use std::cell::RefCell;
 type I = u16;
 
 pub struct TrigMesh {
+  // vertices
   vs: Vec<V3>,
+  // vertex normals
   vns: Option<Vec<V3>>,
+  // triangles
   ts: Vec<([I; 3], [I; 3])>,
   // we cache the vertices of trigs and the bounding box of the whole object
   cache: RefCell<Option<TrigMeshCache>>,

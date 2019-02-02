@@ -8,7 +8,7 @@ pub mod base;
 pub mod compound;
 pub mod mix;
 
-pub use self::base::diffusion::Diffusion;
+pub use self::base::diffuse::Diffuse;
 pub use self::base::phong::Phong;
 pub use self::base::plain::Plain;
 pub use self::base::reflection::Reflection;
