@@ -20,7 +20,7 @@ mod tracer;
 mod example_scene;
 
 fn main() {
-  let scene = example_scene::five_spheres::scene();
-  let img = tracer::modular::trace(scene, 1200, 1200);
+  let scene = example_scene::basic::scene();
+  let img = tracer::modular::trace(scene, 800, 800);
   img.save("./trace.png").ok();
 }

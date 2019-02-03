@@ -1,3 +1,4 @@
 /target
 **/*.rs.bk
 trace.png
+ref.png

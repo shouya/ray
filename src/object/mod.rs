@@ -3,18 +3,25 @@ use scene::Scene;
 use shader::{Incidence, ShaderType};
 
 pub trait Object {
+    // required implementation: intersect & usually render
+
     // returns hit and norm
     fn intersect(&self, ray: &Ray) -> Option<Hit>;
-
-    // implement this method to allow back-face bulling
-    fn const_normal(&self) -> Option<V3> {
-        None
-    }
-
     fn render(&self, _s: &Scene, _i: &Incidence) -> Option<Color> {
         Some(Color::Blue)
     }
 
+    // implement these two functions for accelerating computation if necessary
+    // back-face bulling
+    fn const_normal(&self) -> Option<V3> {
+        None
+    }
+    // bounding box or bouding sphere
+    fn bound(&self) -> Option<Bound> {
+        None
+    }
+
+    // Assign shader to object
     fn shaded(self, shader: ShaderType) -> Shaded
     where
         Self: Sized + 'static,
@@ -22,9 +29,12 @@ pub trait Object {
         Shaded::new(self, shader)
     }
 
-    // accelerate computation when intersection is slow to compute
-    fn bound(&self) -> Option<Bound> {
-        None
+    // Assign transformer to object
+    fn transformed(self) -> Transformed
+    where
+        Self: Sized + 'static,
+    {
+        Transformed::new(self)
     }
 }
 
@@ -48,4 +58,4 @@ pub mod shaded;
 pub mod transformed;
 
 pub use self::shaded::Shaded;
-pub use self::transformed::{Rotated, Scaled, Translated};
+pub use self::transformed::Transformed;

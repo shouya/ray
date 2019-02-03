@@ -10,7 +10,7 @@ flamer = "^0.2.2"
 
 [dependencies]
 derive_builder = "0.7"
-image = "0.19"
+image = { version = "0.19", features = ["png"] }
 rand = "0.5"
 pbr = "1.0"
 random_color = "0.4"

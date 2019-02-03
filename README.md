@@ -82,3 +82,4 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 - [Countless articles on scratchapixel](https://www.scratchapixel.com)
 - [Transformation Hierarchy](http://groups.csail.mit.edu/graphics/classes/6.837/F03/lectures/05_transformation_hierarchy.ppt)
 - [A brief computer graphics / rendering course](https://github.com/ssloy/tinyraytracer)
+- Akenine-Moller et al, "Real-Time Rendering", 3rd edition

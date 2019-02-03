@@ -52,7 +52,9 @@ pub fn scene() -> Scene {
       c: V3([0.04, -0.52, -4.0]),
       r: 1.5,
     }
-    .shaded(shader::simple_glass(Color::Red, 0.95)),
+    .shaded(shader::simple_glass(Color::Red, 0.95))
+    .transformed()
+    .translated(V3([0.0, 3.0, -2.0])),
   );
 
   scene.add_object(
