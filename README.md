@@ -4,70 +4,48 @@ A toy ray tracer engine as a practice to introductory computer graphics.
 
 ![](https://raw.githubusercontent.com/shouya/ray/master/gallery/triangle.png)
 
+Featuring Blender-like composable shader and more.
+
 Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 
-## Roadmap
+## Features
 
-- Basic types
-  - [x] V3
-  - [x] Color
-  - [x] Trig/Plane/Line
-  - [x] Ray
-  - [x] Hit
-  - [x] Bounding box
-- Scene
-  - [x] Screen-camera coordinates translation
-  - [x] Ray generation for a screen pixel
-  - [x] Support both orthogonal and perspective view
-  - [x] Multiple light sources
+- Basic shaders
+  - Phong
+  - Diffuse
+  - Reflection
+  - Refraction
+  - (WIP) Chessboard
+
+- Composite shaders and preset materials
+  - Transparent (Fresnel)
+  - Solid
+  - Glass
+  - Mirror
+
+- Light sources
+  - Point light
+
 - Objects
-  - [x] Sphere
-  - [x] Chessboard background
-  - [x] Triangle
-  - [x] Rectangle
-  - [x] Triangular mesh
-  - [ ] Polygon-faced mesh (optional)
-  - [ ] Bezier mesh
-- Lights
-  - [x] AmbientLight
-  - [x] PointLight
-  - [ ] SpotLight
-- Material support
-  - [x] Solid diffusive object (Material::Solid)
-  - [x] Reflective object (Material::Mirror)
-  - [x] Transparent object (Material::Glass)
-  - [x] Glossy reflective object (Material::FrostedMirror)
-  - [x] Glossy transparent object (Material::FrostedGlass)
-  - [ ] Metal-like objeect (Material::Metal)
-- Ray tracer
-  - [x] Shadows
-  - [x] Render diffusive surface
-  - [x] Render specular reflection
-  - [x] General reflection (e.g. mirror)
-  - [x] Glossy surface reflection (e.g. frosted mirror)
-  - [x] Support refraction
-  - [x] Fresnel effect
-  - [x] Glossy surface refraction (e.g. frosted glass)
-  - [x] Lambertian shading
-  - [ ] Correct shadow for transparent objects
-  - [ ] Texture mapping
-- Rasterization
-  - [ ] More to come
-- Intersection detection
-  - [x] Sphere
-  - [x] Triangle
-  - [x] Plane
-  - [x] Mesh (Trig/Poly)
-  - [x] Bounding box
-  - [x] Subdividing clusters for mesh
-  - [x] Möller–Trumbore algorithm for triangles
-- Misc
-  - [x] Load triangular mesh from .obj model
-  - [ ] Load poly-faced mesh from .obj model
-  - [ ] Load bezier mesh from .obj model
-  - [ ] Animation generation
-  - [ ] Load scene from a DSL (or [dyon](https://github.com/PistonDevelopers/dyon)?)
+  - Sphere
+  - Triangle & Rectangle (one-sided or double-sided)
+  - Triangle mesh (imported via .obj file), vertex normals supported
+  - Chessboard plane
+  - Object transformations (rotation/translation/scaling)
 
+- Camera & Scene
+  - Perspective & Orthogonal view
+  - Ambient light and ambient color
+
+## Planned features
+
+- Rough surface shader
+- Skybox
+- Bezier surface
+- Area light & soft shadow
+- Illuminating object
+- Monte-Carlo tracer
+- Scripting language for describing the scene
 
 ## References
 
