@@ -12,5 +12,5 @@ pub fn simple_glass(color: Color, transparency: f32) -> ShaderType {
 }
 
 pub fn simple_mirror(color: Color) -> ShaderType {
-  mirror(color, 45.0, 0.9)
+  mirror(color, 45.0, 0.8)
 }

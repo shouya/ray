@@ -21,43 +21,7 @@ pub fn scene() -> Scene {
     .unwrap();
 
   scene.add_white_light(V3([-5.0, 10.0, 0.0]), 0.4);
-  scene.add_white_light(V3([2.0, 10.0, -10.0]), 0.4);
-
-  let spheres = vec![
-    Sphere {
-      c: V3([-2.5, 1.0, -6.0]),
-      r: 1.5,
-    },
-    Sphere {
-      c: V3([3.5, 1.5, -7.0]),
-      r: 1.5,
-    },
-    Sphere {
-      c: V3([-1.5, 3.5, -12.0]),
-      r: 1.5,
-    },
-    Sphere {
-      c: V3([3.0, 2.5, -12.0]),
-      r: 1.5,
-    },
-  ];
-
-  for s in spheres.into_iter() {
-    let color = Color::random();
-    let obj = s.shaded(shader::simple_mirror(color));
-    scene.add_object(obj);
-  }
-
-  scene.add_object(
-    Sphere {
-      c: V3([0.0, 0.0, 0.0]),
-      r: 1.0,
-    }
-    .shaded(shader::simple_glass(Color::Red, 0.95))
-    .transformed()
-    .scaled(V3([1.5, 1.5, 1.5]))
-    .translated(V3([0.04*1.5, -0.52*1.5, -4.0*1.5]))
-  );
+  scene.add_white_light(V3([10.0, 10.0, -10.0]), 0.4);
 
   scene.add_object(
     Rectangle::new(
@@ -67,6 +31,16 @@ pub fn scene() -> Scene {
     )
     .double_sided(true)
     .shaded(shader::simple_mirror(Color([0.2; 3]))),
+  );
+
+  let model = ObjModel::from_file("models/torus.obj");
+  let torus = TrigMesh::from_model(&model.unwrap());
+  scene.add_object(
+    torus
+      .shaded(shader::simple_mirror(Color::Blue))
+      .transformed()
+      .rotated(V3([3.14 * 0.6, 3.14 * 0.1, 3.14 * 0.5]))
+      .translated(V3([0.04, -0.52, -4.0])),
   );
 
   scene.add_object(ChessBoard {

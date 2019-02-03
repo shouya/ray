@@ -1,4 +1,4 @@
-use common::{Color, Hit, Ray};
+use common::{Color, Hit, Ray, M4};
 use object::Object;
 use scene::Scene;
 
@@ -14,6 +14,8 @@ pub use self::base::plain::Plain;
 pub use self::base::reflection::Reflection;
 pub use self::base::refraction::Refraction;
 
+pub use self::base::normal::Normal;
+
 pub use self::compound::*;
 
 pub use self::mix::{ChannelMix, Mix, Sum};
@@ -22,6 +24,8 @@ pub struct Incidence<'r, 'h, 'o> {
   pub ray: &'r Ray,
   pub hit: &'h Hit,
   pub obj: &'o dyn Object,
+  // Word-to-object matrix
+  pub mat: Option<(M4, M4)>,
   pub depth: usize,
 }
 

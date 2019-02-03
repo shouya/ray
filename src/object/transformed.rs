@@ -5,84 +5,64 @@ use shader::Incidence;
 
 pub struct Transformed {
   obj: Box<dyn Object>,
-  pub mat: M4,
-  pub inv_mat: M4,
+  pub o2w: M4,
+  pub w2o: M4,
+  pub adj_t: M4,
 }
 
 impl Transformed {
   pub fn new(obj: impl Object + 'static) -> Self {
     Transformed {
       obj: Box::new(obj),
-      mat: M4::new_id(),
-      inv_mat: M4::new_id(),
+      o2w: M4::new_id(),
+      w2o: M4::new_id(),
+      adj_t: M4::new_id(),
     }
   }
 
   pub fn rotated(self, r: V3) -> Self {
-    let mat = M4::new_rotation(r) * self.mat;
-    let inv_mat = mat.inv();
-    Self {
-      mat,
-      inv_mat,
-      ..self
-    }
+    let o2w = M4::new_rotation(r) * self.o2w;
+    Self { o2w, ..self }.fill_cache()
   }
 
   pub fn translated(self, v: V3) -> Self {
-    let mat = M4::new_translation(v) * self.mat;
-    let inv_mat = mat.inv();
-    Self {
-      mat,
-      inv_mat,
-      ..self
-    }
+    let o2w = M4::new_translation(v) * self.o2w;
+    Self { o2w, ..self }.fill_cache()
   }
 
   pub fn scaled(self, s: V3) -> Self {
-    let mat = M4::new_scaling(s) * self.mat;
-    let inv_mat = mat.inv();
-    Self {
-      mat,
-      inv_mat,
-      ..self
-    }
+    let o2w = M4::new_scaling(s) * self.o2w;
+    Self { o2w, ..self }.fill_cache()
   }
 
-  pub fn transform_ray(&self, r: &Ray, inv: bool) -> Ray {
-    let mat = if inv { self.inv_mat } else { self.mat };
-    let new_orig = mat * r.orig;
-    Ray {
-      orig: new_orig,
-      dir: mat * (r.orig + r.dir) - new_orig,
-      ..*r
-    }
-  }
-
-  pub fn transform_hit(&self, h: &Hit, inv: bool) -> Hit {
-    let mat = if inv { self.inv_mat } else { self.mat };
-    let new_pos = mat * h.pos;
-
-    Hit {
-      pos: new_pos,
-      norm: mat * (h.pos + h.norm) - new_pos,
-      ..*h
-    }
+  fn fill_cache(self) -> Self {
+    let w2o = self.o2w.inv();
+    let adj_t = self.o2w.transpose();
+    Self { w2o, adj_t, ..self }
   }
 }
 
 impl Object for Transformed {
   fn intersect(&self, ray: &Ray) -> Option<Hit> {
-    // world to object
-    //dbg!(ray);
-    let ray = self.transform_ray(ray, true);
-    //dbg!(ray);
-    self.obj.intersect(&ray)
+    // ray: world to object
+    let ray = self.w2o.transform_ray(ray);
+    let hit = self.obj.intersect(&ray);
+
+    // hit: object to world
+    hit.map(|h| self.o2w.transform_hit(self.o2w.transpose(), &h))
   }
 
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
-    let ray = &self.transform_ray(i.ray, false);
-    let hit = &self.transform_hit(i.hit, false);
-    let i = Incidence { ray, hit, ..*i };
+    // let ray = &self.o2w.transform_ray(i.ray);
+    // let hit = &self.w2o.transform_hit(self.o2w.transpose(), i.hit);
+    // let mat = Some((self.o2w, self.w2o));
+    // let mat = None;
+    let i = Incidence {
+      // ray,
+      // hit,
+      // mat,
+      ..*i
+    };
     self.obj.render(s, &i)
   }
 

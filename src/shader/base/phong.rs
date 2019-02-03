@@ -1,4 +1,4 @@
-use common::{Color, Ray};
+use common::{Color, Ray, dist2};
 use scene::Scene;
 use shader::{DynValue, Incidence, Shader};
 
@@ -21,10 +21,11 @@ impl Shader for Phong {
     let mut intensity = Color::Black;
 
     for light in s.lights.iter() {
-      let shadowray_dir = light.pos - hit.pos;
+      let light_pos = i.mat.map(|x| x.1 * light.pos).unwrap_or(light.pos);
+      let shadowray_dir = light_pos - hit.pos;
       let shadowray = Ray::new(hit.pos, shadowray_dir).biased(BIAS);
 
-      if !s.is_blocked(&shadowray) {
+      if !s.is_blocked(&shadowray, dist2(light_pos, hit.pos)) {
         let refl_ray = shadowray.reflect(hit);
         let angle = refl_ray.dir.dot(ray.dir);
         intensity = intensity + angle.max(0.0).powf(p);

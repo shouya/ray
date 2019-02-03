@@ -29,11 +29,11 @@ pub fn scene() -> Scene {
     V3([-1.0, 1.0, 0.0]),
   )
   .double_sided(true)
-  .shaded(shader::simple_solid(Color::Red))
+  .shaded(shader::simple_mirror(Color::Red))
   .transformed()
-  .rotated(V3([3.14 * 0.5, 0.0, 3.14 * 0.0]))
-  .scaled(V3([2.0, 0.3, 1.0]))
-  .translated(V3([0.0, 3.0, -5.0]));
+  // .rotated(V3([3.14 * 0.0, 0.0, 3.14 * 0.25]))
+  .scaled(V3([2.0, 2.0, 2.0]))
+  .translated(V3([0.0, -1.0, -4.3]));
 
   scene.add_object(rect);
 

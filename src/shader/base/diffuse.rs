@@ -1,4 +1,4 @@
-use common::{Color, Ray};
+use common::{Color, Ray, dist2};
 use scene::Scene;
 use shader::{DynValue, Incidence, Shader};
 
@@ -21,10 +21,11 @@ impl Shader for Diffuse {
     let Incidence { hit, .. } = i;
 
     for light in s.lights.iter() {
-      let shadowray_dir = light.pos - hit.pos;
+      let light_pos = i.mat.map(|x| x.1 * light.pos).unwrap_or(light.pos);
+      let shadowray_dir = light_pos - hit.pos;
       let shadowray = Ray::new(hit.pos, shadowray_dir).biased(BIAS);
 
-      if !s.is_blocked(&shadowray) {
+      if !s.is_blocked(&shadowray, dist2(light_pos, hit.pos)) {
         let angle = shadowray_dir.norm().dot(hit.norm).max(0.0);
         intensity = intensity + light.color * light.brightness * angle;
       }

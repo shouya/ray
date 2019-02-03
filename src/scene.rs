@@ -74,6 +74,7 @@ impl Scene {
                     ray: &ray,
                     obj: obj.as_ref(),
                     hit: &hit,
+                    mat: None,
                     depth: d,
                 };
                 obj.render(self, &inci)
@@ -81,8 +82,11 @@ impl Scene {
         }
     }
 
-    pub fn is_blocked(&self, ray: &Ray) -> bool {
-        self.nearest_hit(ray).is_some()
+    pub fn is_blocked(&self, ray: &Ray, light_dist2: f32) -> bool {
+        match self.nearest_hit(ray) {
+            None => false,
+            Some((_, h)) => dist2(h.pos, ray.orig) < light_dist2,
+        }
     }
 
     pub fn nearest_hit<'a>(&'a self, ray: &Ray) -> Option<(&'a Box<dyn Object>, Hit)> {

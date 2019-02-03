@@ -113,6 +113,18 @@ pub fn f32_ge(a: f32, b: f32) -> bool {
     a > b || f32_eq(a, b)
 }
 
+pub fn randn(mean: f32, std_dev: f32) -> f32 {
+    use rand::distributions::{Distribution, StandardNormal};
+    use rand::thread_rng;
+
+    let n = StandardNormal;
+    mean + n.sample(&mut thread_rng()) as f32 * std_dev
+}
+
+pub fn randn0() -> f32 {
+    randn(0.0, 1.0)
+}
+
 impl V2 {
     pub fn u(&self) -> f32 {
         self.0[0]
@@ -272,10 +284,7 @@ impl M4 {
     }
 
     pub fn new_rotation(r: V3) -> M4 {
-        Self::new_id()
-            * Self::new_rotation_x(r.x())
-            * Self::new_rotation_y(r.y())
-            * Self::new_rotation_z(r.z())
+        Self::new_rotation_x(r.x()) * Self::new_rotation_y(r.y()) * Self::new_rotation_z(r.z())
     }
 
     pub fn new_scaling(s: V3) -> M4 {
@@ -338,6 +347,76 @@ impl M4 {
 
         M4(res)
     }
+
+    pub fn adjoint(self) -> Self {
+        // A^-1 = 1/det(A) adj(A)
+        let mut res = [[0.0; 4]; 4];
+        let i = self.0;
+
+        let s0 = i[0][0] * i[1][1] - i[1][0] * i[0][1];
+        let s1 = i[0][0] * i[1][2] - i[1][0] * i[0][2];
+        let s2 = i[0][0] * i[1][3] - i[1][0] * i[0][3];
+        let s3 = i[0][1] * i[1][2] - i[1][1] * i[0][2];
+        let s4 = i[0][1] * i[1][3] - i[1][1] * i[0][3];
+        let s5 = i[0][2] * i[1][3] - i[1][2] * i[0][3];
+
+        let c5 = i[2][2] * i[3][3] - i[3][2] * i[2][3];
+        let c4 = i[2][1] * i[3][3] - i[3][1] * i[2][3];
+        let c3 = i[2][1] * i[3][2] - i[3][1] * i[2][2];
+        let c2 = i[2][0] * i[3][3] - i[3][0] * i[2][3];
+        let c1 = i[2][0] * i[3][2] - i[3][0] * i[2][2];
+        let c0 = i[2][0] * i[3][1] - i[3][0] * i[2][1];
+
+        res[0][0] = i[1][1] * c5 - i[1][2] * c4 + i[1][3] * c3;
+        res[0][1] = -i[0][1] * c5 + i[0][2] * c4 - i[0][3] * c3;
+        res[0][2] = i[3][1] * s5 - i[3][2] * s4 + i[3][3] * s3;
+        res[0][3] = -i[2][1] * s5 + i[2][2] * s4 - i[2][3] * s3;
+
+        res[1][0] = -i[1][0] * c5 + i[1][2] * c2 - i[1][3] * c1;
+        res[1][1] = i[0][0] * c5 - i[0][2] * c2 + i[0][3] * c1;
+        res[1][2] = -i[3][0] * s5 + i[3][2] * s2 - i[3][3] * s1;
+        res[1][3] = i[2][0] * s5 - i[2][2] * s2 + i[2][3] * s1;
+
+        res[2][0] = i[1][0] * c4 - i[1][1] * c2 + i[1][3] * c0;
+        res[2][1] = -i[0][0] * c4 + i[0][1] * c2 - i[0][3] * c0;
+        res[2][2] = i[3][0] * s4 - i[3][1] * s2 + i[3][3] * s0;
+        res[2][3] = -i[2][0] * s4 + i[2][1] * s2 - i[2][3] * s0;
+
+        res[3][0] = -i[1][0] * c3 + i[1][1] * c1 - i[1][2] * c0;
+        res[3][1] = i[0][0] * c3 - i[0][1] * c1 + i[0][2] * c0;
+        res[3][2] = -i[3][0] * s3 + i[3][1] * s1 - i[3][2] * s0;
+        res[3][3] = i[2][0] * s3 - i[2][1] * s1 + i[2][2] * s0;
+
+        M4(res)
+    }
+
+    pub fn transpose(self) -> Self {
+        let mut m = self.0;
+        for i in 0..4 {
+            for j in (i + 1)..4 {
+                m[i][j] = m[j][i];
+            }
+        }
+        Self(m)
+    }
+
+    pub fn transform_ray(self, r: &Ray) -> Ray {
+        let new_orig = self * r.orig;
+        let new_dir = (self * (r.orig + r.dir) - new_orig).norm();
+        // let new_dir = (self * r.dir).norm();
+        Ray::new(new_orig, new_dir)
+    }
+
+    pub fn transform_hit(self, adj_t: M4, h: &Hit) -> Hit {
+        let new_pos = self * h.pos;
+        let new_norm = (adj_t * h.norm).norm();
+
+        Hit {
+            pos: new_pos,
+            norm: new_norm,
+            ..*h
+        }
+    }
 }
 
 impl Mul<M4> for M4 {
@@ -364,15 +443,15 @@ impl Mul<V3> for M4 {
     fn mul(self, rhs: V3) -> Self::Output {
         let a = self.0;
         let b = [rhs.0[0], rhs.0[1], rhs.0[2], 1.0];
-        let mut res = [0.0; 3];
+        let mut r = [0.0; 4];
 
-        for i in 0..3 {
+        for i in 0..4 {
             for k in 0..4 {
-                res[i] += a[i][k] * b[k]
+                r[i] += a[i][k] * b[k]
             }
         }
 
-        V3(res)
+        V3([r[0] / r[3], r[1] / r[3], r[2] / r[3]])
     }
 }
 
@@ -556,7 +635,11 @@ impl Ray {
 
     pub fn reflect(&self, hit: &Hit) -> Ray {
         let proj_n_d = hit.norm * self.dir.dot(hit.norm);
-        Ray::new(hit.pos, self.dir - proj_n_d * 2.0)
+        Self {
+            orig: hit.pos,
+            dir: self.dir - proj_n_d * 2.0,
+        }
+        // Ray::new(hit.pos, self.dir - proj_n_d * 2.0)
     }
 
     pub fn refract(&self, hit: &Hit, ior: f32) -> Ray {
