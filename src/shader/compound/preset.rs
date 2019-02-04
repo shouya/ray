@@ -23,16 +23,16 @@ pub fn rough_solid(
     roughness: f32,
     specular_index: f32,
 ) -> ShaderType {
-    let surface: ShaderType = Rough::new(color, roughness).into();
-    let diffusion: ShaderType = Diffuse::new(surface.unwrap()).into();
+    let diffusion: ShaderType = Diffuse::new(color.into()).into();
     let phong: ShaderType = Phong::new(specular_index.into()).into();
 
-    ChannelMix::new(
+    let shader = ChannelMix::new(
         Some(Color::White).into(),
         diffusion,
         phong.map(|x| x.unwrap()),
     )
-    .into()
+    .into();
+    Rough::new(shader, roughness).into()
 }
 
 use super::transparent;

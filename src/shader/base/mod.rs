@@ -10,3 +10,4 @@ pub mod refraction;
 pub mod normal;
 
 pub mod rough;
+pub mod color_noise;

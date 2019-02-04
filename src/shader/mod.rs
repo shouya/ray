@@ -17,6 +17,7 @@ pub use self::base::refraction::Refraction;
 pub use self::base::normal::Normal;
 
 pub use self::base::rough::Rough;
+pub use self::base::color_noise::ColorNoise;
 
 pub use self::compound::*;
 
