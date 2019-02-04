@@ -20,7 +20,7 @@ mod shader;
 mod tracer;
 
 fn main() {
-    let scene = example_scene::transformed::scene();
+    let scene = example_scene::torus::scene();
     let img = tracer::modular::trace(scene, 2400, 2400);
-    img.save("./trace.png").ok();
+    img.save("./trace.png").unwrap();
 }

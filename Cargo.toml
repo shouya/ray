@@ -6,7 +6,7 @@ version = "0.1.0"
 
 [dependencies]
 derive_builder = "0.7"
-image = { version = "0.19", default-features = false, features = ["png"] }
+image = { version = "0.19", default-features = false, features = ["png_codec"] }
 rand = "0.5"
 pbr = "1.0"
 random_color = "0.4"
