@@ -3,14 +3,10 @@ authors = ["Shou Ya <shouya@users.noreply.github.com>"]
 name = "ray"
 version = "0.1.0"
 
-[dev-dependencies]
-flame = "0.2.2"
-flamer = "^0.2.2"
-
 
 [dependencies]
 derive_builder = "0.7"
-image = { version = "0.19", features = ["png"] }
+image = { version = "0.19", default-features = false, features = ["png"] }
 rand = "0.5"
 pbr = "1.0"
 random_color = "0.4"
