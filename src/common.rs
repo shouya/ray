@@ -887,6 +887,17 @@ impl Color {
     pub fn random() -> Self {
         Color::from_rgb(RandomColor::new().to_rgb_array())
     }
+
+    pub fn average(colors: &[Color]) -> Color {
+        if colors.is_empty() {
+            return Color::Black;
+        }
+
+        let mut res = Color::Black;
+        colors.iter().for_each(|c| res = res + *c);
+
+        res * (1.0 / (colors.len() as f32))
+    }
 }
 
 impl PartialEq for Color {

@@ -40,19 +40,18 @@ impl Scene {
         })
     }
 
-    pub fn vp_from_pixel(&self, x: u32, y: u32, w: u32, h: u32) -> V3 {
-        let dx = self.vp_width * 2.0 / (w as f32);
+    pub fn vp_from_pixel(&self, x: f32, y: f32, w: f32, h: f32) -> V3 {
+        let dx = self.vp_width * 2.0 / w;
         // y on screen coordinate system is inverted, down is positive
-        let dy = -self.vp_height * 2.0 / (h as f32);
+        let dy = -self.vp_height * 2.0 / h;
         let plane = &self.vp_plane;
-        let (x, y, w, h) = (x as i64, y as i64, w as i64, h as i64);
 
-        let shift_x = plane.primary_axis() * dx * (x - w / 2) as f32;
-        let shift_y = plane.secondary_axis() * dy * (y - h / 2) as f32;
+        let shift_x = plane.primary_axis() * dx * (x - w / 2.0);
+        let shift_y = plane.secondary_axis() * dy * (y - h / 2.0);
         plane.r0() + shift_x + shift_y
     }
 
-    pub fn generate_ray(&self, x: u32, y: u32, w: u32, h: u32) -> Ray {
+    pub fn generate_ray(&self, x: f32, y: f32, w: f32, h: f32) -> Ray {
         let orig = self.vp_from_pixel(x, y, w, h);
         let dir = match self.projection {
             Projection::Perspective => orig - self.camera,

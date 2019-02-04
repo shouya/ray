@@ -37,6 +37,9 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
   - Perspective & Orthogonal view
   - Ambient light and ambient color
 
+- Image
+  - Supersampling Anti-aliasing
+
 ## Planned features
 
 - Rough surface shader

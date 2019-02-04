@@ -20,7 +20,13 @@ mod shader;
 mod tracer;
 
 fn main() {
-    let scene = example_scene::torus::scene();
-    let img = tracer::modular::trace(scene, 2400, 2400);
+    let scene = example_scene::five_spheres::scene();
+    let conf = tracer::RenderConfigBuilder::default()
+        .aa(Some(tracer::AAPattern::SSAA4x()))
+        .w(2400)
+        .h(2400)
+        .build()
+        .unwrap();
+    let img = tracer::modular::trace(scene, conf);
     img.save("./trace.png").unwrap();
 }
