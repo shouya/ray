@@ -2,6 +2,8 @@
 
 A toy ray tracer engine as a practice to introductory computer graphics.
 
+
+
 ![](https://raw.githubusercontent.com/shouya/ray/master/gallery/triangle.png)
 
 Featuring Blender-like composable shader and more.
@@ -29,7 +31,7 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 - Objects
   - Sphere
   - Triangle & Rectangle (one-sided or double-sided)
-  - Triangle mesh (imported via .obj file), vertex normals supported
+  - Triangle mesh (imported via Wavefront .obj file), vertex normals supported
   - Chessboard plane
   - Object transformations (rotation/translation/scaling)
 
@@ -49,6 +51,15 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 - Illuminating object
 - Monte-Carlo tracer
 - Scripting language for describing the scene
+  
+## Gallery
+
+Preview | Features
+------------ | -------------
+<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/triangle.png" width="600" height="600"> | Frosted glass/mirror, Triangle, Chessboard
+<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/anti-aliasing.png" width="600" height="600"> | Anti-aliasing, Colored glass/mirror
+<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/vertex-normal.png" width="600" height="600"> | Wavefront format, Triagle mesh, Vertex normal
+<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/transform.png" width="600" height="300"> | Affine transformations, Normal map
 
 ## References
 
