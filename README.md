@@ -2,24 +2,17 @@
 
 A toy ray tracer engine as a practice to introductory computer graphics.
 
-
-
-![](https://raw.githubusercontent.com/shouya/ray/master/gallery/triangle.png)
-
-Featuring Blender-like composable shader and more.
-
-Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
+Featuring a [Cycles Renderer](https://docs.blender.org/manual/en/latest/render/cycles/)-like composable shader system in Blender and more.
 
 ## Features
 
-- Basic shaders
+- Shaders
   - Phong
   - Diffuse
   - Reflection
   - Refraction
   - (WIP) Chessboard
-
-- Composite shaders and preset materials
+  - Rough surface shader
   - Transparent (Fresnel)
   - Solid
   - Glass
@@ -44,7 +37,6 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 
 ## Planned features
 
-- Rough surface shader
 - Skybox
 - Bezier surface
 - Area light & soft shadow
@@ -56,10 +48,13 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 
 Preview | Features
 ------------ | -------------
-<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/triangle.png" width="600" height="600"> | Frosted glass/mirror, Triangle, Chessboard
-<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/anti-aliasing.png" width="600" height="600"> | Anti-aliasing, Colored glass/mirror
-<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/vertex-normal.png" width="600" height="600"> | Wavefront format, Triagle mesh, Vertex normal
-<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/transform.png" width="600" height="300"> | Affine transformations, Normal map
+<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/triangle.png" width="480" height="480"> | Frosted glass/mirror, Triangle, Chessboard
+<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/anti-aliasing.png" width="480" height="480"> | Anti-aliasing, Colored glass/mirror
+<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/vertex-normal.png" width="480" height="480"> | Wavefront format, Triangle mesh, Smoothed surface normal
+<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/transform.png" width="480" height="260"> | Affine transformations, Normal map
+<img src="https://raw.githubusercontent.com/shouya/ray/master/gallery/frosted-glass.png" width="480" height="480"> | Frosted glass (reimplementation), Rough surface
+
+Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 
 ## References
 
