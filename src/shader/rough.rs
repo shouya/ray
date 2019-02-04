@@ -1,10 +1,11 @@
-use common::{randn, Color, Hit, Ray, V3};
+use common::{Color, Hit, V3};
 use scene::Scene;
-use shader::{DynValue, Incidence, Shader, ShaderType};
+use shader::{Incidence, Shader, ShaderType};
 
 // varies the hit normal
 pub struct Rough {
     shader: ShaderType,
+    // best with value in (0.005, 0.1)
     roughness: f32, // std_dev
 }
 
@@ -20,12 +21,13 @@ impl Rough {
         use std::hash::Hasher;
 
         let mut hasher = DefaultHasher::new();
-        let f2u = |f| unsafe { std::mem::transmute::<f32, u32>(f) };
+        // this might be better since it wipes out some inaccuracies
+        let f2i = |f| (f * 10000000.0) as i32;
         let pos = h.pos.0;
 
-        hasher.write_u32(f2u(pos[0]));
-        hasher.write_u32(f2u(pos[1]));
-        hasher.write_u32(f2u(pos[2]));
+        hasher.write_i32(f2i(pos[0]));
+        hasher.write_i32(f2i(pos[1]));
+        hasher.write_i32(f2i(pos[2]));
 
         hasher.finish()
     }
@@ -48,7 +50,7 @@ impl Shader for Rough {
         let seed = Self::hash_hit(i.hit);
         let dnorm = Self::pseudo_rand_v3(seed, self.roughness);
         let hit = &Hit {
-            norm: i.hit.norm + dnorm,
+            norm: (i.hit.norm + dnorm).norm(),
             ..*i.hit
         };
         let i = Incidence { hit, ..*i };

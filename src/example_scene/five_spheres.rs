@@ -45,7 +45,9 @@ pub fn scene() -> Scene {
     for s in spheres.into_iter() {
         let color = Color::random();
         // let obj = s.shaded(shader::simple_solid(color));
-        let obj = s.shaded(shader::simple_rough_solid(color, 0.02));
+        let obj = s.shaded(
+            shader::Rough::new(shader::simple_solid(color), 0.1).into(),
+        );
         scene.add_object(obj);
     }
 
@@ -54,7 +56,10 @@ pub fn scene() -> Scene {
             c: V3([0.0, 0.0, 0.0]),
             r: 1.0,
         }
-        .shaded(shader::simple_glass(Color::Red, 0.95))
+        .shaded(
+            shader::Rough::new(shader::simple_glass(Color::Red, 0.95), 0.005)
+                .into(),
+        )
         .transformed()
         .scaled(V3([1.5, 1.5, 1.5]))
         .translated(V3([0.04 * 1.5, -0.52 * 1.5, -4.0 * 1.5])),

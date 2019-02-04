@@ -20,11 +20,13 @@ mod shader;
 mod tracer;
 
 fn main() {
-    let scene = example_scene::five_spheres::scene();
+    let scene = example_scene::transformed::scene();
     let conf = tracer::RenderConfigBuilder::default()
         .aa(Some(tracer::AAPattern::SSAA4x()))
-        .w(1200)
-        .h(1200)
+        // .w(1200)
+        // .h(1200)
+        .w(2400)
+        .h(2400)
         .build()
         .unwrap();
     let img = tracer::modular::trace(scene, conf);

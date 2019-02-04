@@ -4,23 +4,37 @@ use scene::Scene;
 
 use std::rc::Rc;
 
-pub mod base;
-pub mod compound;
+pub mod diffuse;
+pub mod phong;
+pub mod plain;
+pub mod reflection;
+pub mod refraction;
+
+pub use self::diffuse::Diffuse;
+pub use self::phong::Phong;
+pub use self::plain::Plain;
+pub use self::reflection::Reflection;
+pub use self::refraction::Refraction;
+
+pub mod normal;
+pub use self::normal::Normal;
+
+pub mod color_noise;
+pub mod rough;
+pub use self::color_noise::ColorNoise;
+pub use self::rough::Rough;
+
+pub mod transparent;
+pub use self::transparent::{transparent, Transparency};
+
+pub mod preset;
+pub mod simple;
+pub use self::preset::{blank, glass, mirror, rough_solid, solid};
+pub use self::simple::{
+    simple_glass, simple_mirror, simple_rough_solid, simple_solid,
+};
+
 pub mod mix;
-
-pub use self::base::diffuse::Diffuse;
-pub use self::base::phong::Phong;
-pub use self::base::plain::Plain;
-pub use self::base::reflection::Reflection;
-pub use self::base::refraction::Refraction;
-
-pub use self::base::normal::Normal;
-
-pub use self::base::rough::Rough;
-pub use self::base::color_noise::ColorNoise;
-
-pub use self::compound::*;
-
 pub use self::mix::{ChannelMix, Mix, Sum};
 
 pub struct Incidence<'r, 'h, 'o> {

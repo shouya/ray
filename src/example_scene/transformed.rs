@@ -35,8 +35,8 @@ pub fn scene() -> Scene {
             r: 1.5,
         }
         .shaded(shader::Diffuse::new(Color::Red.into()).into())
-        .shaded(shader::Normal.into())
         .shaded(shader::simple_mirror(Color::Blue))
+        .shaded(shader::Normal.into())
     );
 
     // scene.add_object(
@@ -53,6 +53,7 @@ pub fn scene() -> Scene {
             r: 0.5,
         }
         .shaded(shader::simple_glass(Color::random(), 0.80))
+        .shaded(shader::Normal.into())
         //.shaded(shader::Diffuse::new(Color::Red.into()).into())
         .transformed()
         .rotated(V3([1.5, 1.2, 1.0]))
