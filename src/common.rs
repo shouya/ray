@@ -13,7 +13,7 @@ pub struct V3(pub [f32; 3]);
 pub struct V2(pub [f32; 2]);
 
 // Transformation matrix
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct M4(pub [[f32; 4]; 4]);
 
 // V3 with normal
@@ -396,9 +396,11 @@ impl M4 {
 
     pub fn transpose(self) -> Self {
         let mut m = self.0;
-        for i in 0..4 {
-            for j in (i + 1)..4 {
-                m[i][j] = m[j][i];
+        for r in 0..4 {
+            for c in (r + 1)..4 {
+                let mcr = m[c][r];
+                m[c][r] = m[r][c];
+                m[r][c] = mcr;
             }
         }
         Self(m)
@@ -410,9 +412,9 @@ impl M4 {
         Ray::new(new_orig, new_dir)
     }
 
-    pub fn transform_hit(self, h: &Hit) -> Hit {
+    pub fn transform_hit(self, trans_norm: Self, h: &Hit) -> Hit {
         let new_pos = self.transform_point(h.pos);
-        let new_norm = self.transform_vector(h.norm).norm();
+        let new_norm = trans_norm.transform_vector(h.norm).norm();
 
         Hit {
             pos: new_pos,
@@ -448,6 +450,23 @@ impl M4 {
     }
 }
 
+impl std::fmt::Debug for M4 {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let mut fmt_row = |i, r: [f32; 4]| {
+            writeln!(
+                f,
+                "[{:1}] {:<+.5} {:<+.5} {:+.5} {:+.5}",
+                i, r[0], r[1], r[2], r[3]
+            )
+        };
+        let m = self.0;
+        fmt_row(0, m[0])?;
+        fmt_row(1, m[1])?;
+        fmt_row(2, m[2])?;
+        fmt_row(3, m[3])
+    }
+}
+
 impl Mul<M4> for M4 {
     type Output = M4;
     fn mul(self, rhs: M4) -> Self::Output {
@@ -463,6 +482,42 @@ impl Mul<M4> for M4 {
         }
 
         M4(res)
+    }
+}
+
+// transformation matrix with inverse cache
+#[derive(Clone, Copy, Debug)]
+pub struct TransMat {
+    pub o2w: M4,
+    pub w2o: M4,
+}
+
+impl TransMat {
+    pub fn new() -> Self {
+        Self {
+            o2w: M4::new_id(),
+            w2o: M4::new_id(),
+        }
+    }
+
+    pub fn append(&mut self, m: M4) {
+        self.o2w = m * self.o2w;
+        self.w2o = self.w2o * m.inv();
+    }
+
+    pub fn prepend(&mut self, m: M4) {
+        self.o2w = self.o2w * m;
+        self.w2o = m.inv() * self.w2o;
+    }
+
+    pub fn mult_opt(&self, t: Option<TransMat>) -> TransMat {
+        match t {
+            None => *self,
+            Some(t) => Self {
+                o2w: self.o2w * t.o2w,
+                w2o: t.w2o * self.w2o,
+            },
+        }
     }
 }
 

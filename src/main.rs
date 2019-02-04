@@ -21,6 +21,6 @@ mod tracer;
 
 fn main() {
     let scene = example_scene::transformed::scene();
-    let img = tracer::modular::trace(scene, 800, 800);
+    let img = tracer::modular::trace(scene, 2400, 2400);
     img.save("./trace.png").ok();
 }

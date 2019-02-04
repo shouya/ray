@@ -1,4 +1,4 @@
-use common::{Color, Hit, Ray, M4};
+use common::{Color, Hit, Ray, TransMat};
 use object::Object;
 use scene::Scene;
 
@@ -20,11 +20,11 @@ pub use self::compound::*;
 
 pub use self::mix::{ChannelMix, Mix, Sum};
 
-pub struct Incidence<'r, 'h, 'o, 't> {
+pub struct Incidence<'r, 'h, 'o> {
     pub ray: &'r Ray,
     pub hit: &'h Hit,
     pub obj: &'o dyn Object,
-    pub trans: Option<&'t (M4, M4)>,
+    pub trans: Option<TransMat>,
     pub depth: usize,
 }
 

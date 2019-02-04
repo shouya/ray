@@ -5,48 +5,42 @@ use shader::Incidence;
 
 pub struct Transformed {
     obj: Box<dyn Object>,
-    pub o2w: M4,
-    pub w2o: M4,
+    // transformation matrix
+    trans: TransMat,
 }
 
 impl Transformed {
     pub fn new(obj: impl Object + 'static) -> Self {
         Transformed {
             obj: Box::new(obj),
-            o2w: M4::new_id(),
-            w2o: M4::new_id(),
+            trans: TransMat::new(),
         }
     }
 
-    pub fn rotated(self, r: V3) -> Self {
-        let o2w = M4::new_rotation(r) * self.o2w;
-        Self { o2w, ..self }.fill_cache()
+    pub fn rotated(mut self, r: V3) -> Self {
+        self.trans.append(M4::new_rotation(r));
+        self
     }
 
-    pub fn translated(self, v: V3) -> Self {
-        let o2w = M4::new_translation(v) * self.o2w;
-        Self { o2w, ..self }.fill_cache()
+    pub fn translated(mut self, v: V3) -> Self {
+        self.trans.append(M4::new_translation(v));
+        self
     }
 
-    pub fn scaled(self, s: V3) -> Self {
-        let o2w = M4::new_scaling(s) * self.o2w;
-        Self { o2w, ..self }.fill_cache()
-    }
-
-    fn fill_cache(self) -> Self {
-        let w2o = self.o2w.inv();
-        Self { w2o, ..self }
+    pub fn scaled(mut self, s: V3) -> Self {
+        self.trans.append(M4::new_scaling(s));
+        self
     }
 }
 
 impl Object for Transformed {
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
         // ray: world to object
-        let ray = self.w2o.transform_ray(ray);
+        let ray = self.trans.w2o.transform_ray(ray);
         let hit = self.obj.intersect(&ray);
 
         // hit: object to world
-        hit.map(|h| self.o2w.transform_hit(&h))
+        hit.map(|h| self.trans.o2w.transform_hit(self.trans.w2o.transpose(), &h))
     }
 
     fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {

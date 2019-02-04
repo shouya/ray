@@ -34,9 +34,9 @@ pub fn scene() -> Scene {
             c: V3([0.04 - 3.5, -0.32, -6.0]),
             r: 1.5,
         }
-        .shaded(shader::Normal.into())
         .shaded(shader::Diffuse::new(Color::Red.into()).into())
-        .shaded(shader::simple_solid(Color::Blue)),
+        .shaded(shader::simple_mirror(Color::Blue))
+        .shaded(shader::Normal.into())
     );
 
     // scene.add_object(
@@ -52,13 +52,13 @@ pub fn scene() -> Scene {
             c: V3([0.0, 0.0, 0.0]),
             r: 0.5,
         }
-        .shaded(shader::Normal.into())
         .shaded(shader::simple_mirror(Color::Red))
+        .shaded(shader::Normal.into())
         //.shaded(shader::Diffuse::new(Color::Red.into()).into())
         .transformed()
         .rotated(V3([1.5, 1.2, 1.0]))
         // .rotated(V3([0.0, 0.0, 3.14*0.5]))
-        .scaled(V3([4.5, 2.5, 2.5]))
+        .scaled(V3([2.5, 3.5, 2.5]))
         .translated(V3([0.04, -0.32, -6.0])),
     );
 
