@@ -1,4 +1,4 @@
-use common::{Color, Ray, dist2};
+use common::{dist2, Color, Ray};
 use scene::Scene;
 use shader::{DynValue, Incidence, Shader};
 
@@ -21,7 +21,7 @@ impl Shader for Phong {
     let mut intensity = Color::Black;
 
     for light in s.lights.iter() {
-      let light_pos = i.mat.map(|x| x.1 * light.pos).unwrap_or(light.pos);
+      let light_pos = light.pos;
       let shadowray_dir = light_pos - hit.pos;
       let shadowray = Ray::new(hit.pos, shadowray_dir).biased(BIAS);
 

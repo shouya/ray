@@ -401,21 +401,46 @@ impl M4 {
     }
 
     pub fn transform_ray(self, r: &Ray) -> Ray {
-        let new_orig = self * r.orig;
-        let new_dir = (self * (r.orig + r.dir) - new_orig).norm();
-        // let new_dir = (self * r.dir).norm();
+        let new_orig = self.transform_point(r.orig);
+        let new_dir = self.transform_vector(r.dir).norm();
         Ray::new(new_orig, new_dir)
     }
 
-    pub fn transform_hit(self, adj_t: M4, h: &Hit) -> Hit {
-        let new_pos = self * h.pos;
-        let new_norm = (adj_t * h.norm).norm();
+    pub fn transform_hit(self, h: &Hit) -> Hit {
+        let new_pos = self.transform_point(h.pos);
+        let new_norm = self.transform_vector(h.norm).norm();
 
         Hit {
             pos: new_pos,
             norm: new_norm,
             ..*h
         }
+    }
+
+    pub fn transform_v4(self, v4: [f32; 4]) -> [f32; 4] {
+        let a = self.0;
+        let b = v4;
+        let mut r = [0.0; 4];
+
+        for i in 0..4 {
+            for k in 0..4 {
+                r[i] += a[i][k] * b[k]
+            }
+        }
+
+        r
+    }
+
+    pub fn transform_point(self, p: V3) -> V3 {
+        let p = p.0;
+        let r = self.transform_v4([p[0], p[1], p[2], 1.0]);
+        V3([r[0], r[1], r[2]])
+    }
+
+    pub fn transform_vector(self, p: V3) -> V3 {
+        let p = p.0;
+        let r = self.transform_v4([p[0], p[1], p[2], 0.0]);
+        V3([r[0], r[1], r[2]])
     }
 }
 
@@ -434,24 +459,6 @@ impl Mul<M4> for M4 {
         }
 
         M4(res)
-    }
-}
-
-impl Mul<V3> for M4 {
-    type Output = V3;
-
-    fn mul(self, rhs: V3) -> Self::Output {
-        let a = self.0;
-        let b = [rhs.0[0], rhs.0[1], rhs.0[2], 1.0];
-        let mut r = [0.0; 4];
-
-        for i in 0..4 {
-            for k in 0..4 {
-                r[i] += a[i][k] * b[k]
-            }
-        }
-
-        V3([r[0] / r[3], r[1] / r[3], r[2] / r[3]])
     }
 }
 

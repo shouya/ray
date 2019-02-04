@@ -7,7 +7,6 @@ pub struct Transformed {
   obj: Box<dyn Object>,
   pub o2w: M4,
   pub w2o: M4,
-  pub adj_t: M4,
 }
 
 impl Transformed {
@@ -16,7 +15,6 @@ impl Transformed {
       obj: Box::new(obj),
       o2w: M4::new_id(),
       w2o: M4::new_id(),
-      adj_t: M4::new_id(),
     }
   }
 
@@ -37,8 +35,7 @@ impl Transformed {
 
   fn fill_cache(self) -> Self {
     let w2o = self.o2w.inv();
-    let adj_t = self.o2w.transpose();
-    Self { w2o, adj_t, ..self }
+    Self { w2o, ..self }
   }
 }
 
@@ -49,20 +46,10 @@ impl Object for Transformed {
     let hit = self.obj.intersect(&ray);
 
     // hit: object to world
-    hit.map(|h| self.o2w.transform_hit(self.o2w.transpose(), &h))
+    hit.map(|h| self.o2w.transform_hit(&h))
   }
 
   fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
-    // let ray = &self.o2w.transform_ray(i.ray);
-    // let hit = &self.w2o.transform_hit(self.o2w.transpose(), i.hit);
-    // let mat = Some((self.o2w, self.w2o));
-    // let mat = None;
-    let i = Incidence {
-      // ray,
-      // hit,
-      // mat,
-      ..*i
-    };
     self.obj.render(s, &i)
   }
 

@@ -24,8 +24,6 @@ pub struct Incidence<'r, 'h, 'o> {
   pub ray: &'r Ray,
   pub hit: &'h Hit,
   pub obj: &'o dyn Object,
-  // Word-to-object matrix
-  pub mat: Option<(M4, M4)>,
   pub depth: usize,
 }
 

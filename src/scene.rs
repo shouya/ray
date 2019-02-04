@@ -74,7 +74,6 @@ impl Scene {
                     ray: &ray,
                     obj: obj.as_ref(),
                     hit: &hit,
-                    mat: None,
                     depth: d,
                 };
                 obj.render(self, &inci)
