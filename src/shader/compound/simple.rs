@@ -1,10 +1,14 @@
 use common::Color;
 use shader::ShaderType;
 
-use super::preset::{glass, mirror, solid};
+use super::preset::{glass, mirror, rough_solid, solid};
 
 pub fn simple_solid(color: Color) -> ShaderType {
     solid(color, 10.0)
+}
+
+pub fn simple_rough_solid(color: Color, roughness: f32) -> ShaderType {
+    rough_solid(color, roughness, 10.0)
 }
 
 pub fn simple_glass(color: Color, transparency: f32) -> ShaderType {

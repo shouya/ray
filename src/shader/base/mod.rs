@@ -8,3 +8,5 @@ pub mod refraction;
 
 // for debugging purpose only
 pub mod normal;
+
+pub mod rough;

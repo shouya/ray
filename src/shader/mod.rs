@@ -16,6 +16,8 @@ pub use self::base::refraction::Refraction;
 
 pub use self::base::normal::Normal;
 
+pub use self::base::rough::Rough;
+
 pub use self::compound::*;
 
 pub use self::mix::{ChannelMix, Mix, Sum};
@@ -68,6 +70,15 @@ impl<T> DynValue<T> {
         F: 'static,
     {
         DynValue::Dyn(Rc::new(f))
+    }
+}
+
+impl<T: 'static> DynValue<Option<T>>
+where
+    T: Clone,
+{
+    pub fn unwrap(self) -> DynValue<T> {
+        self.map(|x| x.unwrap())
     }
 }
 

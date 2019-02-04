@@ -1,5 +1,5 @@
 use common::Color;
-use shader::{ChannelMix, Diffuse, Mix, Phong, Reflection, ShaderType};
+use shader::{ChannelMix, Diffuse, Mix, Phong, Reflection, Rough, ShaderType};
 
 #[allow(unused)]
 pub fn blank() -> ShaderType {
@@ -8,6 +8,23 @@ pub fn blank() -> ShaderType {
 
 pub fn solid(color: Color, specular_index: f32) -> ShaderType {
     let diffusion: ShaderType = Diffuse::new(color.into()).into();
+    let phong: ShaderType = Phong::new(specular_index.into()).into();
+
+    ChannelMix::new(
+        Some(Color::White).into(),
+        diffusion,
+        phong.map(|x| x.unwrap()),
+    )
+    .into()
+}
+
+pub fn rough_solid(
+    color: Color,
+    roughness: f32,
+    specular_index: f32,
+) -> ShaderType {
+    let surface: ShaderType = Rough::new(color, roughness).into();
+    let diffusion: ShaderType = Diffuse::new(surface.unwrap()).into();
     let phong: ShaderType = Phong::new(specular_index.into()).into();
 
     ChannelMix::new(
