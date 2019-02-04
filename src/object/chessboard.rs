@@ -1,7 +1,7 @@
 use super::Object;
 use scene::Scene;
 use shader::simple_solid;
-use shader::{ShaderType, Incidence};
+use shader::{Incidence, ShaderType};
 
 use common::*;
 

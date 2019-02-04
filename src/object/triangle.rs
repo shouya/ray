@@ -66,10 +66,7 @@ impl Rectangle {
         let t1 = Triangle::new(a, b, c);
         let t2 = Triangle::new(c, d, a);
 
-        Rectangle {
-            t1,
-            t2,
-        }
+        Rectangle { t1, t2 }
     }
 
     pub fn double_sided(mut self, b: bool) -> Self {

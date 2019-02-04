@@ -233,7 +233,9 @@ impl Default for V3 {
 
 impl PartialEq for V3 {
     fn eq(&self, other: &V3) -> bool {
-        f32_eq(self.x(), other.x()) && f32_eq(self.y(), other.y()) && f32_eq(self.z(), other.z())
+        f32_eq(self.x(), other.x())
+            && f32_eq(self.y(), other.y())
+            && f32_eq(self.z(), other.z())
     }
 }
 
@@ -284,7 +286,9 @@ impl M4 {
     }
 
     pub fn new_rotation(r: V3) -> M4 {
-        Self::new_rotation_x(r.x()) * Self::new_rotation_y(r.y()) * Self::new_rotation_z(r.z())
+        Self::new_rotation_x(r.x())
+            * Self::new_rotation_y(r.y())
+            * Self::new_rotation_z(r.z())
     }
 
     pub fn new_scaling(s: V3) -> M4 {
@@ -692,7 +696,12 @@ impl Ray {
 
     // amount = 0: no drift
     // amount = 1: scattered everywhere
-    pub fn drift_array(&self, amount: f32, count: usize, bias: f32) -> Vec<Ray> {
+    pub fn drift_array(
+        &self,
+        amount: f32,
+        count: usize,
+        bias: f32,
+    ) -> Vec<Ray> {
         let mut v = Vec::new();
         if amount == 0.0 {
             return vec![self.biased(bias)];
@@ -827,7 +836,9 @@ impl Color {
 
 impl PartialEq for Color {
     fn eq(&self, other: &Color) -> bool {
-        f32_eq(self.r(), other.r()) && f32_eq(self.g(), other.g()) && f32_eq(self.b(), other.b())
+        f32_eq(self.r(), other.r())
+            && f32_eq(self.g(), other.g())
+            && f32_eq(self.b(), other.b())
     }
 }
 

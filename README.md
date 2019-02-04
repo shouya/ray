@@ -61,3 +61,4 @@ Checkout [gallery](https://github.com/shouya/ray/tree/master/gallery) for more!
 - [Transformation Hierarchy](http://groups.csail.mit.edu/graphics/classes/6.837/F03/lectures/05_transformation_hierarchy.ppt)
 - [A brief computer graphics / rendering course](https://github.com/ssloy/tinyraytracer)
 - Akenine-Moller et al, "Real-Time Rendering", 3rd edition
+- [Transforming Normals / Tutorial](http://www.unknownroad.com/rtfm/graphics/rt_normals.html)

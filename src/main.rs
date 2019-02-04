@@ -12,15 +12,15 @@ extern crate rand;
 extern crate derive_builder;
 
 mod common;
+mod example_scene;
 mod obj_model;
 mod object;
 mod scene;
 mod shader;
 mod tracer;
-mod example_scene;
 
 fn main() {
-  let scene = example_scene::transformed::scene();
-  let img = tracer::modular::trace(scene, 800, 800);
-  img.save("./trace.png").ok();
+    let scene = example_scene::transformed::scene();
+    let img = tracer::modular::trace(scene, 800, 800);
+    img.save("./trace.png").ok();
 }
