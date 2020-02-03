@@ -1,9 +1,9 @@
-use common::*;
-use obj_model::ObjModel;
-use object::{ChessBoard, Rectangle, Shaded, Sphere, TrigMesh};
-use object::{Object, Transform};
-use scene::{Scene, SceneBuilder};
-use shader;
+use crate::common::*;
+
+use crate::object::{ChessBoard, Rectangle};
+use crate::object::{Object};
+use crate::scene::{Scene, SceneBuilder};
+use crate::shader;
 
 pub fn scene() -> Scene {
     let mut scene = SceneBuilder::default()

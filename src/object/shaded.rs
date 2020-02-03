@@ -1,7 +1,7 @@
-use common::*;
-use object::Object;
-use scene::Scene;
-use shader::{Incidence, ShaderType};
+use crate::common::*;
+use crate::object::Object;
+use crate::scene::Scene;
+use crate::shader::{Incidence, ShaderType};
 
 pub struct Shaded {
     pub object: Box<dyn Object>,
@@ -24,7 +24,7 @@ impl Object for Shaded {
     fn const_normal(&self) -> Option<V3> {
         self.object.const_normal()
     }
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         self.shader.get(s, i)
     }
 }

@@ -1,9 +1,9 @@
 use super::Object;
-use scene::Scene;
-use shader::simple_solid;
-use shader::{Incidence, ShaderType};
+use crate::scene::Scene;
+use crate::shader::simple_solid;
+use crate::shader::{Incidence, ShaderType};
 
-use common::*;
+use crate::common::*;
 
 #[derive(Clone)]
 pub struct ChessBoard {
@@ -35,7 +35,7 @@ impl Object for ChessBoard {
         })
     }
 
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         let p = self.map_to_2d(i.hit.pos);
         let is_even = |v: f32| (v / self.cell_size) as i32 % 2 == 0;
         let a = is_even(p.x()) ^ (p.x() < 0.0);

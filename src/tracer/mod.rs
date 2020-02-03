@@ -1,6 +1,6 @@
 use super::image::{ImageBuffer, Rgb, RgbImage};
-use common::*;
-use scene::Scene;
+use crate::common::*;
+use crate::scene::Scene;
 
 pub mod modular;
 

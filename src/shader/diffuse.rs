@@ -1,6 +1,6 @@
-use common::{dist2, Color, Ray};
-use scene::Scene;
-use shader::{DynValue, Incidence, Shader};
+use crate::common::{dist2, Color, Ray};
+use crate::scene::Scene;
+use crate::shader::{DynValue, Incidence, Shader};
 
 pub struct Diffuse {
     pub color: DynValue<Color>,
@@ -15,7 +15,7 @@ impl Diffuse {
 const BIAS: f32 = 1e-4;
 
 impl Shader for Diffuse {
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         let color = self.color.get(s, i);
         let mut intensity = s.background_light;
         let Incidence { hit, .. } = i;

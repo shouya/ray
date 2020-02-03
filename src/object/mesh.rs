@@ -1,5 +1,5 @@
 use super::*;
-use obj_model::ObjModel;
+use crate::obj_model::ObjModel;
 use std::cell::Ref;
 use std::cell::RefCell;
 

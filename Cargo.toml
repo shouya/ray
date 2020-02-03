@@ -2,6 +2,7 @@
 authors = ["Shou Ya <shouya@users.noreply.github.com>"]
 name = "ray"
 version = "0.1.0"
+edition = "2018"
 
 [dependencies]
 derive_builder = "0.9"

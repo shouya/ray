@@ -1,6 +1,6 @@
 use super::{AAPattern, RenderConfig};
 use super::{Color, ImageBuffer, Rgb, RgbImage, Scene};
-extern crate pbr;
+use pbr;
 
 #[allow(dead_code)]
 pub fn trace(s: Scene, conf: RenderConfig) -> RgbImage {

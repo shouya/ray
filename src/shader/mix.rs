@@ -1,6 +1,6 @@
 use super::{DynValue, Incidence, Shader, ShaderType};
-use common::Color;
-use scene::Scene;
+use crate::common::Color;
+use crate::scene::Scene;
 
 pub struct Mix {
     frac: DynValue<f32>,
@@ -15,7 +15,7 @@ impl Mix {
 }
 
 impl Shader for Mix {
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         let f = self.frac.get(s, i);
         if f <= 0.0 {
             self.b.get(s, i)
@@ -42,7 +42,7 @@ impl ChannelMix {
 }
 
 impl Shader for ChannelMix {
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         let frac = self.frac.get(s, i).regularize();
         if frac == Color::Zero {
             self.b.get(s, i)
@@ -70,7 +70,7 @@ impl Sum {
 }
 
 impl Shader for Sum {
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         let a = self.a.get(s, i)?;
         let b = self.b.get(s, i)?;
         Some(a + b)

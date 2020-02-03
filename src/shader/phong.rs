@@ -1,6 +1,6 @@
-use common::{dist2, Color, Ray};
-use scene::Scene;
-use shader::{DynValue, Incidence, Shader};
+use crate::common::{dist2, Color, Ray};
+use crate::scene::Scene;
+use crate::shader::{DynValue, Incidence, Shader};
 
 pub struct Phong {
     pub specular_index: DynValue<f32>,
@@ -15,7 +15,7 @@ impl Phong {
 const BIAS: f32 = 1e-4;
 
 impl Shader for Phong {
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         let p = self.specular_index.get(s, i);
         let Incidence { hit, ray, .. } = i;
         let mut intensity = Color::Black;

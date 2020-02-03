@@ -451,7 +451,7 @@ impl M4 {
 }
 
 impl std::fmt::Debug for M4 {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut fmt_row = |i, r: [f32; 4]| {
             writeln!(
                 f,
@@ -794,7 +794,7 @@ impl Neg for Ray {
     }
 }
 
-extern crate random_color;
+use random_color;
 use self::random_color::RandomColor;
 
 #[allow(non_upper_case_globals)]

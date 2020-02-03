@@ -1,6 +1,6 @@
-use common::{Color, Hit, Ray, TransMat};
-use object::Object;
-use scene::Scene;
+use crate::common::{Color, Hit, Ray, TransMat};
+use crate::object::Object;
+use crate::scene::Scene;
 
 use std::rc::Rc;
 
@@ -46,7 +46,7 @@ pub struct Incidence<'r, 'h, 'o> {
 }
 
 pub trait Shader {
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color>;
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color>;
 }
 
 pub type ShaderType = DynValue<Option<Color>>;
@@ -54,14 +54,14 @@ pub type ShaderType = DynValue<Option<Color>>;
 #[derive(Clone)]
 pub enum DynValue<T> {
     Const(T),
-    Dyn(Rc<Fn(&Scene, &Incidence) -> T>),
+    Dyn(Rc<dyn Fn(&Scene, &Incidence<'_, '_, '_>) -> T>),
 }
 
 impl<T> DynValue<T>
 where
     T: Clone,
 {
-    pub fn get(&self, s: &Scene, i: &Incidence) -> T {
+    pub fn get(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> T {
         match self {
             DynValue::Const(value) => value.clone(),
             DynValue::Dyn(f) => f(s, i),
@@ -74,14 +74,14 @@ where
         F: 'static,
         T: 'static,
     {
-        DynValue::from_fn(move |s: &Scene, i: &Incidence| f(self.get(s, i)))
+        DynValue::from_fn(move |s: &Scene, i: &Incidence<'_, '_, '_>| f(self.get(s, i)))
     }
 }
 
 impl<T> DynValue<T> {
     pub fn from_fn<F>(f: F) -> Self
     where
-        F: Fn(&Scene, &Incidence) -> T,
+        F: Fn(&Scene, &Incidence<'_, '_, '_>) -> T,
         F: 'static,
     {
         DynValue::Dyn(Rc::new(f))
@@ -102,7 +102,7 @@ where
     T: Shader + 'static,
 {
     fn from(v: T) -> ShaderType {
-        DynValue::from_fn(move |s: &Scene, i: &Incidence| v.render(s, i))
+        DynValue::from_fn(move |s: &Scene, i: &Incidence<'_, '_, '_>| v.render(s, i))
     }
 }
 
@@ -116,7 +116,7 @@ impl<T> From<T> for DynValue<T> {
 struct DynValueShader(ShaderType);
 
 impl Shader for DynValueShader {
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         self.0.get(s, i)
     }
 }

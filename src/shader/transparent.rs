@@ -1,6 +1,6 @@
-use common::{Color, Hit, Ray};
-use scene::Scene;
-use shader::{
+use crate::common::{Color, Hit, Ray};
+use crate::scene::Scene;
+use crate::shader::{
     DynValue, Incidence, Mix, Reflection, Refraction, Shader, ShaderType,
 };
 
@@ -30,7 +30,7 @@ fn fresnel_internal(ray: &Ray, hit: &Hit, ior: f32) -> f32 {
 
 pub fn fresnel(ior: &DynValue<f32>) -> DynValue<f32> {
     let ior = ior.clone();
-    let f = move |s: &Scene, i: &Incidence| {
+    let f = move |s: &Scene, i: &Incidence<'_, '_, '_>| {
         let ior = ior.get(s, i);
         fresnel_internal(i.ray, i.hit, ior)
     };
@@ -43,7 +43,7 @@ pub struct Transparency {
 }
 
 impl Shader for Transparency {
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         if i.hit.inside {
             return self.refr.get(s, i);
         } else {

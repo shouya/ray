@@ -1,7 +1,7 @@
-use common::*;
-use object::Object;
-use scene::Scene;
-use shader::Incidence;
+use crate::common::*;
+use crate::object::Object;
+use crate::scene::Scene;
+use crate::shader::Incidence;
 
 pub struct Transformed {
     obj: Box<dyn Object>,
@@ -43,7 +43,7 @@ impl Object for Transformed {
         hit.map(|h| self.trans.o2w.transform_hit(self.trans.w2o.transpose(), &h))
     }
 
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         self.obj.render(s, &i)
     }
 

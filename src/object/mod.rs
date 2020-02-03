@@ -1,13 +1,13 @@
-use common::*;
-use scene::Scene;
-use shader::{Incidence, ShaderType};
+use crate::common::*;
+use crate::scene::Scene;
+use crate::shader::{Incidence, ShaderType};
 
 pub trait Object {
     // required implementation: intersect & usually render
 
     // returns hit and norm
     fn intersect(&self, ray: &Ray) -> Option<Hit>;
-    fn render(&self, _s: &Scene, _i: &Incidence) -> Option<Color> {
+    fn render(&self, _s: &Scene, _i: &Incidence<'_, '_, '_>) -> Option<Color> {
         Some(Color::Blue)
     }
 

@@ -1,6 +1,6 @@
-use common::{Color, Hit, V3};
-use scene::Scene;
-use shader::{Incidence, Shader, ShaderType};
+use crate::common::{Color, Hit, V3};
+use crate::scene::Scene;
+use crate::shader::{Incidence, Shader, ShaderType};
 
 // varies the hit normal
 pub struct Rough {
@@ -32,7 +32,7 @@ impl Rough {
 }
 
 impl Shader for Rough {
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         let dnorm = Self::pseudo_rand_v3(self.roughness);
         let hit = &Hit { norm: (i.hit.norm + dnorm).norm(),
                          ..*i.hit };

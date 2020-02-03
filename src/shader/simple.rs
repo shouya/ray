@@ -1,5 +1,5 @@
-use common::Color;
-use shader::ShaderType;
+use crate::common::Color;
+use crate::shader::ShaderType;
 
 use super::preset::{glass, mirror, rough_solid, solid};
 

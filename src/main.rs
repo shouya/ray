@@ -3,9 +3,7 @@
 // #![feature(plugin, custom_attribute)]
 // #![plugin(flamer)]
 
-extern crate image;
-extern crate rand;
-extern crate rand_distr;
+use image;
 
 // extern crate flame;
 

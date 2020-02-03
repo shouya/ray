@@ -1,5 +1,5 @@
-use common::Color;
-use shader::{ChannelMix, Diffuse, Mix, Phong, Reflection, Rough, ShaderType};
+use crate::common::Color;
+use crate::shader::{ChannelMix, Diffuse, Mix, Phong, Reflection, Rough, ShaderType};
 
 #[allow(unused)]
 pub fn blank() -> ShaderType {

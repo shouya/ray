@@ -1,6 +1,6 @@
-use common::Color;
-use scene::Scene;
-use shader::{DynValue, Incidence, Shader};
+use crate::common::Color;
+use crate::scene::Scene;
+use crate::shader::{DynValue, Incidence, Shader};
 
 const BIAS: f32 = 1e-5;
 
@@ -10,7 +10,7 @@ pub struct Refraction {
 }
 
 impl Shader for Refraction {
-    fn render(&self, s: &Scene, i: &Incidence) -> Option<Color> {
+    fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
         let ior = self.ior.get(s, i);
         // let ior = 1.0 / ior;
         // let ior = if i.hit.inside { ior } else { 1.0 / ior };

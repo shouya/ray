@@ -1,5 +1,5 @@
-use common::*;
-use object::Object;
+use crate::common::*;
+use crate::object::Object;
 
 #[derive(Builder)]
 pub struct Scene {
@@ -61,7 +61,7 @@ impl Scene {
     }
 
     pub fn trace_ray(&self, ray: &Ray, d: usize) -> Option<Color> {
-        use shader::Incidence;
+        use crate::shader::Incidence;
         if d >= self.max_depth {
             return None;
         }
