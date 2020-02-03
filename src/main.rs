@@ -5,6 +5,7 @@
 
 extern crate image;
 extern crate rand;
+extern crate rand_distr;
 
 // extern crate flame;
 

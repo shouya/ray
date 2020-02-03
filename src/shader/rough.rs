@@ -16,16 +16,16 @@ impl Rough {
 }
 
 impl Rough {
-    fn pseudo_rand_v3(seed: u64, std_dev: f32) -> V3 {
+    fn pseudo_rand_v3(std_dev: f32) -> V3 {
         use rand::prelude::thread_rng;
         use rand_distr::Normal;
+        use rand_distr::Distribution;
 
         let rng = thread_rng();
-        let distribution = Normal::new(0.0, std_dev.into());
+        let distribution = Normal::new(0.0, std_dev.into()).unwrap();
         let v = distribution.sample_iter(rng)
                             .take(3)
-                            .collect::<Vec<f32>>()
-                            .as_slice();
+                            .collect::<Vec<f32>>();
 
         V3([v[0], v[1], v[2]])
     }
