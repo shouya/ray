@@ -1,4 +1,4 @@
-use crate::common::{dist2, Color, Ray};
+use crate::common::Color;
 use crate::scene::Scene;
 use crate::shader::{Incidence, Shader};
 

@@ -8,6 +8,7 @@ pub struct ColorNoise {
 }
 
 impl ColorNoise {
+    #[allow(unused)]
     pub fn new(color: Color, roughness: f32) -> Self {
         Self { color, roughness }
     }

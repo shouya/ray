@@ -18,6 +18,7 @@ pub fn solid(color: Color, specular_index: f32) -> ShaderType {
     .into()
 }
 
+#[allow(unused)]
 pub fn rough_solid(
     color: Color,
     roughness: f32,

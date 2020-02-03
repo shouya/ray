@@ -7,6 +7,7 @@ pub fn simple_solid(color: Color) -> ShaderType {
     solid(color, 10.0)
 }
 
+#[allow(unused)]
 pub fn simple_rough_solid(color: Color, roughness: f32) -> ShaderType {
     rough_solid(color, roughness, 10.0)
 }

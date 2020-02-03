@@ -24,6 +24,7 @@ impl AAPattern {
             [[0.25, 0.25], [0.25, 0.75], [0.75, 0.25], [0.75, 0.75]].to_vec(),
         )
     }
+    #[allow(unused)]
     pub fn hraa() -> Self {
         AAPattern(
             [[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0], [0.5, 0.5]]
@@ -34,11 +35,10 @@ impl AAPattern {
     pub fn pixel_offsets(aa: &Option<Self>, x: u32, y: u32) -> Vec<[f32; 2]> {
         match aa {
             None => vec![[x as f32, y as f32]],
-            Some(aa) => {
-                aa.0.iter()
-                    .map(|[dx, dy]| [x as f32 + dx, y as f32 + dy])
-                    .collect()
-            }
+            Some(aa) => aa.0
+                          .iter()
+                          .map(|[dx, dy]| [x as f32 + dx, y as f32 + dy])
+                          .collect(),
         }
     }
 }

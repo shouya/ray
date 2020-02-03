@@ -92,6 +92,7 @@ impl<T: 'static> DynValue<Option<T>>
 where
     T: Clone,
 {
+    #[allow(unused)]
     pub fn unwrap(self) -> DynValue<T> {
         self.map(|x| x.unwrap())
     }

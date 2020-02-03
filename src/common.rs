@@ -90,6 +90,7 @@ pub struct BoundingSphere {
     pub r: f32,
 }
 
+#[allow(dead_code)]
 pub enum Bound {
     BoundingBox(BoundingBox),
     BoundingSphere(BoundingSphere),
@@ -114,13 +115,14 @@ pub fn f32_ge(a: f32, b: f32) -> bool {
 }
 
 pub fn randn(mean: f32, std_dev: f32) -> f32 {
-    use rand::distributions::{Distribution, StandardNormal};
     use rand::thread_rng;
+    use rand_distr::{Distribution, Normal};
 
-    let n = StandardNormal;
-    mean + n.sample(&mut thread_rng()) as f32 * std_dev
+    let n = Normal::new(mean, std_dev).unwrap();
+    n.sample(&mut thread_rng())
 }
 
+#[allow(unused)]
 pub fn randn0() -> f32 {
     randn(0.0, 1.0)
 }
@@ -173,8 +175,12 @@ impl V3 {
     pub fn zero() -> V3 {
         V3([0.0, 0.0, 0.0])
     }
+
+    #[allow(unused)]
     pub fn is_zero(&self) -> bool {
-        self.x() == 0.0 && self.y() == 0.0 && self.z() == 0.0
+        f32_eq(self.0[0], 0.0)
+        && f32_eq(self.0[1], 0.0)
+        && f32_eq(self.0[2], 0.0)
     }
 }
 
@@ -234,70 +240,58 @@ impl Default for V3 {
 impl PartialEq for V3 {
     fn eq(&self, other: &V3) -> bool {
         f32_eq(self.x(), other.x())
-            && f32_eq(self.y(), other.y())
-            && f32_eq(self.z(), other.z())
+        && f32_eq(self.y(), other.y())
+        && f32_eq(self.z(), other.z())
     }
 }
 
 impl M4 {
     pub fn new_id() -> M4 {
-        M4([
-            [1.0, 0.0, 0.0, 0.0],
+        M4([[1.0, 0.0, 0.0, 0.0],
             [0.0, 1.0, 0.0, 0.0],
             [0.0, 0.0, 1.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ])
+            [0.0, 0.0, 0.0, 1.0]])
     }
 
     pub fn new_translation(v: V3) -> M4 {
-        M4([
-            [1.0, 0.0, 0.0, v.x()],
+        M4([[1.0, 0.0, 0.0, v.x()],
             [0.0, 1.0, 0.0, v.y()],
             [0.0, 0.0, 1.0, v.z()],
-            [0.0, 0.0, 0.0, 1.0],
-        ])
+            [0.0, 0.0, 0.0, 1.0]])
     }
 
     pub fn new_rotation_x(t: f32) -> M4 {
-        M4([
-            [1.0, 0.0, 0.0, 0.0],
+        M4([[1.0, 0.0, 0.0, 0.0],
             [0.0, t.cos(), -t.sin(), 0.0],
             [0.0, t.sin(), t.cos(), 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ])
+            [0.0, 0.0, 0.0, 1.0]])
     }
 
     pub fn new_rotation_y(t: f32) -> M4 {
-        M4([
-            [t.cos(), 0.0, t.sin(), 0.0],
+        M4([[t.cos(), 0.0, t.sin(), 0.0],
             [0.0, 1.0, 0.0, 0.0],
             [-t.sin(), 0.0, t.cos(), 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ])
+            [0.0, 0.0, 0.0, 1.0]])
     }
 
     pub fn new_rotation_z(t: f32) -> M4 {
-        M4([
-            [t.cos(), -t.sin(), 0.0, 0.0],
+        M4([[t.cos(), -t.sin(), 0.0, 0.0],
             [t.sin(), t.cos(), 0.0, 0.0],
             [0.0, 0.0, 1.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ])
+            [0.0, 0.0, 0.0, 1.0]])
     }
 
     pub fn new_rotation(r: V3) -> M4 {
         Self::new_rotation_x(r.x())
-            * Self::new_rotation_y(r.y())
-            * Self::new_rotation_z(r.z())
+        * Self::new_rotation_y(r.y())
+        * Self::new_rotation_z(r.z())
     }
 
     pub fn new_scaling(s: V3) -> M4 {
-        M4([
-            [s.x(), 0.0, 0.0, 0.0],
+        M4([[s.x(), 0.0, 0.0, 0.0],
             [0.0, s.y(), 0.0, 0.0],
             [0.0, 0.0, s.z(), 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ])
+            [0.0, 0.0, 0.0, 1.0]])
     }
 
     // shearing implementation is skipped
@@ -352,6 +346,7 @@ impl M4 {
         M4(res)
     }
 
+    #[allow(unused)]
     pub fn adjoint(self) -> Self {
         // A^-1 = 1/det(A) adj(A)
         let mut res = [[0.0; 4]; 4];
@@ -416,11 +411,9 @@ impl M4 {
         let new_pos = self.transform_point(h.pos);
         let new_norm = trans_norm.transform_vector(h.norm).norm();
 
-        Hit {
-            pos: new_pos,
-            norm: new_norm,
-            ..*h
-        }
+        Hit { pos: new_pos,
+              norm: new_norm,
+              ..*h }
     }
 
     pub fn transform_v4(self, v4: [f32; 4]) -> [f32; 4] {
@@ -453,11 +446,9 @@ impl M4 {
 impl std::fmt::Debug for M4 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut fmt_row = |i, r: [f32; 4]| {
-            writeln!(
-                f,
-                "[{:1}] {:<+.5} {:<+.5} {:+.5} {:+.5}",
-                i, r[0], r[1], r[2], r[3]
-            )
+            writeln!(f,
+                     "[{:1}] {:<+.5} {:<+.5} {:+.5} {:+.5}",
+                     i, r[0], r[1], r[2], r[3])
         };
         let m = self.0;
         fmt_row(0, m[0])?;
@@ -494,10 +485,8 @@ pub struct TransMat {
 
 impl TransMat {
     pub fn new() -> Self {
-        Self {
-            o2w: M4::new_id(),
-            w2o: M4::new_id(),
-        }
+        Self { o2w: M4::new_id(),
+               w2o: M4::new_id() }
     }
 
     pub fn append(&mut self, m: M4) {
@@ -505,18 +494,18 @@ impl TransMat {
         self.w2o = self.w2o * m.inv();
     }
 
+    #[allow(unused)]
     pub fn prepend(&mut self, m: M4) {
         self.o2w = self.o2w * m;
         self.w2o = m.inv() * self.w2o;
     }
 
+    #[allow(unused)]
     pub fn mult_opt(&self, t: Option<TransMat>) -> TransMat {
         match t {
             None => *self,
-            Some(t) => Self {
-                o2w: self.o2w * t.o2w,
-                w2o: t.w2o * self.w2o,
-            },
+            Some(t) => Self { o2w: self.o2w * t.o2w,
+                              w2o: t.w2o * self.w2o },
         }
     }
 }
@@ -557,18 +546,18 @@ impl Plane {
         Some(pos)
     }
 
+    #[allow(unused)]
     pub fn from_points(ps: &[V3]) -> Option<Self> {
         if ps.len() < 3 {
             return None;
         }
         // test all trigs are coplane
-        if !ps
-            .windows(3)
-            .map(|t| Trig(t[0], t[1], t[2]).n())
-            .collect::<Vec<_>>()
-            .windows(2)
-            .map(|n| n[0] == n[1])
-            .all(|t| t)
+        if !ps.windows(3)
+              .map(|t| Trig(t[0], t[1], t[2]).n())
+              .collect::<Vec<_>>()
+              .windows(2)
+              .map(|n| n[0] == n[1])
+              .all(|t| t)
         {
             return None;
         }
@@ -658,8 +647,8 @@ impl Trig {
             self.n().dot(c) < 0.0
         };
         if test_edge(self.a(), self.b())
-            || test_edge(self.b(), self.c())
-            || test_edge(self.c(), self.a())
+           || test_edge(self.b(), self.c())
+           || test_edge(self.c(), self.a())
         {
             false
         } else {
@@ -693,24 +682,18 @@ impl Trig {
 
 impl Ray {
     pub fn new(orig: V3, dir: V3) -> Self {
-        Self {
-            orig,
-            dir: dir.norm(),
-        }
+        Self { orig,
+               dir: dir.norm() }
     }
 
     pub fn reflect(&self, hit: &Hit) -> Ray {
         let proj_n_d = hit.norm * self.dir.dot(hit.norm);
-        Self {
-            orig: hit.pos,
-            dir: self.dir - proj_n_d * 2.0,
-        }
+        Self { orig: hit.pos,
+               dir: self.dir - proj_n_d * 2.0 }
         // Ray::new(hit.pos, self.dir - proj_n_d * 2.0)
     }
 
     pub fn refract(&self, hit: &Hit, ior: f32) -> Ray {
-        use std::mem;
-
         let i = self.dir;
         let mut n = hit.norm;
         let mut cosi = n.dot(i).max(-1.0).min(1.0);
@@ -734,29 +717,26 @@ impl Ray {
         Ray::new(hit.pos, dir)
     }
 
+    #[allow(unused)]
     pub fn drift(&self, std_dev: f32) -> Ray {
-        use rand::distributions::{Distribution, StandardNormal};
-        use rand::thread_rng;
-
         if std_dev == 0.0 {
             return self.clone();
         }
 
-        let n = StandardNormal;
-        let dx = n.sample(&mut thread_rng()) as f32 * std_dev;
-        let dy = n.sample(&mut thread_rng()) as f32 * std_dev;
-        let dz = n.sample(&mut thread_rng()) as f32 * std_dev;
+        let dx = randn(0.0, std_dev);
+        let dy = randn(0.0, std_dev);
+        let dz = randn(0.0, std_dev);
         Ray::new(self.orig, self.dir + V3([dx, dy, dz]))
     }
 
     // amount = 0: no drift
     // amount = 1: scattered everywhere
-    pub fn drift_array(
-        &self,
-        amount: f32,
-        count: usize,
-        bias: f32,
-    ) -> Vec<Ray> {
+    #[allow(unused)]
+    pub fn drift_array(&self,
+                       amount: f32,
+                       count: usize,
+                       bias: f32)
+                       -> Vec<Ray> {
         let mut v = Vec::new();
         if amount == 0.0 {
             return vec![self.biased(bias)];
@@ -777,25 +757,21 @@ impl Ray {
 impl Add<V3> for Ray {
     type Output = Ray;
     fn add(self, rhs: V3) -> Ray {
-        Ray {
-            orig: self.orig + rhs,
-            dir: self.dir,
-        }
+        Ray { orig: self.orig + rhs,
+              dir: self.dir }
     }
 }
 
 impl Neg for Ray {
     type Output = Ray;
     fn neg(self) -> Ray {
-        Ray {
-            orig: self.orig,
-            dir: -self.dir,
-        }
+        Ray { orig: self.orig,
+              dir: -self.dir }
     }
 }
 
-use random_color;
 use self::random_color::RandomColor;
+use random_color;
 
 #[allow(non_upper_case_globals)]
 impl Color {
@@ -832,6 +808,7 @@ impl Color {
         self.mix_with(rhs, |l, r| l * t0 + r * t1)
     }
 
+    #[allow(unused)]
     pub fn blend_all(colors: &[Color]) -> Color {
         if colors.is_empty() {
             return Color([0.0, 0.0, 0.0]);
@@ -846,35 +823,29 @@ impl Color {
 
     pub fn channel_blend(&self, rhs: Color, frac: Color) -> Color {
         let c = frac;
-        Color([
-            self.r() * c.r() + rhs.r() * (1.0 - c.r()),
-            self.g() * c.g() + rhs.g() * (1.0 - c.g()),
-            self.b() * c.b() + rhs.b() * (1.0 - c.b()),
-        ])
+        Color([self.r() * c.r() + rhs.r() * (1.0 - c.r()),
+               self.g() * c.g() + rhs.g() * (1.0 - c.g()),
+               self.b() * c.b() + rhs.b() * (1.0 - c.b())])
     }
 
     pub fn mix_with<F>(&self, rhs: Color, f: F) -> Color
-    where
-        F: Fn(f32, f32) -> f32,
+        where F: Fn(f32, f32) -> f32
     {
-        Color([
-            f(self.r(), rhs.r()),
-            f(self.g(), rhs.g()),
-            f(self.b(), rhs.b()),
-        ])
+        Color([f(self.r(), rhs.r()),
+               f(self.g(), rhs.g()),
+               f(self.b(), rhs.b())])
     }
 
     pub fn clamp(&self, min: f32, max: f32) -> Color {
-        Color([
-            self.r().max(min).min(max),
-            self.g().max(min).min(max),
-            self.b().max(min).min(max),
-        ])
+        Color([self.r().max(min).min(max),
+               self.g().max(min).min(max),
+               self.b().max(min).min(max)])
     }
     pub fn regularize(&self) -> Color {
         self.clamp(0.0, 1.0)
     }
 
+    #[allow(unused)]
     pub fn mult(self, brightness: Color) -> Color {
         self.mix_with(brightness, |a, b| a * b)
     }
@@ -903,8 +874,8 @@ impl Color {
 impl PartialEq for Color {
     fn eq(&self, other: &Color) -> bool {
         f32_eq(self.r(), other.r())
-            && f32_eq(self.g(), other.g())
-            && f32_eq(self.b(), other.b())
+        && f32_eq(self.g(), other.g())
+        && f32_eq(self.b(), other.b())
     }
 }
 
@@ -919,11 +890,9 @@ impl Into<[u8; 3]> for Color {
                 (k * 255.0) as u8
             }
         };
-        [
-            normalize(self.r()),
-            normalize(self.g()),
-            normalize(self.b()),
-        ]
+        [normalize(self.r()),
+         normalize(self.g()),
+         normalize(self.b())]
     }
 }
 
@@ -972,19 +941,15 @@ impl Add<V3> for Hit {
     type Output = Hit;
 
     fn add(self, rhs: V3) -> Hit {
-        Hit {
-            pos: self.pos + rhs,
-            ..self
-        }
+        Hit { pos: self.pos + rhs,
+              ..self }
     }
 }
 
 impl BoundingBox {
     pub fn new() -> Self {
-        Self {
-            min: V3([f32::MAX, f32::MAX, f32::MAX]),
-            max: V3([f32::MIN, f32::MIN, f32::MIN]),
-        }
+        Self { min: V3([f32::MAX, f32::MAX, f32::MAX]),
+               max: V3([f32::MIN, f32::MIN, f32::MIN]) }
     }
     pub fn extend(&mut self, p: V3) {
         macro_rules! check {
