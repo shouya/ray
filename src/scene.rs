@@ -4,7 +4,7 @@ use object::Object;
 #[derive(Builder)]
 pub struct Scene {
     #[builder(setter(skip))]
-    pub objs: Vec<Box<Object>>,
+    pub objs: Vec<Box<dyn Object>>,
     // plane w/ center, width, height
     pub vp_plane: Plane,
     pub vp_width: f32,

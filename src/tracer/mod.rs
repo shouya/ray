@@ -19,12 +19,12 @@ pub struct AAPattern(Vec<[f32; 2]>);
 
 impl AAPattern {
     // See: https://en.wikipedia.org/wiki/Supersampling
-    pub fn SSAA4x() -> Self {
+    pub fn ssaa4x() -> Self {
         AAPattern(
             [[0.25, 0.25], [0.25, 0.75], [0.75, 0.25], [0.75, 0.75]].to_vec(),
         )
     }
-    pub fn HRAA() -> Self {
+    pub fn hraa() -> Self {
         AAPattern(
             [[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0], [0.5, 0.5]]
                 .to_vec(),
