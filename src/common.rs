@@ -114,6 +114,12 @@ pub fn f32_ge(a: f32, b: f32) -> bool {
     a > b || f32_eq(a, b)
 }
 
+pub fn randn_v3(mean: f32, std_dev: f32) -> V3 {
+    V3([randn(mean, std_dev),
+        randn(mean, std_dev),
+        randn(mean, std_dev)])
+}
+
 pub fn randn(mean: f32, std_dev: f32) -> f32 {
     use rand::thread_rng;
     use rand_distr::{Distribution, Normal};

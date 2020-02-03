@@ -1,4 +1,4 @@
-use crate::common::{Color, Hit, V3};
+use crate::common::{randn_v3, Color, Hit};
 use crate::scene::Scene;
 use crate::shader::{Incidence, Shader, ShaderType};
 
@@ -15,25 +15,9 @@ impl Rough {
     }
 }
 
-impl Rough {
-    fn pseudo_rand_v3(std_dev: f32) -> V3 {
-        use rand::prelude::thread_rng;
-        use rand_distr::Normal;
-        use rand_distr::Distribution;
-
-        let rng = thread_rng();
-        let distribution = Normal::new(0.0, std_dev.into()).unwrap();
-        let v = distribution.sample_iter(rng)
-                            .take(3)
-                            .collect::<Vec<f32>>();
-
-        V3([v[0], v[1], v[2]])
-    }
-}
-
 impl Shader for Rough {
     fn render(&self, s: &Scene, i: &Incidence<'_, '_, '_>) -> Option<Color> {
-        let dnorm = Self::pseudo_rand_v3(self.roughness);
+        let dnorm = randn_v3(0.0, self.roughness);
         let hit = &Hit { norm: (i.hit.norm + dnorm).norm(),
                          ..*i.hit };
         let i = Incidence { hit, ..*i };
