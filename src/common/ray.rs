@@ -16,14 +16,18 @@ pub struct Hit {
 
 impl Ray {
   pub fn new(orig: V3, dir: V3) -> Self {
-    Self { orig,
-           dir: dir.norm() }
+    Self {
+      orig,
+      dir: dir.norm(),
+    }
   }
 
   pub fn reflect(&self, hit: &Hit) -> Ray {
     let proj_n_d = hit.norm * self.dir.dot(hit.norm);
-    Self { orig: hit.pos,
-           dir: self.dir - proj_n_d * 2.0 }
+    Self {
+      orig: hit.pos,
+      dir: self.dir - proj_n_d * 2.0,
+    }
     // Ray::new(hit.pos, self.dir - proj_n_d * 2.0)
   }
 
@@ -87,16 +91,20 @@ impl Ray {
 impl Add<V3> for Ray {
   type Output = Ray;
   fn add(self, rhs: V3) -> Ray {
-    Ray { orig: self.orig + rhs,
-          dir: self.dir }
+    Ray {
+      orig: self.orig + rhs,
+      dir: self.dir,
+    }
   }
 }
 
 impl Neg for Ray {
   type Output = Ray;
   fn neg(self) -> Ray {
-    Ray { orig: self.orig,
-          dir: -self.dir }
+    Ray {
+      orig: self.orig,
+      dir: -self.dir,
+    }
   }
 }
 
@@ -110,7 +118,19 @@ impl Add<V3> for Hit {
   type Output = Hit;
 
   fn add(self, rhs: V3) -> Hit {
-    Hit { pos: self.pos + rhs,
-          ..self }
+    Hit {
+      pos: self.pos + rhs,
+      ..self
+    }
+  }
+}
+
+impl Neg for Hit {
+  type Output = Hit;
+  fn neg(self) -> Hit {
+    Hit {
+      norm: -self.norm,
+      ..self
+    }
   }
 }
